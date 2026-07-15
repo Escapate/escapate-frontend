@@ -1,0 +1,281 @@
+export const WHATSAPP_NUMBER = "573000000000"; // TODO: número real
+export const INSTAGRAM = "escapate";
+export const EMAIL = "hola@escapate.com"; // TODO
+export const WEB3FORMS_KEY = ""; // TODO: pega tu access key de https://web3forms.com
+
+export const content = {
+  es: {
+    nav: {
+      links: [
+        { id: "destinos", label: "Destinos" },
+        { id: "nosotros", label: "Nosotros" },
+        { id: "servicios", label: "Servicios" },
+        { id: "contacto", label: "Contacto" },
+      ],
+      cta: "Escríbenos",
+    },
+    hero: {
+      eyebrow: "Agencia de viajes · Cúcuta",
+      titleA: "Tu viaje",
+      titleB: "empieza",
+      titleAccent: "aquí",
+      subtitle:
+        "Gira el mundo, elige un destino y nosotros armamos la escapada completa. Vuelos, hoteles y planes pensados a tu medida.",
+      ctaPrimary: "Planear mi viaje",
+      ctaSecondary: "Explorar destinos",
+      dragHint: "arrastra para girar el mundo",
+    },
+    marquee: "Tu viaje empieza aquí",
+    destinos: {
+      eyebrow: "Destinos",
+      title: "A dónde te llevamos",
+      note: "Precios de referencia por persona. Cuéntanos tus fechas y armamos el plan exacto.",
+      groups: { colombia: "Colombia", internacional: "Internacional" },
+      items: [
+        { group: "colombia", name: "Cartagena", region: "Caribe colombiano", nights: "4 noches", price: "desde $890.000", img: "/destinos/cartagena.jpg" },
+        { group: "colombia", name: "San Andrés", region: "Mar de siete colores", nights: "5 noches", price: "desde $1.250.000", img: "/destinos/san-andres.jpg" },
+        { group: "colombia", name: "Santa Marta", region: "Tayrona y Caribe", nights: "4 noches", price: "desde $760.000", img: "/destinos/santa-marta.jpg" },
+        { group: "colombia", name: "Eje Cafetero", region: "Valle de Cocora", nights: "3 noches", price: "desde $640.000", img: "/destinos/eje-cafetero.jpg" },
+        { group: "internacional", name: "Cancún", region: "Riviera Maya", nights: "6 noches", price: "desde $3.100.000", img: "/destinos/cancun.jpg" },
+        { group: "internacional", name: "Punta Cana", region: "Caribe", nights: "6 noches", price: "desde $3.400.000", img: "/destinos/punta-cana.jpg" },
+        { group: "internacional", name: "España", region: "Madrid · Sevilla", nights: "8 noches", price: "desde $5.400.000", img: "/destinos/espana.jpg" },
+        { group: "internacional", name: "Europa", region: "París · multidestino", nights: "10 noches", price: "desde $7.200.000", img: "/destinos/europa.jpg" },
+      ],
+    },
+    clocks: {
+      label: "La hora en el mundo",
+      cities: [
+        { city: "New York", tz: "America/New_York" },
+        { city: "Francia", tz: "Europe/Paris" },
+        { city: "España", tz: "Europe/Madrid" },
+        { city: "Cúcuta", tz: "America/Bogota" },
+      ],
+    },
+    about: {
+      eyebrow: "Quiénes somos",
+      title: "No vendemos viajes. Diseñamos recuerdos.",
+      body: "Somos un equipo de Cúcuta apasionado por viajar. Creemos en el trato cercano: te escuchamos, entendemos cómo sueñas tu escapada y nos encargamos de cada detalle para que tú solo te preocupes por disfrutar.",
+      stats: [
+        { n: "+10", label: "años de experiencia" },
+        { n: "+2.500", label: "viajeros felices" },
+        { n: "+40", label: "destinos" },
+        { n: "100%", label: "acompañamiento" },
+      ],
+    },
+    services: {
+      eyebrow: "Lo que hacemos por ti",
+      title: "Todo en un solo lugar",
+      items: [
+        { title: "Paquetes a tu medida", desc: "Vuelo, hotel, traslados y planes en una sola cotización clara." },
+        { title: "Asesoría experta", desc: "Te guiamos paso a paso, desde la idea hasta la maleta lista." },
+        { title: "Soporte total", desc: "Acompañamiento antes, durante y después de tu viaje." },
+        { title: "Lunas de miel y grupos", desc: "Experiencias especiales para parejas, familias y empresas." },
+      ],
+    },
+    why: {
+      eyebrow: "Por qué Escápate",
+      title: "Viajar tranquilo se siente distinto",
+      points: [
+        "Atención personalizada, cara a cara o por WhatsApp.",
+        "Precios transparentes, sin sorpresas de último minuto.",
+        "Aliados confiables en aerolíneas y hoteles.",
+        "Planes flexibles que se adaptan a tu presupuesto.",
+      ],
+    },
+    gallery: {
+      eyebrow: "Nuestro local",
+      title: "Un espacio pensado para soñar",
+    },
+    testimonials: {
+      eyebrow: "Lo que dicen",
+      title: "Viajeros que ya se escaparon",
+      items: [
+        { quote: "Nos armaron la luna de miel perfecta. Cada detalle salió tal como lo soñamos.", name: "Laura & Andrés", role: "Cancún 2025" },
+        { quote: "Súper atentos por WhatsApp a cualquier hora. Viajé tranquila y sin estrés.", name: "Daniela M.", role: "España 2025" },
+        { quote: "Mejor precio que buscando por mi cuenta, y con todo resuelto. Repetiré.", name: "Carlos R.", role: "San Andrés 2024" },
+      ],
+    },
+    contact: {
+      eyebrow: "Contacto",
+      title: "¿Listo para volar?",
+      subtitle: "Escríbenos por WhatsApp o déjanos tus datos y te contactamos hoy mismo.",
+      whatsapp: "Hablar por WhatsApp",
+      form: {
+        name: "Tu nombre",
+        email: "Correo electrónico",
+        destination: "¿A dónde quieres ir?",
+        message: "Cuéntanos más (fechas, personas...)",
+        submit: "Enviar solicitud",
+        sending: "Enviando...",
+        ok: "¡Gracias! Te contactaremos muy pronto.",
+        err: "Algo salió mal. Escríbenos por WhatsApp.",
+      },
+      address: "Cúcuta, Norte de Santander, Colombia",
+      hours: "Lun a Sáb · 8:00 a.m. – 6:00 p.m.",
+    },
+    quote: {
+      eyebrow: "Cotiza tu viaje",
+      title: "Arma tu escapada",
+      from: "Ciudad de salida",
+      dest: "Destino / Tour",
+      passengers: "Pasajeros",
+      adults: "Adultos",
+      children: "Niños",
+      infants: "Bebés",
+      days: "Días",
+      daysUnit: "días",
+      name: "Tu nombre",
+      people: "personas",
+      whatsapp: "Cotizar por WhatsApp",
+      email: "Enviar al correo",
+      ok: "¡Gracias! Te enviaremos la cotización muy pronto.",
+      err: "Algo salió mal. Escríbenos por WhatsApp.",
+      cities: ["Cúcuta", "Bogotá", "Medellín", "Cali", "Bucaramanga", "Otra ciudad"],
+      tours: ["Cartagena", "San Andrés", "Santa Marta", "Eje Cafetero", "Cancún", "Punta Cana", "Panamá", "España", "Europa", "Aún no lo decido"],
+    },
+    footer: {
+      tagline: "Tu viaje empieza aquí.",
+      rights: "Todos los derechos reservados.",
+      madeIn: "Hecho con cariño en Cúcuta.",
+    },
+  },
+
+  en: {
+    nav: {
+      links: [
+        { id: "destinos", label: "Destinations" },
+        { id: "nosotros", label: "About" },
+        { id: "servicios", label: "Services" },
+        { id: "contacto", label: "Contact" },
+      ],
+      cta: "Get in touch",
+    },
+    hero: {
+      eyebrow: "Travel agency · Cúcuta",
+      titleA: "Your journey",
+      titleB: "starts",
+      titleAccent: "here",
+      subtitle:
+        "Spin the globe, pick a destination and we'll handle the whole escape. Flights, hotels and plans tailored to you.",
+      ctaPrimary: "Plan my trip",
+      ctaSecondary: "Explore destinations",
+      dragHint: "drag to spin the globe",
+    },
+    marquee: "Your journey starts here",
+    destinos: {
+      eyebrow: "Destinations",
+      title: "Where we take you",
+      note: "Reference prices per person. Tell us your dates and we'll build the exact plan.",
+      groups: { colombia: "Colombia", internacional: "International" },
+      items: [
+        { group: "colombia", name: "Cartagena", region: "Colombian Caribbean", nights: "4 nights", price: "from $890,000", img: "/destinos/cartagena.jpg" },
+        { group: "colombia", name: "San Andrés", region: "Seven-color sea", nights: "5 nights", price: "from $1,250,000", img: "/destinos/san-andres.jpg" },
+        { group: "colombia", name: "Santa Marta", region: "Tayrona & Caribbean", nights: "4 nights", price: "from $760,000", img: "/destinos/santa-marta.jpg" },
+        { group: "colombia", name: "Coffee Region", region: "Cocora Valley", nights: "3 nights", price: "from $640,000", img: "/destinos/eje-cafetero.jpg" },
+        { group: "internacional", name: "Cancún", region: "Riviera Maya", nights: "6 nights", price: "from $3,100,000", img: "/destinos/cancun.jpg" },
+        { group: "internacional", name: "Punta Cana", region: "Caribbean", nights: "6 nights", price: "from $3,400,000", img: "/destinos/punta-cana.jpg" },
+        { group: "internacional", name: "Spain", region: "Madrid · Seville", nights: "8 nights", price: "from $5,400,000", img: "/destinos/espana.jpg" },
+        { group: "internacional", name: "Europe", region: "Paris · multi-city", nights: "10 nights", price: "from $7,200,000", img: "/destinos/europa.jpg" },
+      ],
+    },
+    clocks: {
+      label: "Time around the world",
+      cities: [
+        { city: "New York", tz: "America/New_York" },
+        { city: "France", tz: "Europe/Paris" },
+        { city: "Spain", tz: "Europe/Madrid" },
+        { city: "Cúcuta", tz: "America/Bogota" },
+      ],
+    },
+    about: {
+      eyebrow: "About us",
+      title: "We don't sell trips. We design memories.",
+      body: "We're a team from Cúcuta who love to travel. We believe in a personal touch: we listen, understand how you dream your escape, and take care of every detail so all you have to do is enjoy.",
+      stats: [
+        { n: "+10", label: "years of experience" },
+        { n: "+2,500", label: "happy travelers" },
+        { n: "+40", label: "destinations" },
+        { n: "100%", label: "support" },
+      ],
+    },
+    services: {
+      eyebrow: "What we do for you",
+      title: "Everything in one place",
+      items: [
+        { title: "Tailor-made packages", desc: "Flight, hotel, transfers and plans in one clear quote." },
+        { title: "Expert advice", desc: "We guide you step by step, from the idea to a packed suitcase." },
+        { title: "Full support", desc: "We're with you before, during and after your trip." },
+        { title: "Honeymoons & groups", desc: "Special experiences for couples, families and companies." },
+      ],
+    },
+    why: {
+      eyebrow: "Why Escápate",
+      title: "Traveling with peace of mind feels different",
+      points: [
+        "Personal attention, face to face or over WhatsApp.",
+        "Transparent prices, no last-minute surprises.",
+        "Trusted airline and hotel partners.",
+        "Flexible plans that fit your budget.",
+      ],
+    },
+    gallery: {
+      eyebrow: "Our space",
+      title: "A place made for dreaming",
+    },
+    testimonials: {
+      eyebrow: "What they say",
+      title: "Travelers who already escaped",
+      items: [
+        { quote: "They built the perfect honeymoon. Every detail turned out just as we dreamed.", name: "Laura & Andrés", role: "Cancún 2025" },
+        { quote: "Super responsive on WhatsApp at any hour. I traveled relaxed and stress-free.", name: "Daniela M.", role: "Spain 2025" },
+        { quote: "Better price than booking on my own, with everything sorted. I'll be back.", name: "Carlos R.", role: "San Andrés 2024" },
+      ],
+    },
+    contact: {
+      eyebrow: "Contact",
+      title: "Ready to fly?",
+      subtitle: "Message us on WhatsApp or leave your details and we'll reach out today.",
+      whatsapp: "Chat on WhatsApp",
+      form: {
+        name: "Your name",
+        email: "Email address",
+        destination: "Where do you want to go?",
+        message: "Tell us more (dates, people...)",
+        submit: "Send request",
+        sending: "Sending...",
+        ok: "Thank you! We'll contact you very soon.",
+        err: "Something went wrong. Message us on WhatsApp.",
+      },
+      address: "Cúcuta, Norte de Santander, Colombia",
+      hours: "Mon to Sat · 8:00 a.m. – 6:00 p.m.",
+    },
+    quote: {
+      eyebrow: "Get a quote",
+      title: "Build your escape",
+      from: "Departure city",
+      dest: "Destination / Tour",
+      passengers: "Passengers",
+      adults: "Adults",
+      children: "Children",
+      infants: "Infants",
+      days: "Days",
+      daysUnit: "days",
+      name: "Your name",
+      people: "people",
+      whatsapp: "Quote on WhatsApp",
+      email: "Send by email",
+      ok: "Thank you! We'll send your quote very soon.",
+      err: "Something went wrong. Message us on WhatsApp.",
+      cities: ["Cúcuta", "Bogotá", "Medellín", "Cali", "Bucaramanga", "Other city"],
+      tours: ["Cartagena", "San Andrés", "Santa Marta", "Coffee Region", "Cancún", "Punta Cana", "Panama", "Spain", "Europe", "Not sure yet"],
+    },
+    footer: {
+      tagline: "Your journey starts here.",
+      rights: "All rights reserved.",
+      madeIn: "Made with love in Cúcuta.",
+    },
+  },
+} as const;
+
+export type Lang = keyof typeof content;
+export type Dict = (typeof content)[Lang];

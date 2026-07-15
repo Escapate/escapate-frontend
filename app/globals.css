@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark theme (default) */
+:root {
+  --surface: 12 27 47; /* #0C1B2F */
+  --surface-2: 17 35 62; /* #11233E */
+  --panel: 22 37 63; /* #16253F */
+  --field: 9 16 30; /* deep navy for inputs */
+  --ink: 234 238 245; /* near-white text */
+  --orange: #e8732a;
+  color-scheme: dark;
+}
+
+/* Light theme */
+html.light {
+  --surface: 245 241 233; /* cream #F5F1E9 */
+  --surface-2: 255 255 255; /* white */
+  --panel: 255 255 255; /* white */
+  --field: 237 231 219; /* cream-100 for inputs on white panels */
+  --ink: 17 35 62; /* navy text */
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: rgb(var(--surface));
+}
+
+body {
+  background-color: rgb(var(--surface));
+  color: rgb(var(--ink));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+::selection {
+  background: var(--orange);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgb(var(--surface));
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--ink) / 0.25);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--orange);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
