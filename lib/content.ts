@@ -19,7 +19,7 @@ export const content = {
         { id: "servicios", label: "Servicios" },
         { id: "contacto", label: "Contacto" },
       ],
-      cta: "Escríbenos",
+      cta: "Cotizar",
       skip: "Saltar al contenido",
     },
     hero: {
@@ -161,7 +161,7 @@ export const content = {
         { id: "servicios", label: "Services" },
         { id: "contacto", label: "Contact" },
       ],
-      cta: "Get in touch",
+      cta: "Get a quote",
       skip: "Skip to content",
     },
     hero: {

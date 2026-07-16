@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
-import { waLink } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Menu, X } from "lucide-react";
@@ -13,7 +12,6 @@ export default function Navbar() {
   const { c } = useI18n();
   const { theme } = useTheme();
   const [open, setOpen] = useState(false);
-  const wa = waLink(c.wa.hello);
   const dark = theme === "dark";
   const tone = dark ? "dark" : "light";
   const logo = dark
@@ -53,13 +51,10 @@ export default function Navbar() {
           <ThemeToggle tone={tone} />
           <LangToggle tone={tone} />
           <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-wa px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-[#06351a] transition hover:brightness-105"
+            href="#contacto"
+            className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-white transition hover:bg-orange-600"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#06351a]" aria-hidden="true" />
-            WhatsApp
+            {c.nav.cta}
           </a>
         </div>
 
@@ -92,12 +87,11 @@ export default function Navbar() {
             <div className="flex items-center gap-3 pt-1">
               <LangToggle tone={tone} />
               <a
-                href={wa}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full bg-wa px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-[#06351a]"
+                href="#contacto"
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-orange px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-white"
               >
-                WhatsApp
+                {c.nav.cta}
               </a>
             </div>
           </div>
