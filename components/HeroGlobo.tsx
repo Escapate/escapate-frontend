@@ -39,11 +39,11 @@ export default function HeroGlobo() {
             {...rise(0)}
             className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 lg:justify-start"
           >
-            <span className="inline-block h-px w-8 bg-orange-400/60" aria-hidden="true" />
             <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-orange-400 sm:text-sm">
               Agencia de viajes
             </span>
-            <span className="font-display text-xl font-black uppercase tracking-tight text-orange sm:text-2xl">
+            <span className="inline-block h-5 w-px bg-cream-50/30" aria-hidden="true" />
+            <span className="font-display text-xl font-black uppercase tracking-tight text-cream-50 sm:text-2xl">
               Escápate
             </span>
           </motion.p>

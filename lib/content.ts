@@ -1,6 +1,6 @@
 export const WHATSAPP_NUMBER = "573102108900"; // +57 310 210 8900
 export const INSTAGRAM = "escapate.cuc";
-export const EMAIL = "hola@escapate.com"; // TODO
+export const EMAIL = "reservas@escapate.tours";
 export const WEB3FORMS_KEY = ""; // TODO: pega tu access key de https://web3forms.com
 
 /** Enlace de WhatsApp con un mensaje opcional prellenado. */
