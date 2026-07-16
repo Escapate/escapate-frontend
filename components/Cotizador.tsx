@@ -126,6 +126,9 @@ export default function Cotizador() {
   const [seniors, setSeniors] = useState(0);
   const [days, setDays] = useState(5);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState<Status>("idle");
 
   const from = q.cities[fromIdx] ?? q.cities[0];
@@ -186,6 +189,13 @@ export default function Cotizador() {
       setStatus("err");
     }
   }
+
+  const inputCls = (bad?: boolean) =>
+    `w-full rounded-lg border bg-white px-4 py-3 text-navy-900 outline-none transition placeholder:text-navy-900/35 focus:ring-2 ${
+      bad
+        ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+        : "border-navy-900/15 focus:border-orange focus:ring-orange/30"
+    }`;
 
   return (
     <div
@@ -314,13 +324,40 @@ export default function Cotizador() {
           </div>
         </div>
 
-        {/* Nombre */}
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={q.name}
-          className="mt-3 w-full rounded-lg border border-navy-900/15 bg-white px-4 py-3 text-navy-900 outline-none transition placeholder:text-navy-900/35 focus:border-orange focus:ring-2 focus:ring-orange/30"
-        />
+        {/* Contacto: nombre / celular / correo */}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={q.name}
+              className={inputCls(errors.name)}
+            />
+            {errors.name && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+          </div>
+          <div>
+            <input
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={q.phone}
+              className={inputCls(errors.phone)}
+            />
+            {errors.phone && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+          </div>
+          <div>
+            <input
+              type="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={q.emailField}
+              className={inputCls(errors.email)}
+            />
+            {errors.email && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+          </div>
+        </div>
 
         {/* Resumen bonito (talón del pase) */}
         <div className="mt-4 rounded-xl border border-navy-900/10 bg-navy-950/[0.03] p-4">
