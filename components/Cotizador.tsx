@@ -148,6 +148,9 @@ export default function Cotizador() {
   const q = c.quote;
   const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
   const ref = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   const [menu, setMenu] = useState<Menu>(null);
   // Índices (no texto) → no se pierde la selección al cambiar de idioma.
@@ -227,6 +230,9 @@ export default function Cotizador() {
     if (!phone.trim()) e.phone = true;
     if (!email.trim() || !email.includes("@")) e.email = true;
     setErrors(e);
+    if (e.name) nameRef.current?.focus();
+    else if (e.phone) phoneRef.current?.focus();
+    else if (e.email) emailRef.current?.focus();
     return Object.keys(e).length === 0;
   }
 
@@ -238,26 +244,39 @@ export default function Cotizador() {
     }
     setStatus("sending");
     try {
+      const fechas = hasDates
+        ? [departure, depReturn].filter(Boolean).join(" → ")
+        : monthIdx !== null
+          ? q.months[monthIdx]
+          : "";
+
+      const payload: Record<string, string | number> = {
+        access_key: WEB3FORMS_KEY,
+        subject: "Nueva cotización · Escápate",
+        name,
+        salida: from,
+        destino: dest,
+        pasajeros: paxParts,
+        dias: days,
+        message,
+      };
+      const optional: Record<string, string> = {
+        celular: phone,
+        correo: email,
+        fechas,
+        hotel: hotelIdx !== null ? q.hotelOptions[hotelIdx] : "",
+        plan: planIdx !== null ? q.planOptions[planIdx] : "",
+        preferencias: prefsList.join(", "),
+        notas: notes,
+      };
+      for (const [key, value] of Object.entries(optional)) {
+        if (value) payload[key] = value;
+      }
+
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
-          subject: "Nueva cotización · Escápate",
-          name,
-          celular: phone,
-          correo: email,
-          salida: from,
-          destino: dest,
-          pasajeros: paxParts,
-          dias: days,
-          fechas: hasDates ? `${departure} → ${depReturn}` : (monthIdx !== null ? q.months[monthIdx] : ""),
-          hotel: hotelIdx !== null ? q.hotelOptions[hotelIdx] : "",
-          plan: planIdx !== null ? q.planOptions[planIdx] : "",
-          preferencias: prefsList.join(", "),
-          notas: notes,
-          message,
-        }),
+        body: JSON.stringify(payload),
       });
       const j = await res.json();
       setStatus(j.success ? "ok" : "err");
@@ -404,34 +423,55 @@ export default function Cotizador() {
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <input
+              ref={nameRef}
               value={name}
               onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: false })); }}
               placeholder={q.name}
               className={inputCls(errors.name)}
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "quote-name-error" : undefined}
             />
-            {errors.name && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+            {errors.name && (
+              <p id="quote-name-error" role="alert" className="mt-1 text-xs text-red-600">
+                {q.required}
+              </p>
+            )}
           </div>
           <div>
             <input
+              ref={phoneRef}
               type="tel"
               inputMode="tel"
               value={phone}
               onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: false })); }}
               placeholder={q.phone}
               className={inputCls(errors.phone)}
+              aria-invalid={!!errors.phone}
+              aria-describedby={errors.phone ? "quote-phone-error" : undefined}
             />
-            {errors.phone && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+            {errors.phone && (
+              <p id="quote-phone-error" role="alert" className="mt-1 text-xs text-red-600">
+                {q.required}
+              </p>
+            )}
           </div>
           <div>
             <input
+              ref={emailRef}
               type="email"
               inputMode="email"
               value={email}
               onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: false })); }}
               placeholder={q.emailField}
               className={inputCls(errors.email)}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "quote-email-error" : undefined}
             />
-            {errors.email && <p className="mt-1 text-xs text-red-600">{q.required}</p>}
+            {errors.email && (
+              <p id="quote-email-error" role="alert" className="mt-1 text-xs text-red-600">
+                {q.required}
+              </p>
+            )}
           </div>
         </div>
 
@@ -504,21 +544,30 @@ export default function Cotizador() {
                     </div>
                   </div>
                 ) : (
-                  <select
-                    value={monthIdx ?? ""}
-                    onChange={(e) => setMonthIdx(e.target.value === "" ? null : Number(e.target.value))}
-                    className={`mt-2 ${inputCls()}`}
-                  >
-                    <option value="">{q.monthPh}</option>
-                    {q.months.map((mo, i) => (
-                      <option key={mo} value={i}>{mo}</option>
-                    ))}
-                  </select>
+                  <div className="mt-2">
+                    <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
+                      {q.month}
+                    </FieldLabel>
+                    <select
+                      value={monthIdx ?? ""}
+                      onChange={(e) => setMonthIdx(e.target.value === "" ? null : Number(e.target.value))}
+                      className={inputCls()}
+                    >
+                      <option value="">{q.monthPh}</option>
+                      {q.months.map((mo, i) => (
+                        <option key={mo} value={i}>{mo}</option>
+                      ))}
+                    </select>
+                  </div>
                 )}
               </div>
 
               {/* Hospedaje */}
               <div className="grid gap-3">
+                <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-navy-900/70">
+                  <MapPin className="h-3.5 w-3.5 text-orange-500" />
+                  {q.lodging}
+                </div>
                 <div>
                   <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
                     {q.hotel}
