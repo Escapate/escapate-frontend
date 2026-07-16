@@ -123,7 +123,7 @@ export default function Cotizador() {
   const [destIdx, setDestIdx] = useState(0);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
+  const [seniors, setSeniors] = useState(0);
   const [days, setDays] = useState(5);
   const [name, setName] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -139,11 +139,11 @@ export default function Cotizador() {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  const total = adults + children + infants;
+  const total = adults + children + seniors;
   const paxParts = [
     `${adults} ${q.adults}`,
     children > 0 ? `${children} ${q.children}` : null,
-    infants > 0 ? `${infants} ${q.infants}` : null,
+    seniors > 0 ? `${seniors} ${q.seniors}` : null,
   ]
     .filter(Boolean)
     .join(", ");
@@ -289,7 +289,7 @@ export default function Cotizador() {
                 {[
                   { label: q.adults, value: adults, set: setAdults, min: 1 },
                   { label: q.children, value: children, set: setChildren, min: 0 },
-                  { label: q.infants, value: infants, set: setInfants, min: 0 },
+                  { label: q.seniors, value: seniors, set: setSeniors, min: 0 },
                 ].map((row) => (
                   <div key={row.label} className="flex items-center justify-between py-1.5">
                     <span className="text-sm text-navy-900/80">{row.label}</span>
