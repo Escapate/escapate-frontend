@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import StaticGlobe from "./StaticGlobe";
 
@@ -11,14 +12,63 @@ const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
 
 export default function Globe() {
   const reduced = useReducedMotion();
-  // Respect prefers-reduced-motion: serve a calm, static globe.
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false); // el navegador ya está ocioso
+  const [inView, setInView] = useState(true); // el hero está en pantalla
+  const [mounted, setMounted] = useState(false); // el canvas ya se enganchó
+
+  // (1) Diferir el "upgrade" a WebGL hasta que el navegador esté ocioso. Así
+  // three.js (~233 KB gz) no compite con la carga crítica: el globo estático ya
+  // está pintado y el 3D entra ~1s después, casi imperceptible.
+  useEffect(() => {
+    if (reduced) return;
+    const start = () => setReady(true);
+    const w = window as Window &
+      typeof globalThis & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+    if (typeof w.requestIdleCallback === "function") {
+      const id = w.requestIdleCallback(start, { timeout: 2500 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(start, 1200);
+    return () => window.clearTimeout(id);
+  }, [reduced]);
+
+  // (2) Pausar el render cuando el hero sale de pantalla → no quema CPU/GPU/batería
+  // mientras el usuario lee el resto de la página.
+  useEffect(() => {
+    if (reduced) return;
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
+      rootMargin: "200px",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduced]);
+
+  // Engancha el canvas una vez que está ocioso y visible; luego lo deja montado y
+  // solo alterna el bucle de render con `inView` (evita re-crear el contexto WebGL).
+  useEffect(() => {
+    if (ready && inView) setMounted(true);
+  }, [ready, inView]);
+
+  // Respeta prefers-reduced-motion: globo estático, sin three.js.
   if (reduced) return <StaticGlobe />;
-  // The canvas bleeds beyond its square container so the orbit path + plane stay
-  // fully visible on all sides while the globe keeps its original on-screen size
-  // (the camera is pulled back by the same factor in GlobeCanvas).
+
+  // El canvas se desborda del contenedor cuadrado para que la órbita + el avión
+  // queden visibles por todos lados (la cámara se retrae el mismo factor en GlobeCanvas).
   return (
-    <div className="absolute inset-[-24%]" aria-hidden="true">
-      <GlobeCanvas />
+    <div ref={ref} className="absolute inset-0" aria-hidden="true">
+      {mounted ? (
+        <div className="absolute inset-[-24%]">
+          <GlobeCanvas frameloop={inView ? "always" : "never"} />
+        </div>
+      ) : (
+        <StaticGlobe />
+      )}
     </div>
   );
 }

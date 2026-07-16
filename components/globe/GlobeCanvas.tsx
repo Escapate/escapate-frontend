@@ -23,12 +23,13 @@ function Earth() {
   return (
     <group rotation={[0.32, 0, 0]}>
       <mesh ref={ref}>
-        <sphereGeometry args={[GLOBE_R, 96, 96]} />
+        {/* 64 segmentos se ven idénticos a este tamaño (~460px) con menos vértices. */}
+        <sphereGeometry args={[GLOBE_R, 64, 64]} />
         <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
       </mesh>
-      {/* soft atmospheric halo */}
+      {/* soft atmospheric halo — es un halo difuso, los segmentos casi no importan */}
       <mesh scale={1.16}>
-        <sphereGeometry args={[GLOBE_R, 48, 48]} />
+        <sphereGeometry args={[GLOBE_R, 32, 32]} />
         <meshBasicMaterial
           color="#E8732A"
           transparent
@@ -121,12 +122,20 @@ function Scene() {
   );
 }
 
-export default function GlobeCanvas() {
+export default function GlobeCanvas({
+  frameloop = "always",
+}: {
+  frameloop?: "always" | "never";
+}) {
+  // En pantallas de alta densidad (móvil retina) el antialias es innecesario —
+  // los píxeles ya son densos — y ahorra fill-rate.
+  const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
   return (
     <Canvas
+      frameloop={frameloop}
       camera={{ position: [0, 0, 6.4], fov: 42 }}
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
+      dpr={[1, 1.5]}
+      gl={{ antialias: !hiDpr, alpha: true }}
       style={{ background: "transparent" }}
     >
       <Scene />
