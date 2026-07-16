@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
 import { RouteTag, Perf, WhatsAppIcon } from "./ui";
@@ -19,7 +19,7 @@ import {
   StickyNote,
 } from "lucide-react";
 
-type Menu = "from" | "dest" | "pax" | null;
+type Menu = "pax" | null;
 type Status = "idle" | "sending" | "ok" | "err";
 
 /* Stepper +/- (estilo main, sobre crema) */
@@ -76,37 +76,81 @@ function FieldLabel({
   );
 }
 
-function Options({
-  options,
+/* Combobox: input con recomendaciones. Al enfocar muestra la lista curada;
+   al escribir filtra por coincidencia; admite cualquier texto (ciudad libre). */
+function Combobox({
   value,
-  onPick,
+  onChange,
+  options,
+  placeholder,
 }: {
-  options: readonly string[];
   value: string;
-  onPick: (v: string) => void;
+  onChange: (v: string) => void;
+  options: readonly string[];
+  placeholder: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  const query = value.trim().toLowerCase();
+  const exact = options.some((o) => o.toLowerCase() === query);
+  // Recomendaciones por defecto: vacío o coincidencia exacta → muestra todas.
+  const filtered =
+    query === "" || exact ? options : options.filter((o) => o.toLowerCase().includes(query));
+
   return (
-    <ul
-      role="listbox"
-      className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-navy-900/10 bg-white p-1.5 shadow-2xl"
-    >
-      {options.map((o) => (
-        <li key={o} role="option" aria-selected={o === value}>
-          <button
-            type="button"
-            onClick={() => onPick(o)}
-            className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
-              o === value
-                ? "bg-orange/15 text-orange-600"
-                : "text-navy-900/80 hover:bg-navy-900/5"
-            }`}
-          >
-            {o}
-            {o === value && <Check className="h-4 w-4" />}
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div ref={boxRef} className="relative">
+      <input
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        role="combobox"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-autocomplete="list"
+        className="w-full rounded-lg border border-navy-900/15 bg-white p-3 text-navy-900 outline-none transition placeholder:text-navy-900/35 hover:border-navy-900/30 focus:border-orange focus:ring-2 focus:ring-orange/30"
+      />
+      {open && filtered.length > 0 && (
+        <ul
+          id={listId}
+          role="listbox"
+          className="absolute z-30 mt-2 max-h-56 w-full overflow-auto rounded-xl border border-navy-900/10 bg-white p-1.5 shadow-2xl"
+        >
+          {filtered.map((o) => (
+            <li key={o} role="option" aria-selected={o === value}>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange(o);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
+                  o === value
+                    ? "bg-orange/15 text-orange-600"
+                    : "text-navy-900/80 hover:bg-navy-900/5"
+                }`}
+              >
+                {o}
+                {o === value && <Check className="h-4 w-4" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -153,9 +197,9 @@ export default function Cotizador() {
   const emailRef = useRef<HTMLInputElement>(null);
 
   const [menu, setMenu] = useState<Menu>(null);
-  // Índices (no texto) → no se pierde la selección al cambiar de idioma.
-  const [fromIdx, setFromIdx] = useState(0);
-  const [destIdx, setDestIdx] = useState(0);
+  // Salida/destino: texto libre con recomendaciones (combobox) → admite cualquier ciudad.
+  const [from, setFrom] = useState<string>(() => q.cities[0]);
+  const [dest, setDest] = useState<string>(() => q.tours[0]);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [seniors, setSeniors] = useState(0);
@@ -175,9 +219,6 @@ export default function Cotizador() {
   const [planIdx, setPlanIdx] = useState<number | null>(null);
   const [prefsIdx, setPrefsIdx] = useState<number[]>([]);
   const [otherPref, setOtherPref] = useState("");
-
-  const from = q.cities[fromIdx] ?? q.cities[0];
-  const dest = q.tours[destIdx] ?? q.tours[0];
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -315,61 +356,19 @@ export default function Cotizador() {
       <div className="px-5 py-6 sm:px-6">
         <div className="grid gap-3 sm:grid-cols-2">
           {/* Ciudad de salida */}
-          <div className="relative">
+          <div>
             <FieldLabel icon={<PlaneTakeoff className="h-3.5 w-3.5 text-orange-500" />}>
               {q.from}
             </FieldLabel>
-            <button
-              type="button"
-              className={triggerCls}
-              aria-haspopup="listbox"
-              aria-expanded={menu === "from"}
-              onClick={() => setMenu(menu === "from" ? null : "from")}
-            >
-              {from}
-              <ChevronDown
-                className={`h-4 w-4 text-navy-900/40 transition ${menu === "from" ? "rotate-180" : ""}`}
-              />
-            </button>
-            {menu === "from" && (
-              <Options
-                options={q.cities}
-                value={from}
-                onPick={(v) => {
-                  setFromIdx((q.cities as readonly string[]).indexOf(v));
-                  setMenu(null);
-                }}
-              />
-            )}
+            <Combobox value={from} onChange={setFrom} options={q.cities} placeholder={q.from} />
           </div>
 
           {/* Destino / Tour */}
-          <div className="relative">
+          <div>
             <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
               {q.dest}
             </FieldLabel>
-            <button
-              type="button"
-              className={triggerCls}
-              aria-haspopup="listbox"
-              aria-expanded={menu === "dest"}
-              onClick={() => setMenu(menu === "dest" ? null : "dest")}
-            >
-              {dest}
-              <ChevronDown
-                className={`h-4 w-4 text-navy-900/40 transition ${menu === "dest" ? "rotate-180" : ""}`}
-              />
-            </button>
-            {menu === "dest" && (
-              <Options
-                options={q.tours}
-                value={dest}
-                onPick={(v) => {
-                  setDestIdx((q.tours as readonly string[]).indexOf(v));
-                  setMenu(null);
-                }}
-              />
-            )}
+            <Combobox value={dest} onChange={setDest} options={q.tours} placeholder={q.dest} />
           </div>
 
           {/* Pasajeros */}
@@ -420,8 +419,8 @@ export default function Cotizador() {
         </div>
 
         {/* Contacto: nombre / celular / correo */}
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
             <input
               ref={nameRef}
               value={name}
@@ -504,7 +503,7 @@ export default function Cotizador() {
           </button>
 
           {open && (
-            <div className="mt-4 grid gap-4">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {/* Fechas */}
               <div>
                 <label className="flex cursor-pointer items-center justify-between">
@@ -611,7 +610,7 @@ export default function Cotizador() {
               </div>
 
               {/* Notas */}
-              <div>
+              <div className="sm:col-span-2">
                 <FieldLabel icon={<StickyNote className="h-3.5 w-3.5 text-orange-500" />}>
                   {q.notes}
                 </FieldLabel>

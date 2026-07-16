@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
-import { INSTAGRAM, waLink } from "@/lib/content";
+import { INSTAGRAM, EMAIL, waLink } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
 import { ThemeToggle } from "./ThemeToggle";
-import { Instagram } from "lucide-react";
+import { Instagram, MapPin, Clock, Mail } from "lucide-react";
 import { WhatsAppIcon } from "./ui";
 
 export default function Footer() {
@@ -36,6 +36,22 @@ export default function Footer() {
             <p className="mt-3 font-mono text-xs uppercase tracking-wider text-inkB/45">
               {c.footer.tagline}
             </p>
+            <ul className="mt-4 flex flex-col gap-1.5 text-sm text-inkB/60">
+              <li className="flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+                <span>{c.contact.address}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+                <span>{c.contact.hours}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+                <a href={`mailto:${EMAIL}`} className="transition hover:text-orange">
+                  {EMAIL}
+                </a>
+              </li>
+            </ul>
           </div>
 
           <nav className="flex flex-wrap items-center gap-x-7 gap-y-2">
