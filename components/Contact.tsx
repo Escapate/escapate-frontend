@@ -1,14 +1,14 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n";
-import { WHATSAPP_NUMBER, EMAIL, INSTAGRAM } from "@/lib/content";
+import { EMAIL, INSTAGRAM, waLink } from "@/lib/content";
 import { Reveal, SectionHead } from "./ui";
 import Cotizador from "./Cotizador";
 import { MessageCircle, MapPin, Clock, Mail, Instagram } from "lucide-react";
 
 export default function Contact() {
   const { c } = useI18n();
-  const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const wa = waLink(c.wa.hello);
 
   return (
     <section

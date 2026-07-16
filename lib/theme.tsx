@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("default");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("escapate-theme");
+    const saved = window.localStorage.getItem("escapate-theme-v2");
     if (saved === "light" || saved === "dark" || saved === "default") {
       setThemeState(saved);
     }
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     try {
-      window.localStorage.setItem("escapate-theme", t);
+      window.localStorage.setItem("escapate-theme-v2", t);
     } catch {}
   }, []);
 
@@ -47,7 +47,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState((cur) => {
       const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
       try {
-        window.localStorage.setItem("escapate-theme", next);
+        window.localStorage.setItem("escapate-theme-v2", next);
       } catch {}
       return next;
     });

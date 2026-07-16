@@ -41,8 +41,9 @@ html.theme-dark {
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 4.5rem;
-  scroll-snap-type: y proximity;
+  /* Única compensación para los anclas del navbar (= alto del header sticky).
+     No combinar con scroll-margin-top en las secciones: se sumarían. */
+  scroll-padding-top: 4.75rem;
   background-color: rgb(var(--section-b));
 }
 
@@ -55,11 +56,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Cada pantalla completa. 100svh evita el salto por la barra del navegador móvil. */
+/* Cada pantalla completa. 100svh evita el salto por la barra del navegador móvil.
+   El offset del ancla lo maneja scroll-padding-top en <html> (no duplicar aquí). */
 .screen {
   min-height: 100svh;
-  scroll-snap-align: start;
-  scroll-margin-top: 4.5rem;
 }
 
 button:not(:disabled),
@@ -123,7 +123,6 @@ textarea:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-    scroll-snap-type: none;
   }
   *,
   *::before,

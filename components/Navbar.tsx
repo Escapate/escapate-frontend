@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
-import { WHATSAPP_NUMBER } from "@/lib/content";
+import { waLink } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Menu, X } from "lucide-react";
@@ -13,7 +13,7 @@ export default function Navbar() {
   const { c } = useI18n();
   const { theme } = useTheme();
   const [open, setOpen] = useState(false);
-  const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const wa = waLink(c.wa.hello);
   const dark = theme === "dark";
   const tone = dark ? "dark" : "light";
   const logo = dark

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
-import { WHATSAPP_NUMBER, INSTAGRAM } from "@/lib/content";
+import { INSTAGRAM, waLink } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Instagram, Facebook, MessageCircle } from "lucide-react";
@@ -11,7 +11,7 @@ import { Instagram, Facebook, MessageCircle } from "lucide-react";
 export default function Footer() {
   const { c } = useI18n();
   const { theme } = useTheme();
-  const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const wa = waLink(c.wa.hello);
   const year = new Date().getFullYear();
   // Footer = slot B: navy en default/dark, crema-100 en light.
   const light = theme === "light";
