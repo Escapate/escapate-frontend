@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
+import { RouteTag, Perf } from "./ui";
 import {
   PlaneTakeoff,
   MapPin,
@@ -14,12 +16,12 @@ import {
   MessageCircle,
   Mail,
   Check,
-  Route,
 } from "lucide-react";
 
 type Menu = "from" | "dest" | "pax" | null;
 type Status = "idle" | "sending" | "ok" | "err";
 
+/* Stepper +/- (estilo main, sobre crema) */
 function Stepper({
   value,
   onChange,
@@ -35,19 +37,19 @@ function Stepper({
     <div className="flex items-center gap-2">
       <button
         type="button"
-        aria-label="−"
+        aria-label="Restar"
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        className="grid h-8 w-8 place-items-center rounded-lg border border-ink/25 text-ink transition hover:border-orange disabled:opacity-30"
+        className="grid h-8 w-8 place-items-center rounded-lg border border-navy-900/20 text-navy-900 transition hover:border-orange disabled:opacity-30"
       >
         <Minus className="h-4 w-4" />
       </button>
-      <span className="w-6 text-center font-mono text-base tabular-nums text-ink">
+      <span className="w-6 text-center font-mono text-base tabular-nums text-navy-900">
         {value}
       </span>
       <button
         type="button"
-        aria-label="+"
+        aria-label="Sumar"
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
         className="grid h-8 w-8 place-items-center rounded-lg bg-orange text-white transition hover:bg-orange-600 disabled:opacity-40"
@@ -66,7 +68,7 @@ function FieldLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-ink/45">
+    <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-navy-900/55">
       {icon}
       {children}
     </div>
@@ -85,7 +87,7 @@ function Options({
   return (
     <ul
       role="listbox"
-      className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-ink/15 bg-panel p-1.5 shadow-2xl"
+      className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-navy-900/10 bg-white p-1.5 shadow-2xl"
     >
       {options.map((o) => (
         <li key={o} role="option" aria-selected={o === value}>
@@ -94,8 +96,8 @@ function Options({
             onClick={() => onPick(o)}
             className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
               o === value
-                ? "bg-orange/15 text-orange-400"
-                : "text-ink/80 hover:bg-ink/5"
+                ? "bg-orange/15 text-orange-600"
+                : "text-navy-900/80 hover:bg-navy-900/5"
             }`}
           >
             {o}
@@ -108,7 +110,7 @@ function Options({
 }
 
 const triggerCls =
-  "flex w-full items-center justify-between rounded-xl border border-ink/15 bg-field p-3 text-left text-ink transition hover:border-ink/30";
+  "flex w-full items-center justify-between rounded-lg border border-navy-900/15 bg-white p-3 text-left text-navy-900 transition hover:border-navy-900/30";
 
 export default function Cotizador() {
   const { c } = useI18n();
@@ -117,8 +119,9 @@ export default function Cotizador() {
   const ref = useRef<HTMLDivElement>(null);
 
   const [menu, setMenu] = useState<Menu>(null);
-  const [from, setFrom] = useState<string>(q.cities[0]);
-  const [dest, setDest] = useState<string>(q.tours[0]);
+  // Índices (no texto) → no se pierde la selección al cambiar de idioma.
+  const [fromIdx, setFromIdx] = useState(0);
+  const [destIdx, setDestIdx] = useState(0);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
@@ -126,10 +129,8 @@ export default function Cotizador() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState<Status>("idle");
 
-  useEffect(() => {
-    setFrom(q.cities[0]);
-    setDest(q.tours[0]);
-  }, [q]);
+  const from = q.cities[fromIdx] ?? q.cities[0];
+  const dest = q.tours[destIdx] ?? q.tours[0];
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -147,7 +148,6 @@ export default function Cotizador() {
   ]
     .filter(Boolean)
     .join(", ");
-  const summary = `${from} → ${dest} · ${paxParts} · ${days} ${q.daysUnit}`;
 
   const m = q.msg;
   const message = `${m.intro}
@@ -191,155 +191,185 @@ export default function Cotizador() {
   return (
     <div
       ref={ref}
-      className="rounded-3xl border border-ink/10 bg-panel p-5 shadow-sm sm:p-7"
+      className="overflow-hidden rounded-[10px] bg-cream-50 text-navy-900 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)]"
     >
-      <div className="grid gap-3 sm:grid-cols-2">
-        {/* Ciudad de salida */}
-        <div className="relative">
-          <FieldLabel icon={<PlaneTakeoff className="h-3.5 w-3.5 text-orange-400" />}>
-            {q.from}
-          </FieldLabel>
-          <button
-            type="button"
-            className={triggerCls}
-            aria-haspopup="listbox"
-            aria-expanded={menu === "from"}
-            onClick={() => setMenu(menu === "from" ? null : "from")}
-          >
-            {from}
-            <ChevronDown className="h-4 w-4 text-ink/40" />
-          </button>
-          {menu === "from" && (
-            <Options
-              options={q.cities}
-              value={from}
-              onPick={(v) => {
-                setFrom(v);
-                setMenu(null);
-              }}
-            />
-          )}
-        </div>
+      {/* header del pase */}
+      <div className="flex items-center justify-between border-b-2 border-dashed border-navy-900/20 px-6 py-4">
+        <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-orange">
+          {q.eyebrow.toUpperCase()}
+        </span>
+        <Image
+          src="/logo/escapate-transparent.png"
+          alt="Escápate"
+          width={600}
+          height={364}
+          className="h-5 w-auto"
+        />
+      </div>
 
-        {/* Destino / Tour */}
-        <div className="relative">
-          <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-400" />}>
-            {q.dest}
-          </FieldLabel>
-          <button
-            type="button"
-            className={triggerCls}
-            aria-haspopup="listbox"
-            aria-expanded={menu === "dest"}
-            onClick={() => setMenu(menu === "dest" ? null : "dest")}
-          >
-            {dest}
-            <ChevronDown className="h-4 w-4 text-ink/40" />
-          </button>
-          {menu === "dest" && (
-            <Options
-              options={q.tours}
-              value={dest}
-              onPick={(v) => {
-                setDest(v);
-                setMenu(null);
-              }}
-            />
-          )}
-        </div>
+      {/* campos */}
+      <div className="px-5 py-6 sm:px-6">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {/* Ciudad de salida */}
+          <div className="relative">
+            <FieldLabel icon={<PlaneTakeoff className="h-3.5 w-3.5 text-orange-500" />}>
+              {q.from}
+            </FieldLabel>
+            <button
+              type="button"
+              className={triggerCls}
+              aria-haspopup="listbox"
+              aria-expanded={menu === "from"}
+              onClick={() => setMenu(menu === "from" ? null : "from")}
+            >
+              {from}
+              <ChevronDown
+                className={`h-4 w-4 text-navy-900/40 transition ${menu === "from" ? "rotate-180" : ""}`}
+              />
+            </button>
+            {menu === "from" && (
+              <Options
+                options={q.cities}
+                value={from}
+                onPick={(v) => {
+                  setFromIdx((q.cities as readonly string[]).indexOf(v));
+                  setMenu(null);
+                }}
+              />
+            )}
+          </div>
 
-        {/* Pasajeros */}
-        <div className="relative">
-          <FieldLabel icon={<Users className="h-3.5 w-3.5 text-orange-400" />}>
-            {q.passengers}
-          </FieldLabel>
-          <button
-            type="button"
-            className={triggerCls}
-            aria-haspopup="dialog"
-            aria-expanded={menu === "pax"}
-            onClick={() => setMenu(menu === "pax" ? null : "pax")}
-          >
-            {total} {q.people}
-            <ChevronDown className="h-4 w-4 text-ink/40" />
-          </button>
-          {menu === "pax" && (
-            <div className="absolute z-20 mt-2 w-full rounded-xl border border-ink/15 bg-panel p-3 shadow-2xl">
-              {[
-                { label: q.adults, value: adults, set: setAdults, min: 1 },
-                { label: q.children, value: children, set: setChildren, min: 0 },
-                { label: q.infants, value: infants, set: setInfants, min: 0 },
-              ].map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-center justify-between py-1.5"
-                >
-                  <span className="text-sm text-ink/80">{row.label}</span>
-                  <Stepper
-                    value={row.value}
-                    onChange={row.set}
-                    min={row.min}
-                    max={20}
-                  />
-                </div>
-              ))}
+          {/* Destino / Tour */}
+          <div className="relative">
+            <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
+              {q.dest}
+            </FieldLabel>
+            <button
+              type="button"
+              className={triggerCls}
+              aria-haspopup="listbox"
+              aria-expanded={menu === "dest"}
+              onClick={() => setMenu(menu === "dest" ? null : "dest")}
+            >
+              {dest}
+              <ChevronDown
+                className={`h-4 w-4 text-navy-900/40 transition ${menu === "dest" ? "rotate-180" : ""}`}
+              />
+            </button>
+            {menu === "dest" && (
+              <Options
+                options={q.tours}
+                value={dest}
+                onPick={(v) => {
+                  setDestIdx((q.tours as readonly string[]).indexOf(v));
+                  setMenu(null);
+                }}
+              />
+            )}
+          </div>
+
+          {/* Pasajeros */}
+          <div className="relative">
+            <FieldLabel icon={<Users className="h-3.5 w-3.5 text-orange-500" />}>
+              {q.passengers}
+            </FieldLabel>
+            <button
+              type="button"
+              className={triggerCls}
+              aria-haspopup="dialog"
+              aria-expanded={menu === "pax"}
+              onClick={() => setMenu(menu === "pax" ? null : "pax")}
+            >
+              {total} {q.people}
+              <ChevronDown
+                className={`h-4 w-4 text-navy-900/40 transition ${menu === "pax" ? "rotate-180" : ""}`}
+              />
+            </button>
+            {menu === "pax" && (
+              <div className="absolute z-20 mt-2 w-full rounded-xl border border-navy-900/10 bg-white p-3 shadow-2xl">
+                {[
+                  { label: q.adults, value: adults, set: setAdults, min: 1 },
+                  { label: q.children, value: children, set: setChildren, min: 0 },
+                  { label: q.infants, value: infants, set: setInfants, min: 0 },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-center justify-between py-1.5">
+                    <span className="text-sm text-navy-900/80">{row.label}</span>
+                    <Stepper value={row.value} onChange={row.set} min={row.min} max={20} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Días */}
+          <div>
+            <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
+              {q.days}
+            </FieldLabel>
+            <div className="flex items-center justify-between rounded-lg border border-navy-900/15 bg-white p-3">
+              <span className="text-navy-900">
+                {days} {q.daysUnit}
+              </span>
+              <Stepper value={days} onChange={setDays} min={1} max={60} />
             </div>
-          )}
-        </div>
-
-        {/* Días */}
-        <div>
-          <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-400" />}>
-            {q.days}
-          </FieldLabel>
-          <div className="flex items-center justify-between rounded-xl border border-ink/15 bg-field p-3">
-            <span className="text-ink">
-              {days} {q.daysUnit}
-            </span>
-            <Stepper value={days} onChange={setDays} min={1} max={60} />
           </div>
         </div>
+
+        {/* Nombre */}
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={q.name}
+          className="mt-3 w-full rounded-lg border border-navy-900/15 bg-white px-4 py-3 text-navy-900 outline-none transition placeholder:text-navy-900/35 focus:border-orange focus:ring-2 focus:ring-orange/30"
+        />
+
+        {/* Resumen bonito (talón del pase) */}
+        <div className="mt-4 rounded-xl border border-navy-900/10 bg-navy-950/[0.03] p-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <RouteTag to={dest} from={from} />
+            <span className="flex items-center gap-1.5 text-sm text-navy-900/75">
+              <Users className="h-4 w-4 text-orange-500" />
+              {total} {q.people}
+            </span>
+            <span className="flex items-center gap-1.5 text-sm text-navy-900/75">
+              <CalendarDays className="h-4 w-4 text-orange-500" />
+              {days} {q.daysUnit}
+            </span>
+          </div>
+          <p className="mt-2 font-mono text-[11px] text-navy-900/55">{paxParts}</p>
+        </div>
       </div>
 
-      {/* Nombre */}
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder={q.name}
-        className="mt-3 w-full rounded-xl border border-ink/15 bg-field px-4 py-3 text-ink outline-none transition placeholder:text-ink/35 focus:border-orange focus:ring-2 focus:ring-orange/30"
-      />
+      {/* muesca troquelada */}
+      <Perf notch="#0C1B2F" />
 
-      {/* Resumen en vivo */}
-      <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-orange/25 bg-orange/5 px-4 py-3">
-        <Route className="h-5 w-5 shrink-0 text-orange-400" />
-        <span className="text-sm text-ink/85">{summary}</span>
+      {/* acciones */}
+      <div className="px-5 py-6 sm:px-6">
+        <div className="grid gap-2 sm:grid-cols-[1.5fr_1fr]">
+          <button
+            type="button"
+            onClick={onWhatsApp}
+            className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-wa px-5 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-[#06351c] shadow-[0_16px_34px_-16px_rgba(37,211,102,0.8)] transition hover:brightness-105"
+          >
+            <MessageCircle className="h-5 w-5" />
+            {q.whatsapp}
+          </button>
+          <button
+            type="button"
+            onClick={onEmail}
+            disabled={status === "sending"}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-navy-900/20 px-5 py-3.5 text-sm font-semibold text-navy-900 transition hover:border-orange hover:text-orange disabled:opacity-60"
+          >
+            <Mail className="h-4 w-4" />
+            {status === "sending" ? "…" : q.email}
+          </button>
+        </div>
+
+        {status === "ok" && <p className="mt-3 text-sm font-semibold text-green-700">{q.ok}</p>}
+        {status === "err" && (
+          <p className="mt-3 text-sm font-semibold text-orange-600">{q.err}</p>
+        )}
       </div>
-
-      {/* Acciones */}
-      <div className="mt-4 grid gap-2 sm:grid-cols-[1.4fr_1fr]">
-        <button
-          type="button"
-          onClick={onWhatsApp}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-wa px-5 py-3.5 font-medium text-[#06351a] transition hover:brightness-105"
-        >
-          <MessageCircle className="h-5 w-5" />
-          {q.whatsapp}
-        </button>
-        <button
-          type="button"
-          onClick={onEmail}
-          disabled={status === "sending"}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange/50 px-5 py-3.5 text-ink transition hover:bg-orange/10 disabled:opacity-60"
-        >
-          <Mail className="h-4 w-4" />
-          {q.email}
-        </button>
-      </div>
-
-      {status === "ok" && <p className="mt-3 text-sm text-wa">{q.ok}</p>}
-      {status === "err" && (
-        <p className="mt-3 text-sm text-orange-400">{q.err}</p>
-      )}
     </div>
   );
 }

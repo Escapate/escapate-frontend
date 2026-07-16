@@ -27,3 +27,6 @@ skills-lock.json
 /_pdf_pages
 /_work
 RENDERS FINALES AGENCIA DE VIAJES.pdf
+
+# TS incremental build info
+tsconfig.tsbuildinfo

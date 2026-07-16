@@ -1,10 +1,17 @@
-export const WHATSAPP_NUMBER = "573000000000"; // TODO: número real
-export const INSTAGRAM = "escapate";
+export const WHATSAPP_NUMBER = "573102108900"; // +57 310 210 8900
+export const INSTAGRAM = "escapate.cuc";
 export const EMAIL = "hola@escapate.com"; // TODO
 export const WEB3FORMS_KEY = ""; // TODO: pega tu access key de https://web3forms.com
 
+/** Enlace de WhatsApp con un mensaje opcional prellenado. */
+export function waLink(message?: string) {
+  const base = `https://wa.me/${WHATSAPP_NUMBER}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}
+
 export const content = {
   es: {
+    wa: { hello: "¡Hola! Quisiera información sobre sus planes de viaje." },
     nav: {
       links: [
         { id: "destinos", label: "Destinos" },
@@ -25,6 +32,8 @@ export const content = {
       ctaPrimary: "Planear mi viaje",
       ctaSecondary: "Explorar destinos",
       dragHint: "arrastra para girar el mundo",
+      passenger: "Pasajero",
+      route: "Cúcuta → el mundo",
     },
     destinos: {
       eyebrow: "Destinos",
@@ -66,6 +75,8 @@ export const content = {
     why: {
       eyebrow: "Por qué Escápate",
       title: "Viajar tranquilo se siente distinto",
+      board: "Tablero de salidas",
+      onTime: "A tiempo",
       points: [
         "Atención personalizada, cara a cara o por WhatsApp.",
         "Precios transparentes, sin sorpresas de último minuto.",
@@ -74,8 +85,10 @@ export const content = {
       ],
     },
     gallery: {
-      eyebrow: "Nuestro local",
-      title: "Un espacio pensado para soñar",
+      eyebrow: "El local",
+      title: "Ven a soñar tu viaje en persona",
+      body: "Un espacio pensado para inspirarte. Te esperamos en el centro de Cúcuta.",
+      directions: "Cómo llegar",
     },
     testimonials: {
       eyebrow: "Lo que dicen",
@@ -140,6 +153,7 @@ export const content = {
   },
 
   en: {
+    wa: { hello: "Hi! I'd like information about your travel plans." },
     nav: {
       links: [
         { id: "destinos", label: "Destinations" },
@@ -160,6 +174,8 @@ export const content = {
       ctaPrimary: "Plan my trip",
       ctaSecondary: "Explore destinations",
       dragHint: "drag to spin the globe",
+      passenger: "Passenger",
+      route: "Cúcuta → the world",
     },
     destinos: {
       eyebrow: "Destinations",
@@ -201,6 +217,8 @@ export const content = {
     why: {
       eyebrow: "Why Escápate",
       title: "Traveling with peace of mind feels different",
+      board: "Departures board",
+      onTime: "On time",
       points: [
         "Personal attention, face to face or over WhatsApp.",
         "Transparent prices, no last-minute surprises.",
@@ -210,7 +228,9 @@ export const content = {
     },
     gallery: {
       eyebrow: "Our space",
-      title: "A place made for dreaming",
+      title: "Come dream your trip in person",
+      body: "A space made to inspire you. Come see us in downtown Cúcuta.",
+      directions: "Get directions",
     },
     testimonials: {
       eyebrow: "What they say",

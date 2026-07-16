@@ -2,64 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark theme (default) */
+/* ── Tema 3 "Pase de Abordar" + 3 modos de tema ──────────────────────────
+   Las secciones son de tipo A o B. Los 3 temas solo cambian qué color toma
+   cada tipo (y su texto), así que el mismo layout sirve para los tres:
+   - default : A = crema, B = navy  → alterna (el "intercambio de colores")
+   - light   : A = crema, B = crema-100 → todo claro
+   - dark    : A = navy-800, B = navy-950 → todo oscuro
+   Hero, Destinos, Contacto y sus fotos se mantienen oscuros en los 3. */
+
 :root {
-  --surface: 12 27 47; /* #0C1B2F */
-  --surface-2: 17 35 62; /* #11233E */
-  --panel: 22 37 63; /* #16253F */
-  --field: 9 16 30; /* deep navy for inputs */
-  --ink: 234 238 245; /* near-white text */
-  --orange: #e8732a;
-  color-scheme: dark;
+  --section-a: 245 241 233; /* cream-50 */
+  --ink-a: 17 35 62; /* navy-900 */
+  --section-b: 12 27 47; /* navy-950 */
+  --ink-b: 245 241 233; /* cream-50 */
+  --orange: 232 115 42;
+  color-scheme: light;
 }
 
-/* Light theme */
-html.light {
-  --surface: 245 241 233; /* cream #F5F1E9 */
-  --surface-2: 255 255 255; /* white */
-  --panel: 255 255 255; /* white */
-  --field: 237 231 219; /* cream-100 for inputs on white panels */
-  --ink: 17 35 62; /* navy text */
+html.theme-light {
+  --section-a: 245 241 233; /* cream-50 */
+  --ink-a: 17 35 62;
+  --section-b: 237 231 219; /* cream-100 */
+  --ink-b: 17 35 62;
   color-scheme: light;
+}
+
+html.theme-dark {
+  --section-a: 22 37 63; /* navy-800 */
+  --ink-a: 245 241 233;
+  --section-b: 12 27 47; /* navy-950 */
+  --ink-b: 245 241 233;
+  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Native <button> keeps the arrow cursor by default; make everything
-   clickable feel clickable (design-system checklist §8). */
-button:not(:disabled),
-[role="button"] {
-  cursor: pointer;
-}
-
-/* Visible keyboard focus for interactive elements (a11y checklist §8). */
-a:focus-visible,
-button:focus-visible,
-[role="button"]:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid var(--orange);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
 html {
   scroll-behavior: smooth;
-  background-color: rgb(var(--surface));
+  /* Única compensación para los anclas del navbar (= alto del header sticky).
+     No combinar con scroll-margin-top en las secciones: se sumarían. */
+  scroll-padding-top: 4.75rem;
+  background-color: rgb(var(--section-b));
 }
 
 body {
-  background-color: rgb(var(--surface));
-  color: rgb(var(--ink));
+  background-color: rgb(var(--section-b));
+  color: rgb(var(--ink-b));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Cada pantalla completa. 100svh evita el salto por la barra del navegador móvil.
+   El offset del ancla lo maneja scroll-padding-top en <html> (no duplicar aquí). */
+.screen {
+  min-height: 100svh;
+}
+
+button:not(:disabled),
+[role="button"] {
+  cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid rgb(var(--orange));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 ::selection {
-  background: var(--orange);
+  background: rgb(var(--orange));
   color: #fff;
 }
 
@@ -67,26 +88,33 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: rgb(var(--surface));
+  background: rgb(var(--section-b));
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--ink) / 0.25);
+  background: rgb(255 255 255 / 0.18);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--orange);
+  background: rgb(var(--orange));
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  .dotgrid {
+    background-image: radial-gradient(
+      rgb(255 255 255 / 0.07) 1.1px,
+      transparent 1.1px
+    );
+    background-size: 26px 26px;
+  }
   .grain::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.04;
+    opacity: 0.045;
     z-index: 1;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }

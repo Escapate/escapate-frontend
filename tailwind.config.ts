@@ -9,12 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Semantic tokens (flip with the .light class via CSS variables)
-        surface: "rgb(var(--surface) / <alpha-value>)",
-        surface2: "rgb(var(--surface-2) / <alpha-value>)",
-        panel: "rgb(var(--panel) / <alpha-value>)",
-        field: "rgb(var(--field) / <alpha-value>)",
-        ink: "rgb(var(--ink) / <alpha-value>)",
+        // Tokens que cambian con el tema (default / light / dark).
+        sectionA: "rgb(var(--section-a) / <alpha-value>)",
+        sectionB: "rgb(var(--section-b) / <alpha-value>)",
+        inkA: "rgb(var(--ink-a) / <alpha-value>)",
+        inkB: "rgb(var(--ink-b) / <alpha-value>)",
         navy: {
           950: "#0C1B2F",
           900: "#11233E",
@@ -36,16 +35,34 @@ const config: Config = {
         wa: "#25D366",
       },
       fontFamily: {
-        display: ["var(--font-display)", "serif"],
+        // Display / titulares "pase de abordar" en mayúsculas.
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        // Titulares suaves (El local, Testimonios).
+        heading: ["var(--font-heading)", "system-ui", "sans-serif"],
+        // Cuerpo.
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
-        numeric: ["var(--font-numeric)", "sans-serif"],
+        // Etiquetas / eyebrows / códigos de vuelo.
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+      },
+      letterSpacing: {
+        tightest: "-.03em",
       },
       keyframes: {
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "esc-float": {
+          "0%,100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-12px)" },
+        },
+        "esc-dash": {
+          to: { "stroke-dashoffset": "-600" },
+        },
+      },
+      animation: {
+        float: "esc-float 6s ease-in-out infinite",
+        dash: "esc-dash 9s linear infinite",
       },
     },
   },

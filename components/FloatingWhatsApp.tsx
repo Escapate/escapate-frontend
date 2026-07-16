@@ -1,12 +1,14 @@
 "use client";
 
-import { WHATSAPP_NUMBER } from "@/lib/content";
+import { useI18n } from "@/lib/i18n";
+import { waLink } from "@/lib/content";
 import { MessageCircle } from "lucide-react";
 
 export default function FloatingWhatsApp() {
+  const { c } = useI18n();
   return (
     <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}`}
+      href={waLink(c.wa.hello)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"
