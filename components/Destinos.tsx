@@ -37,9 +37,9 @@ export default function Destinos() {
           />
         </div>
       ))}
-      {/* Solo un velo inferior para legibilidad; arriba la foto se ve nítida */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/45 to-navy-950/15" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-navy-950/60 to-transparent" />
+      {/* Velo más suave: la foto se ve más; solo se oscurece abajo para leer el texto */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-navy-950/45 to-transparent" />
 
       <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-between gap-8 px-5 py-24 sm:px-8">
         <SectionHead
@@ -55,7 +55,7 @@ export default function Destinos() {
             <h3 className="mt-4 font-display text-[clamp(2.75rem,7vw,5.5rem)] font-black uppercase leading-[0.9] tracking-tightest drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
               {feat.name}
             </h3>
-            <p className="mt-2 text-lg text-cream-50/90 drop-shadow">
+            <p className="mt-2 text-lg text-cream-50 [text-shadow:0_2px_12px_rgba(0,0,0,0.7)]">
               {feat.region} · {feat.nights}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">

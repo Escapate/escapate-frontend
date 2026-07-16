@@ -32,7 +32,7 @@ export default function HeroGlobo() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 px-5 pb-10 pt-16 sm:px-8 lg:grid-cols-[1.04fr_0.92fr] lg:gap-12">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 px-5 pb-8 pt-10 sm:px-8 lg:grid-cols-[1.04fr_0.92fr] lg:gap-12">
         {/* Copy */}
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <motion.p
