@@ -1,8 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Marquee from "@/components/Marquee";
 import Destinos from "@/components/Destinos";
-import Clocks from "@/components/Clocks";
 import About from "@/components/About";
 import Services from "@/components/Services";
 import Why from "@/components/Why";
@@ -17,9 +15,7 @@ export default function Home() {
     <main className="relative">
       <Navbar />
       <Hero />
-      <Marquee />
       <Destinos />
-      <Clocks />
       <About />
       <Services />
       <Why />

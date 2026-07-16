@@ -26,7 +26,6 @@ export const content = {
       ctaSecondary: "Explorar destinos",
       dragHint: "arrastra para girar el mundo",
     },
-    marquee: "Tu viaje empieza aquí",
     destinos: {
       eyebrow: "Destinos",
       title: "A dónde te llevamos",
@@ -41,15 +40,6 @@ export const content = {
         { group: "internacional", name: "Punta Cana", region: "Caribe", nights: "6 noches", price: "desde $3.400.000", img: "/destinos/punta-cana.jpg" },
         { group: "internacional", name: "España", region: "Madrid · Sevilla", nights: "8 noches", price: "desde $5.400.000", img: "/destinos/espana.jpg" },
         { group: "internacional", name: "Europa", region: "París · multidestino", nights: "10 noches", price: "desde $7.200.000", img: "/destinos/europa.jpg" },
-      ],
-    },
-    clocks: {
-      label: "La hora en el mundo",
-      cities: [
-        { city: "New York", tz: "America/New_York" },
-        { city: "Francia", tz: "Europe/Paris" },
-        { city: "España", tz: "Europe/Madrid" },
-        { city: "Cúcuta", tz: "America/Bogota" },
       ],
     },
     about: {
@@ -171,7 +161,6 @@ export const content = {
       ctaSecondary: "Explore destinations",
       dragHint: "drag to spin the globe",
     },
-    marquee: "Your journey starts here",
     destinos: {
       eyebrow: "Destinations",
       title: "Where we take you",
@@ -186,15 +175,6 @@ export const content = {
         { group: "internacional", name: "Punta Cana", region: "Caribbean", nights: "6 nights", price: "from $3,400,000", img: "/destinos/punta-cana.jpg" },
         { group: "internacional", name: "Spain", region: "Madrid · Seville", nights: "8 nights", price: "from $5,400,000", img: "/destinos/espana.jpg" },
         { group: "internacional", name: "Europe", region: "Paris · multi-city", nights: "10 nights", price: "from $7,200,000", img: "/destinos/europa.jpg" },
-      ],
-    },
-    clocks: {
-      label: "Time around the world",
-      cities: [
-        { city: "New York", tz: "America/New_York" },
-        { city: "France", tz: "Europe/Paris" },
-        { city: "Spain", tz: "Europe/Madrid" },
-        { city: "Cúcuta", tz: "America/Bogota" },
       ],
     },
     about: {

@@ -42,17 +42,10 @@ const config: Config = {
         numeric: ["var(--font-numeric)", "sans-serif"],
       },
       keyframes: {
-        marquee: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
-        },
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-      },
-      animation: {
-        marquee: "marquee 28s linear infinite",
       },
     },
   },
