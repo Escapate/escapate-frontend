@@ -2,7 +2,6 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
-import { FlightPath } from "./ui";
 import Globe from "./globe/Globe";
 import { ArrowRight, Hand } from "lucide-react";
 
@@ -28,13 +27,12 @@ export default function HeroGlobo() {
       className="screen relative flex flex-col justify-center overflow-hidden bg-gradient-to-br from-navy-800 to-navy-950 text-cream-50"
     >
       <div className="dotgrid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
-      <FlightPath className="pointer-events-none absolute inset-0 h-full w-full opacity-50" />
       <div
         className="pointer-events-none absolute -right-24 top-1/4 h-[38vh] w-[38vh] rounded-full bg-orange/15 blur-[120px]"
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-8 px-5 pb-14 pt-24 sm:px-8 lg:grid-cols-[1.04fr_0.92fr] lg:gap-12">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 px-5 pb-10 pt-16 sm:px-8 lg:grid-cols-[1.04fr_0.92fr] lg:gap-12">
         {/* Copy */}
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <motion.p
@@ -69,7 +67,7 @@ export default function HeroGlobo() {
 
           <motion.div
             {...rise(0.26)}
-            className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
+            className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:mt-6 lg:justify-start"
           >
             <a
               href="#contacto"
@@ -88,7 +86,7 @@ export default function HeroGlobo() {
 
           <motion.div
             {...rise(0.34)}
-            className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-wider text-cream-50/55 lg:justify-start"
+            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-wider text-cream-50/55 lg:mt-6 lg:justify-start"
           >
             {stats.map((s, i) => (
               <span key={s.label} className="flex items-center gap-6">
