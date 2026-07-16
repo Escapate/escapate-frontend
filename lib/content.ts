@@ -9,6 +9,43 @@ export function waLink(message?: string) {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/**
+ * Datos del negocio — fuente única de verdad para el structured data (SEO local)
+ * y para la UI (NAP visible). Que el JSON-LD y lo que se ve en la página coincidan
+ * es justo lo que Google premia para el negocio local / Google Maps.
+ */
+export const BUSINESS = {
+  name: "Escápate",
+  legalName: "Escápate · Agencia de Viajes",
+  url: "https://escapate.tours",
+  // Email de contacto público (el formulario del sitio enruta a EMAIL / reservas@).
+  email: "hola@escapate.tours",
+  phone: "+573102108900",
+  priceRange: "$$",
+  currency: "COP",
+  address: {
+    street: "Local 2, Autopista Internacional Vía Antigua Boconó K1-046",
+    locality: "Cúcuta",
+    region: "Norte de Santander",
+    country: "CO",
+    // Cadena lista para mostrar (NAP visible == structured data).
+    full: "Local 2, Autopista Internacional Vía Antigua Boconó K1-046, Cúcuta, Norte de Santander",
+  },
+  // Coordenadas del pin (opcional). Mantén presionado el pin en Google Maps para
+  // copiarlas y ponlas aquí como { lat, lng }; el pin real ya lo da tu Google
+  // Business verificado, así que esto solo lo refuerza.
+  geo: null as { lat: number; lng: number } | null,
+  maps: "https://share.google/4xzchCjiY6NQzaqlN",
+  hours: {
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    opens: "08:00",
+    closes: "18:00",
+  },
+  sameAs: [`https://www.instagram.com/${INSTAGRAM}`],
+  logo: "/logo/escapate-transparent.png",
+  photos: ["/renders/local-reception.jpg", "/renders/local-lounge.jpg"],
+};
+
 export const content = {
   es: {
     wa: { hello: "¡Hola! Quisiera información sobre sus planes de viaje." },
@@ -114,7 +151,7 @@ export const content = {
         ok: "¡Gracias! Te contactaremos muy pronto.",
         err: "Algo salió mal. Escríbenos por WhatsApp.",
       },
-      address: "Cúcuta, Norte de Santander, Colombia",
+      address: BUSINESS.address.full,
       hours: "Lun a Sáb · 8:00 a.m. – 6:00 p.m.",
     },
     quote: {
@@ -256,7 +293,7 @@ export const content = {
         ok: "Thank you! We'll contact you very soon.",
         err: "Something went wrong. Message us on WhatsApp.",
       },
-      address: "Cúcuta, Norte de Santander, Colombia",
+      address: BUSINESS.address.full,
       hours: "Mon to Sat · 8:00 a.m. – 6:00 p.m.",
     },
     quote: {

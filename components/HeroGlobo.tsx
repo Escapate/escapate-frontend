@@ -43,14 +43,7 @@ export default function HeroGlobo() {
               Agencia de viajes
             </span>
             <span className="hidden h-5 w-px bg-cream-50/30 sm:inline-block" aria-hidden="true" />
-            <span
-              className="font-display text-xl font-black uppercase tracking-tight sm:text-2xl"
-              style={{
-                color: "#3E6FB5",
-                WebkitTextStroke: "2px #E8732A",
-                paintOrder: "stroke",
-              }}
-            >
+            <span className="font-display text-xl font-black uppercase tracking-tight text-cream-50 sm:text-2xl">
               Escápate
             </span>
           </motion.p>
