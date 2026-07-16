@@ -1,0 +1,7 @@
+# pnpm 11 movió la decisión sobre build scripts de dependencias a este archivo.
+# unrs-resolver (dep transitiva de eslint-config-next) trae un build script.
+# Lo omitimos de forma explícita: el lint funciona sin él, así `pnpm install`
+# termina limpio (exit 0) en local y en el deploy de Cloudflare Pages, sin
+# ejecutar scripts nativos.
+allowBuilds:
+  unrs-resolver: false

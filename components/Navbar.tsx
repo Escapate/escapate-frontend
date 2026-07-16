@@ -50,8 +50,8 @@ export default function Navbar() {
           <Image
             src={logoSrc}
             alt="Escápate · Agencia de viajes"
-            width={1502}
-            height={912}
+            width={600}
+            height={364}
             priority
             className="h-10 w-auto sm:h-12"
           />

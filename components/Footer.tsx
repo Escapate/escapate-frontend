@@ -26,8 +26,8 @@ export default function Footer() {
             <Image
               src={logoSrc}
               alt="Escápate · Agencia de viajes"
-              width={1502}
-              height={912}
+              width={600}
+              height={364}
               className="h-14 w-auto"
             />
             <p className="mt-3 font-mono text-xs text-ink/40">
