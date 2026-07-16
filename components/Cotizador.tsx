@@ -15,6 +15,8 @@ import {
   Plus,
   Mail,
   Check,
+  ChevronRight,
+  StickyNote,
 } from "lucide-react";
 
 type Menu = "from" | "dest" | "pax" | null;
@@ -130,6 +132,12 @@ export default function Cotizador() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState<Status>("idle");
+  const [open, setOpen] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [hasDates, setHasDates] = useState(false);
+  const [monthIdx, setMonthIdx] = useState<number | null>(null);
+  const [departure, setDeparture] = useState("");
+  const [depReturn, setDepReturn] = useState("");
 
   const from = q.cities[fromIdx] ?? q.cities[0];
   const dest = q.tours[destIdx] ?? q.tours[0];
@@ -373,6 +381,89 @@ export default function Cotizador() {
             </span>
           </div>
           <p className="mt-2 font-mono text-[11px] text-navy-900/55">{paxParts}</p>
+        </div>
+
+        {/* Más detalles (opcional) */}
+        <div className="mt-4 border-t border-navy-900/10 pt-3">
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            className="flex w-full items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] text-navy-900/60 transition hover:text-orange"
+          >
+            <ChevronRight className={`h-4 w-4 transition ${open ? "rotate-90" : ""}`} />
+            {q.more}
+          </button>
+
+          {open && (
+            <div className="mt-4 grid gap-4">
+              {/* Fechas */}
+              <div>
+                <label className="flex cursor-pointer items-center justify-between">
+                  <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
+                    {q.hasDates}
+                  </FieldLabel>
+                  <input
+                    type="checkbox"
+                    checked={hasDates}
+                    onChange={(e) => setHasDates(e.target.checked)}
+                    className="h-4 w-4 accent-orange"
+                  />
+                </label>
+                {hasDates ? (
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
+                        {q.departure}
+                      </FieldLabel>
+                      <input
+                        type="date"
+                        value={departure}
+                        onChange={(e) => setDeparture(e.target.value)}
+                        className={inputCls()}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
+                        {q.returnLabel}
+                      </FieldLabel>
+                      <input
+                        type="date"
+                        value={depReturn}
+                        onChange={(e) => setDepReturn(e.target.value)}
+                        className={inputCls()}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <select
+                    value={monthIdx ?? ""}
+                    onChange={(e) => setMonthIdx(e.target.value === "" ? null : Number(e.target.value))}
+                    className={`mt-2 ${inputCls()}`}
+                  >
+                    <option value="">{q.monthPh}</option>
+                    {q.months.map((mo, i) => (
+                      <option key={mo} value={i}>{mo}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Notas */}
+              <div>
+                <FieldLabel icon={<StickyNote className="h-3.5 w-3.5 text-orange-500" />}>
+                  {q.notes}
+                </FieldLabel>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={q.notesPh}
+                  rows={3}
+                  className={`${inputCls()} resize-none`}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
