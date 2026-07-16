@@ -10,6 +10,12 @@ export function waLink(message?: string) {
 }
 
 /**
+ * Deep link de Google Maps para "Cómo llegar" (abre el pin del local).
+ * Distinto de BUSINESS.maps, que alimenta el `hasMap` del JSON-LD.
+ */
+export const MAPS_DIRECTIONS_URL = "https://maps.app.goo.gl/YnDfD9VLLPeg2bBYA";
+
+/**
  * Datos del negocio — fuente única de verdad para el structured data (SEO local)
  * y para la UI (NAP visible). Que el JSON-LD y lo que se ve en la página coincidan
  * es justo lo que Google premia para el negocio local / Google Maps.

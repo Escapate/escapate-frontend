@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
+import { MAPS_DIRECTIONS_URL } from "@/lib/content";
 import { SectionHead, Reveal } from "./ui";
 import { MapPin, Clock, ArrowUpRight } from "lucide-react";
 
@@ -17,7 +18,6 @@ export default function Gallery() {
   // Ubicación real de "Escápate" (Cúcuta): 7.853932, -72.4663327
   const mapEmbed =
     "https://maps.google.com/maps?q=7.853932,-72.4663327&z=16&output=embed";
-  const mapsLink = "https://maps.app.goo.gl/YnDfD9VLLPeg2bBYA";
 
   return (
     <section
@@ -58,8 +58,8 @@ export default function Gallery() {
             ))}
           </Reveal>
 
-          {/* Ubicación */}
-          <Reveal delay={0.1}>
+          {/* Ubicación — oculta en móvil; ahí se usa el FAB flotante (FloatingMap) */}
+          <Reveal delay={0.1} className="hidden sm:block">
             <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-navy-950 text-cream-50 shadow-[0_40px_80px_-40px_rgba(12,27,47,0.6)]">
               <div className="relative h-40 w-full">
                 <iframe
@@ -84,7 +84,7 @@ export default function Gallery() {
                   </p>
                 </div>
                 <a
-                  href={mapsLink}
+                  href={MAPS_DIRECTIONS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group mt-auto inline-flex items-center justify-center gap-2 rounded-md border border-white/25 px-5 py-3 text-sm font-semibold transition hover:border-orange hover:text-orange-400"
