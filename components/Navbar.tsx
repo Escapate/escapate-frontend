@@ -35,6 +35,12 @@ export default function Navbar() {
           : "border-b border-transparent bg-transparent"
       }`}
     >
+      <a
+        href="#destinos"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-orange focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
+      >
+        {c.nav.skip}
+      </a>
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
         <a
           href="#top"

@@ -24,8 +24,19 @@ npm run dev      # http://localhost:3000
 >    `net use Z: \\wsl.localhost\Ubuntu` y luego, en esa unidad,
 >    `set WATCHPACK_POLLING=1000 && npm run dev`.
 >
-> El **deploy en Vercel compila en Linux**, así que la build de producción funciona
-> sin problemas allí (no sufre la limitación de Windows).
+> El **deploy en Cloudflare Pages compila en Linux**, así que la build de producción
+> funciona sin problemas allí (no sufre la limitación de Windows).
+
+## Deploy
+
+**Cloudflare Pages** (export estático). Ajustes del proyecto en Cloudflare:
+
+- Build command: `pnpm build`
+- Output directory: `out`
+- Node version: fijada en `.node-version`; pnpm vía `.npmrc` / `packageManager`.
+
+`next.config.mjs` usa `output: "export"` con `images.unoptimized`, así que el sitio
+sale como HTML/JS/CSS estáticos servidos directamente por Cloudflare.
 
 ## Qué falta completar (placeholders)
 

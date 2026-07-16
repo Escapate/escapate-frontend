@@ -87,7 +87,7 @@ Tailwind: `fontFamily: { display:['Playfair Display','serif'], sans:['Inter','sa
 - **next/image** para los renders del local
 - i18n ES/EN: `next-intl` o toggle simple con diccionarios
 - Form: **Web3Forms** (gratis). WhatsApp: enlace `wa.me`.
-- Deploy: **Vercel**
+- Deploy: **Cloudflare Pages** (export estático)
 - Iconos: **Lucide** (SVG, NO emojis como iconos)
 
 ## 8. Checklist pre-entrega (skill)

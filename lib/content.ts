@@ -13,6 +13,7 @@ export const content = {
         { id: "contacto", label: "Contacto" },
       ],
       cta: "Escríbenos",
+      skip: "Saltar al contenido",
     },
     hero: {
       eyebrow: "Agencia de viajes · Cúcuta",
@@ -132,6 +133,14 @@ export const content = {
       err: "Algo salió mal. Escríbenos por WhatsApp.",
       cities: ["Cúcuta", "Bogotá", "Medellín", "Cali", "Bucaramanga", "Otra ciudad"],
       tours: ["Cartagena", "San Andrés", "Santa Marta", "Eje Cafetero", "Cancún", "Punta Cana", "Panamá", "España", "Europa", "Aún no lo decido"],
+      msg: {
+        intro: "Hola, quiero cotizar un viaje:",
+        from: "Salida",
+        dest: "Destino",
+        pax: "Pasajeros",
+        days: "Días",
+        name: "Nombre",
+      },
     },
     footer: {
       tagline: "Tu viaje empieza aquí.",
@@ -149,6 +158,7 @@ export const content = {
         { id: "contacto", label: "Contact" },
       ],
       cta: "Get in touch",
+      skip: "Skip to content",
     },
     hero: {
       eyebrow: "Travel agency · Cúcuta",
@@ -268,6 +278,14 @@ export const content = {
       err: "Something went wrong. Message us on WhatsApp.",
       cities: ["Cúcuta", "Bogotá", "Medellín", "Cali", "Bucaramanga", "Other city"],
       tours: ["Cartagena", "San Andrés", "Santa Marta", "Coffee Region", "Cancún", "Punta Cana", "Panama", "Spain", "Europe", "Not sure yet"],
+      msg: {
+        intro: "Hi, I'd like a quote for a trip:",
+        from: "Departure",
+        dest: "Destination",
+        pax: "Passengers",
+        days: "Days",
+        name: "Name",
+      },
     },
     footer: {
       tagline: "Your journey starts here.",

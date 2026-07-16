@@ -7,8 +7,8 @@
 /build
 next-env.d.ts.timestamp
 
-# production / deploy
-/.vercel
+# production / deploy (Cloudflare Pages / Wrangler)
+/.wrangler
 
 # env
 .env*

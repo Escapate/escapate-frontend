@@ -36,6 +36,8 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
+  // TODO: reemplazar por el dominio real de producción (Cloudflare Pages).
+  metadataBase: new URL("https://escapate.com"),
   title: "Escápate · Agencia de viajes en Cúcuta",
   description:
     "Tu viaje empieza aquí. Diseñamos escapadas a tu medida: vuelos, hoteles y planes pensados para ti. Agencia de viajes en Cúcuta, Colombia.",
@@ -47,11 +49,16 @@ export const metadata: Metadata = {
     "Escápate",
     "tiquetes",
   ],
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Escápate · Agencia de viajes",
     description: "Tu viaje empieza aquí. Escapadas a tu medida desde Cúcuta.",
     type: "website",
     locale: "es_CO",
+    siteName: "Escápate",
+    // TODO: agregar una imagen social (1200×630) en public/ y referenciarla aquí:
+    // images: ["/og.jpg"],
   },
 };
 

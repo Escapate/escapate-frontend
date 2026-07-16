@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static HTML export — required for Cloudflare Pages (and works on Vercel too).
+  // Static HTML export — required for Cloudflare Pages.
   output: "export",
   reactStrictMode: true,
   images: {

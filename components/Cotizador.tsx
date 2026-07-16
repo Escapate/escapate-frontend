@@ -88,7 +88,7 @@ function Options({
       className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-ink/15 bg-panel p-1.5 shadow-2xl"
     >
       {options.map((o) => (
-        <li key={o}>
+        <li key={o} role="option" aria-selected={o === value}>
           <button
             type="button"
             onClick={() => onPick(o)}
@@ -149,11 +149,12 @@ export default function Cotizador() {
     .join(", ");
   const summary = `${from} → ${dest} · ${paxParts} · ${days} ${q.daysUnit}`;
 
-  const message = `Hola, quiero cotizar un viaje:
-• Salida: ${from}
-• Destino: ${dest}
-• Pasajeros: ${paxParts}
-• Días: ${days}${name ? `\n• Nombre: ${name}` : ""}`;
+  const m = q.msg;
+  const message = `${m.intro}
+• ${m.from}: ${from}
+• ${m.dest}: ${dest}
+• ${m.pax}: ${paxParts}
+• ${m.days}: ${days}${name ? `\n• ${m.name}: ${name}` : ""}`;
 
   function onWhatsApp() {
     window.open(`${wa}?text=${encodeURIComponent(message)}`, "_blank");
@@ -255,6 +256,7 @@ export default function Cotizador() {
           <button
             type="button"
             className={triggerCls}
+            aria-haspopup="dialog"
             aria-expanded={menu === "pax"}
             onClick={() => setMenu(menu === "pax" ? null : "pax")}
           >
