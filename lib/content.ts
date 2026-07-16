@@ -25,6 +25,8 @@ export const content = {
       ctaPrimary: "Planear mi viaje",
       ctaSecondary: "Explorar destinos",
       dragHint: "arrastra para girar el mundo",
+      passenger: "Pasajero",
+      route: "Cúcuta → el mundo",
     },
     destinos: {
       eyebrow: "Destinos",
@@ -66,6 +68,8 @@ export const content = {
     why: {
       eyebrow: "Por qué Escápate",
       title: "Viajar tranquilo se siente distinto",
+      board: "Tablero de salidas",
+      onTime: "A tiempo",
       points: [
         "Atención personalizada, cara a cara o por WhatsApp.",
         "Precios transparentes, sin sorpresas de último minuto.",
@@ -74,8 +78,10 @@ export const content = {
       ],
     },
     gallery: {
-      eyebrow: "Nuestro local",
-      title: "Un espacio pensado para soñar",
+      eyebrow: "El local",
+      title: "Ven a soñar tu viaje en persona",
+      body: "Un espacio pensado para inspirarte. Te esperamos en el centro de Cúcuta.",
+      directions: "Cómo llegar",
     },
     testimonials: {
       eyebrow: "Lo que dicen",
@@ -160,6 +166,8 @@ export const content = {
       ctaPrimary: "Plan my trip",
       ctaSecondary: "Explore destinations",
       dragHint: "drag to spin the globe",
+      passenger: "Passenger",
+      route: "Cúcuta → the world",
     },
     destinos: {
       eyebrow: "Destinations",
@@ -201,6 +209,8 @@ export const content = {
     why: {
       eyebrow: "Why Escápate",
       title: "Traveling with peace of mind feels different",
+      board: "Departures board",
+      onTime: "On time",
       points: [
         "Personal attention, face to face or over WhatsApp.",
         "Transparent prices, no last-minute surprises.",
@@ -210,7 +220,9 @@ export const content = {
     },
     gallery: {
       eyebrow: "Our space",
-      title: "A place made for dreaming",
+      title: "Come dream your trip in person",
+      body: "A space made to inspire you. Come see us in downtown Cúcuta.",
+      directions: "Get directions",
     },
     testimonials: {
       eyebrow: "What they say",

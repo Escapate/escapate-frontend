@@ -9,22 +9,27 @@ export default function Services() {
   return (
     <section
       id="servicios"
-      className="relative overflow-hidden bg-surface2 py-14 sm:py-20"
+      className="screen relative flex flex-col justify-center overflow-hidden bg-navy-950 py-24 text-cream-50"
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <SectionHead eyebrow={c.services.eyebrow} title={c.services.title} />
+      <div className="dotgrid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8">
+        <SectionHead
+          eyebrow={c.services.eyebrow}
+          title={c.services.title}
+          tone="dark"
+        />
 
-        <div className="mt-12 border-t border-ink/10">
+        <div className="mt-12 border-t border-white/12">
           {c.services.items.map((s, i) => (
             <Reveal key={s.title}>
-              <div className="grid gap-2 border-b border-ink/10 py-8 sm:grid-cols-[auto_1.1fr_2fr] sm:items-baseline sm:gap-10">
-                <span className="font-numeric text-4xl leading-none text-orange-400 sm:text-6xl">
+              <div className="group grid gap-2 border-b border-white/12 py-7 transition sm:grid-cols-[auto_1.05fr_1.9fr] sm:items-baseline sm:gap-10">
+                <span className="font-display text-3xl font-black leading-none text-orange-400 sm:text-5xl">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="font-display text-2xl text-ink sm:text-3xl">
+                <h3 className="font-heading text-2xl font-bold sm:text-3xl">
                   {s.title}
                 </h3>
-                <p className="max-w-md text-lg leading-relaxed text-ink/80">
+                <p className="max-w-md leading-relaxed text-cream-50/70">
                   {s.desc}
                 </p>
               </div>

@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER, EMAIL, INSTAGRAM } from "@/lib/content";
-import { Reveal, Eyebrow } from "./ui";
+import { Reveal, SectionHead } from "./ui";
 import Cotizador from "./Cotizador";
 import { MessageCircle, MapPin, Clock, Mail, Instagram } from "lucide-react";
 
@@ -13,63 +13,69 @@ export default function Contact() {
   return (
     <section
       id="contacto"
-      className="relative overflow-hidden bg-surface py-14 sm:py-20"
+      className="screen relative flex flex-col justify-center overflow-hidden bg-gradient-to-b from-navy-800 to-navy-950 py-24 text-cream-50"
     >
-      <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 rounded-full bg-orange/10 blur-[120px]" />
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
-        {/* Left: pitch + info */}
-        <Reveal>
-          <Eyebrow>{c.contact.eyebrow}</Eyebrow>
-          <h2 className="mt-3 text-balance font-display text-4xl leading-[1.05] text-ink sm:text-5xl">
-            {c.contact.title}
-          </h2>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-ink/75">
-            {c.contact.subtitle}
-          </p>
+      <div className="dotgrid pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <SectionHead
+          eyebrow={c.contact.eyebrow}
+          title={c.contact.title}
+          tone="dark"
+          align="center"
+          className="mx-auto"
+        />
 
-          <a
-            href={wa}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-wa px-6 py-3.5 text-sm font-medium text-[#06351a] transition hover:brightness-105"
-          >
-            <MessageCircle className="h-5 w-5" />
-            {c.contact.whatsapp}
-          </a>
+        <div className="mt-12 grid grid-cols-1 items-start gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <Reveal>
+            <Cotizador />
+          </Reveal>
 
-          <ul className="mt-10 space-y-4 text-sm text-ink/70">
-            <li className="flex items-center gap-3">
-              <MapPin className="h-4 w-4 text-orange" />
-              {c.contact.address}
-            </li>
-            <li className="flex items-center gap-3">
-              <Clock className="h-4 w-4 text-orange" />
-              {c.contact.hours}
-            </li>
-            <li className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-orange" />
-              <a href={`mailto:${EMAIL}`} className="hover:text-ink">
-                {EMAIL}
-              </a>
-            </li>
-            <li className="flex items-center gap-3">
-              <Instagram className="h-4 w-4 text-orange" />
+          <Reveal delay={0.1}>
+            <div className="flex flex-col gap-6 rounded-2xl border border-white/15 p-7">
+              <p className="max-w-sm leading-relaxed text-cream-50/80">
+                {c.contact.subtitle}
+              </p>
+
               <a
-                href={`https://instagram.com/${INSTAGRAM}`}
+                href={wa}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-ink"
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-wa px-5 py-4 font-mono text-sm font-bold uppercase tracking-wider text-[#06351c] transition hover:brightness-105"
               >
-                @{INSTAGRAM}
+                <MessageCircle className="h-5 w-5" />
+                {c.contact.whatsapp}
               </a>
-            </li>
-          </ul>
-        </Reveal>
 
-        {/* Right: cotizador */}
-        <Reveal delay={0.1}>
-          <Cotizador />
-        </Reveal>
+              <ul className="flex flex-col gap-4 text-sm">
+                <li className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                  <span className="text-cream-50/80">{c.contact.address}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                  <span className="text-cream-50/80">{c.contact.hours}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                  <a href={`mailto:${EMAIL}`} className="text-cream-50/80 transition hover:text-orange-400">
+                    {EMAIL}
+                  </a>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Instagram className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                  <a
+                    href={`https://instagram.com/${INSTAGRAM}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cream-50/80 transition hover:text-orange-400"
+                  >
+                    @{INSTAGRAM}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

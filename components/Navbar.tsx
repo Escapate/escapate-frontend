@@ -1,59 +1,34 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { useTheme } from "@/lib/theme";
 import { WHATSAPP_NUMBER } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
-import { ThemeToggle } from "./ThemeToggle";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const { c } = useI18n();
-  const { theme } = useTheme();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
-  const logoSrc =
-    theme === "light"
-      ? "/logo/escapate-transparent.png"
-      : "/logo/escapate-mono-white.png";
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "border-b border-ink/10 bg-surface/85 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
+    <header className="sticky top-0 z-50 border-b border-navy-900/10 bg-cream-100/85 backdrop-blur-md">
       <a
         href="#destinos"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-orange focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
       >
         {c.nav.skip}
       </a>
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <a
-          href="#top"
-          className="flex items-center"
-          aria-label="Escápate · Agencia de viajes"
-        >
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3 sm:px-8">
+        <a href="#top" className="flex items-center" aria-label="Escápate · Agencia de viajes">
           <Image
-            src={logoSrc}
+            src="/logo/escapate-transparent.png"
             alt="Escápate · Agencia de viajes"
             width={600}
             height={364}
             priority
-            className="h-10 w-auto sm:h-12"
+            className="h-9 w-auto sm:h-11"
           />
         </a>
 
@@ -62,30 +37,30 @@ export default function Navbar() {
             <a
               key={l.id}
               href={`#${l.id}`}
-              className="text-sm text-ink/70 transition hover:text-ink"
+              className="font-mono text-xs font-bold uppercase tracking-wider text-navy-900/70 transition hover:text-orange"
             >
               {l.label}
             </a>
           ))}
-          <ThemeToggle />
-          <LangToggle />
+          <LangToggle tone="light" />
           <a
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+            className="inline-flex items-center gap-2 rounded bg-wa px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-[#06351a] transition hover:brightness-105"
           >
-            {c.nav.cta}
+            <span className="h-1.5 w-1.5 rounded-full bg-[#06351a]" aria-hidden="true" />
+            WhatsApp
           </a>
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
-          <LangToggle />
+          <LangToggle tone="light" />
           <button
             onClick={() => setOpen((o) => !o)}
             aria-label="Menú"
-            className="text-ink"
+            aria-expanded={open}
+            className="text-navy-900"
           >
             {open ? <X /> : <Menu />}
           </button>
@@ -93,14 +68,14 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div className="border-t border-ink/10 bg-surface/95 px-5 py-4 backdrop-blur md:hidden">
+        <div className="border-t border-navy-900/10 bg-cream-100/95 px-5 py-4 backdrop-blur md:hidden">
           <div className="flex flex-col gap-4">
             {c.nav.links.map((l) => (
               <a
                 key={l.id}
                 href={`#${l.id}`}
                 onClick={() => setOpen(false)}
-                className="text-ink/80"
+                className="font-mono text-sm font-bold uppercase tracking-wider text-navy-900/80"
               >
                 {l.label}
               </a>
@@ -109,9 +84,9 @@ export default function Navbar() {
               href={wa}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 rounded-full bg-orange px-4 py-2 text-center font-medium text-white"
+              className="mt-1 rounded bg-wa px-4 py-2.5 text-center font-mono text-xs font-bold uppercase tracking-wider text-[#06351a]"
             >
-              {c.nav.cta}
+              WhatsApp
             </a>
           </div>
         </div>

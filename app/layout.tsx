@@ -1,37 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter, JetBrains_Mono, Anton } from "next/font/google";
+import {
+  Archivo,
+  Bricolage_Grotesque,
+  Hanken_Grotesk,
+  Space_Mono,
+} from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
-import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
-const themeScript = `(function(){try{var t=localStorage.getItem('escapate-theme');if(t==='light'){document.documentElement.classList.add('light');}}catch(e){}})();`;
-
-const playfair = Playfair_Display({
+// Display / titulares — "pase de abordar" en mayúsculas.
+const archivo = Archivo({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "900"],
-  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
 });
 
-const inter = Inter({
+// Titulares suaves (El local, Testimonios).
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+// Cuerpo.
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+// Etiquetas / eyebrows / códigos de vuelo.
+const spaceMono = Space_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "700"],
   variable: "--font-mono",
-  display: "swap",
-});
-
-const anton = Anton({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-numeric",
   display: "swap",
 });
 
@@ -57,8 +59,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_CO",
     siteName: "Escápate",
-    // TODO: agregar una imagen social (1200×630) en public/ y referenciarla aquí:
-    // images: ["/og.jpg"],
+    // La imagen social la genera app/opengraph-image.tsx (1200×630).
   },
 };
 
@@ -75,15 +76,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body
-        className={`${playfair.variable} ${inter.variable} ${jetbrains.variable} ${anton.variable} font-sans antialiased`}
+        className={`${archivo.variable} ${bricolage.variable} ${hanken.variable} ${spaceMono.variable} font-sans antialiased`}
       >
-        <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
-        </ThemeProvider>
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   );
