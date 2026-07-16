@@ -33,24 +33,24 @@ export function Reveal({
   );
 }
 
+/* ── Slots de tema ────────────────────────────────────────────────────── */
+// "a"/"b" se adaptan a los 3 temas; "onDark"/"onLight" son fijos (hero, fotos).
+export type Slot = "a" | "b" | "onDark" | "onLight";
+
+const inkCls: Record<Slot, string> = {
+  a: "text-inkA",
+  b: "text-inkB",
+  onDark: "text-cream-50",
+  onLight: "text-navy-900",
+};
+
 /* ── Eyebrow (etiqueta mono con barra) ────────────────────────────────── */
 
-export function Eyebrow({
-  children,
-  tone = "light",
-}: {
-  children: React.ReactNode;
-  tone?: "light" | "dark";
-}) {
-  const color = tone === "dark" ? "text-orange-400" : "text-orange-600";
+export function Eyebrow({ children }: { children: React.ReactNode }) {
+  // El naranja funciona sobre crema y navy en los tres temas.
   return (
-    <p
-      className={`flex items-center gap-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] sm:text-xs ${color}`}
-    >
-      <span
-        className="inline-block h-2.5 w-px bg-current opacity-70"
-        aria-hidden="true"
-      />
+    <p className="flex items-center gap-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-orange-500 sm:text-xs">
+      <span className="inline-block h-2.5 w-px bg-current opacity-80" aria-hidden="true" />
       {children}
     </p>
   );
@@ -61,14 +61,14 @@ export function Eyebrow({
 export function SectionHead({
   eyebrow,
   title,
-  tone = "light",
+  slot = "a",
   font = "display",
   align = "left",
   className = "",
 }: {
   eyebrow: string;
   title: string;
-  tone?: "light" | "dark";
+  slot?: Slot;
   font?: "display" | "heading";
   align?: "left" | "center";
   className?: string;
@@ -81,9 +81,9 @@ export function SectionHead({
     <Reveal
       className={`${align === "center" ? "flex flex-col items-center text-center" : ""} ${className}`}
     >
-      <Eyebrow tone={tone}>{eyebrow}</Eyebrow>
+      <Eyebrow>{eyebrow}</Eyebrow>
       <h2
-        className={`mt-3 max-w-2xl text-balance text-[clamp(1.9rem,4.2vw,3.2rem)] leading-[1.02] ${titleCls}`}
+        className={`mt-3 max-w-2xl text-balance text-[clamp(1.9rem,4.2vw,3.2rem)] leading-[1.02] ${titleCls} ${inkCls[slot]}`}
       >
         {title}
       </h2>

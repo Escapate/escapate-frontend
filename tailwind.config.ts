@@ -9,6 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Tokens que cambian con el tema (default / light / dark).
+        sectionA: "rgb(var(--section-a) / <alpha-value>)",
+        sectionB: "rgb(var(--section-b) / <alpha-value>)",
+        inkA: "rgb(var(--ink-a) / <alpha-value>)",
+        inkB: "rgb(var(--ink-b) / <alpha-value>)",
         navy: {
           950: "#0C1B2F",
           900: "#11233E",

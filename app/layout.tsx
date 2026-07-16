@@ -6,7 +6,11 @@ import {
   Space_Mono,
 } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
+
+// Aplica el tema guardado antes del primer paint (evita parpadeo).
+const themeScript = `(function(){try{var t=localStorage.getItem('escapate-theme');if(t==='light'||t==='dark'){document.documentElement.classList.add('theme-'+t);}}catch(e){}})();`;
 
 // Display / titulares — "pase de abordar" en mayúsculas.
 const archivo = Archivo({
@@ -76,10 +80,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body
         className={`${archivo.variable} ${bricolage.variable} ${hanken.variable} ${spaceMono.variable} font-sans antialiased`}
       >
-        <I18nProvider>{children}</I18nProvider>
+        <ThemeProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

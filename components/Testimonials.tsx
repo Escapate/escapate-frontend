@@ -15,12 +15,12 @@ export default function Testimonials() {
   const { c } = useI18n();
 
   return (
-    <section className="screen relative flex flex-col justify-center overflow-hidden bg-cream-100 py-24 text-navy-900">
+    <section className="screen relative flex flex-col justify-center overflow-hidden bg-sectionA py-24 text-inkA">
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8">
         <SectionHead
           eyebrow={c.testimonials.eyebrow}
           title={c.testimonials.title}
-          tone="light"
+          slot="a"
           font="heading"
         />
 

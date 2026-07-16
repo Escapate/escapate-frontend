@@ -12,7 +12,7 @@ export function LangToggle({ tone = "light" }: { tone?: "light" | "dark" }) {
     <button
       onClick={toggle}
       aria-label={lang === "es" ? "Switch to English" : "Cambiar a español"}
-      className={`rounded border ${border} px-2.5 py-1 font-mono text-[11px] font-bold tracking-wider transition hover:border-orange`}
+      className={`rounded-full border ${border} px-3 py-1.5 font-mono text-[11px] font-bold tracking-wider transition hover:border-orange`}
     >
       <span className={lang === "es" ? on : off}>ES</span>
       <span className={`mx-1 ${sep}`}>/</span>

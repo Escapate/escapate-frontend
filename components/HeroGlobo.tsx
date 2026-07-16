@@ -39,16 +39,20 @@ export default function HeroGlobo() {
         <div className="order-2 text-center lg:order-1 lg:text-left">
           <motion.p
             {...rise(0)}
-            className="flex items-center justify-center gap-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-orange-400 sm:text-xs lg:justify-start"
+            className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 lg:justify-start"
           >
-            Pase de abordar
-            <span className="inline-block h-px w-10 bg-orange-400/60" aria-hidden="true" />
-            Boarding pass
+            <span className="inline-block h-px w-8 bg-orange-400/60" aria-hidden="true" />
+            <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-orange-400 sm:text-sm">
+              Agencia de viajes
+            </span>
+            <span className="font-display text-xl font-black uppercase tracking-tight text-orange sm:text-2xl">
+              Escápate
+            </span>
           </motion.p>
 
           <motion.h1
             {...rise(0.08)}
-            className="mt-5 font-display text-[clamp(3rem,8vw,6.25rem)] font-black uppercase leading-[0.9] tracking-tightest"
+            className="mt-5 font-display text-[clamp(3rem,8vw,6.25rem)] font-black uppercase leading-[0.9] tracking-tightest lg:text-[6.75rem]"
           >
             {c.hero.titleA}
             <br />
@@ -99,7 +103,7 @@ export default function HeroGlobo() {
 
         {/* Globo 3D */}
         <div className="order-1 lg:order-2">
-          <div className="relative mx-auto aspect-square w-[80vw] max-w-[460px] lg:w-full">
+          <div className="relative mx-auto aspect-square w-[80vw] max-w-[460px] lg:w-full lg:max-w-[520px]">
             <Globe />
             <div className="pointer-events-none absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
               <Hand className="h-3.5 w-3.5 text-orange-400" />

@@ -2,15 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Tema 3 "Pase de Abordar" ────────────────────────────────────────────
-   Un solo tema editorial. Las secciones alternan crema ↔ navy por sí mismas
-   (el "intercambio de colores en el fondo"); no hay toggle claro/oscuro. */
+/* ── Tema 3 "Pase de Abordar" + 3 modos de tema ──────────────────────────
+   Las secciones son de tipo A o B. Los 3 temas solo cambian qué color toma
+   cada tipo (y su texto), así que el mismo layout sirve para los tres:
+   - default : A = crema, B = navy  → alterna (el "intercambio de colores")
+   - light   : A = crema, B = crema-100 → todo claro
+   - dark    : A = navy-800, B = navy-950 → todo oscuro
+   Hero, Destinos, Contacto y sus fotos se mantienen oscuros en los 3. */
 
 :root {
-  --navy-950: 12 27 47;
-  --cream-50: 245 241 233;
+  --section-a: 245 241 233; /* cream-50 */
+  --ink-a: 17 35 62; /* navy-900 */
+  --section-b: 12 27 47; /* navy-950 */
+  --ink-b: 245 241 233; /* cream-50 */
   --orange: 232 115 42;
   color-scheme: light;
+}
+
+html.theme-light {
+  --section-a: 245 241 233; /* cream-50 */
+  --ink-a: 17 35 62;
+  --section-b: 237 231 219; /* cream-100 */
+  --ink-b: 17 35 62;
+  color-scheme: light;
+}
+
+html.theme-dark {
+  --section-a: 22 37 63; /* navy-800 */
+  --ink-a: 245 241 233;
+  --section-b: 12 27 47; /* navy-950 */
+  --ink-b: 245 241 233;
+  color-scheme: dark;
 }
 
 * {
@@ -19,20 +41,18 @@
 
 html {
   scroll-behavior: smooth;
-  /* Los anclas (#destinos, …) aterrizan debajo del navbar sticky. */
   scroll-padding-top: 4.5rem;
-  /* Cada sección "importante" ocupa 1 pantalla; el snap es suave (proximity)
-     para no atrapar el scroll cuando una sección es más alta que el viewport. */
   scroll-snap-type: y proximity;
-  background-color: rgb(var(--navy-950));
+  background-color: rgb(var(--section-b));
 }
 
 body {
-  background-color: rgb(var(--navy-950));
-  color: rgb(var(--cream-50));
+  background-color: rgb(var(--section-b));
+  color: rgb(var(--ink-b));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Cada pantalla completa. 100svh evita el salto por la barra del navegador móvil. */
@@ -47,7 +67,6 @@ button:not(:disabled),
   cursor: pointer;
 }
 
-/* Foco de teclado visible (a11y). */
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,
@@ -69,7 +88,7 @@ textarea:focus-visible,
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: rgb(var(--navy-950));
+  background: rgb(var(--section-b));
 }
 ::-webkit-scrollbar-thumb {
   background: rgb(255 255 255 / 0.18);
@@ -83,7 +102,6 @@ textarea:focus-visible,
   .text-balance {
     text-wrap: balance;
   }
-  /* Rejilla de puntos del hero (papel milimetrado del pasaporte). */
   .dotgrid {
     background-image: radial-gradient(
       rgb(255 255 255 / 0.07) 1.1px,
@@ -91,7 +109,6 @@ textarea:focus-visible,
     );
     background-size: 26px 26px;
   }
-  /* Grano sutil para las superficies crema. */
   .grain::before {
     content: "";
     position: absolute;

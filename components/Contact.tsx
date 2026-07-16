@@ -20,7 +20,7 @@ export default function Contact() {
         <SectionHead
           eyebrow={c.contact.eyebrow}
           title={c.contact.title}
-          tone="dark"
+          slot="onDark"
           align="center"
           className="mx-auto"
         />

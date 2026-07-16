@@ -20,18 +20,18 @@ export default function Gallery() {
   return (
     <section
       id="galeria"
-      className="screen grain relative flex flex-col justify-center overflow-hidden bg-cream-50 py-24 text-navy-900"
+      className="screen grain relative flex flex-col justify-center overflow-hidden bg-sectionA py-24 text-inkA"
     >
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8">
         <div className="flex flex-col gap-3">
           <SectionHead
             eyebrow={c.gallery.eyebrow}
             title={c.gallery.title}
-            tone="light"
+            slot="a"
             font="heading"
           />
           <Reveal delay={0.05}>
-            <p className="max-w-md text-navy-900/65">{c.gallery.body}</p>
+            <p className="max-w-md text-inkA/65">{c.gallery.body}</p>
           </Reveal>
         </div>
 

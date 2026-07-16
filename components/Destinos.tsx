@@ -16,9 +16,9 @@ export default function Destinos() {
   return (
     <section
       id="destinos"
-      className="screen relative flex flex-col justify-center overflow-hidden bg-navy-950 text-cream-50"
+      className="screen relative flex flex-col overflow-hidden bg-navy-950 text-cream-50"
     >
-      {/* Fondo: foto del destino activo */}
+      {/* Fondo: foto del destino activo (más visible que antes) */}
       {items.map((d, i) => (
         <div
           key={d.img}
@@ -37,33 +37,34 @@ export default function Destinos() {
           />
         </div>
       ))}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/85 to-navy-950/30" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-navy-950/40" />
+      {/* Solo un velo inferior para legibilidad; arriba la foto se ve nítida */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/45 to-navy-950/15" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-navy-950/60 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-24 sm:px-8">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl flex-col justify-between gap-8 px-5 py-24 sm:px-8">
         <SectionHead
           eyebrow={c.destinos.eyebrow}
           title={c.destinos.title}
-          tone="dark"
+          slot="onDark"
         />
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1fr] lg:items-end">
+        <div className="flex flex-col gap-7">
           {/* Featured */}
           <div>
             <RouteTag to={feat.name} />
-            <h3 className="mt-4 font-display text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[0.92] tracking-tightest">
+            <h3 className="mt-4 font-display text-[clamp(2.75rem,7vw,5.5rem)] font-black uppercase leading-[0.9] tracking-tightest drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
               {feat.name}
             </h3>
-            <p className="mt-2 text-cream-50/75">
+            <p className="mt-2 text-lg text-cream-50/90 drop-shadow">
               {feat.region} · {feat.nights}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
-              <span className="font-mono text-lg font-bold text-orange-400">
+              <span className="rounded-md bg-orange px-4 py-2 font-mono text-lg font-bold text-white shadow-[0_12px_28px_-12px_rgba(232,115,42,0.9)]">
                 {feat.price}
               </span>
               <a
                 href="#contacto"
-                className="group inline-flex items-center gap-2 rounded-md bg-orange px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
+                className="group inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/5 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:border-white hover:bg-white/15"
               >
                 {c.hero.ctaPrimary}
                 <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -71,38 +72,40 @@ export default function Destinos() {
             </div>
           </div>
 
-          {/* Lista */}
-          <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-1">
+          {/* Selector: mini-cards con foto */}
+          <ul className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {items.map((d, i) => (
-              <li key={d.img}>
+              <li key={d.img} className="shrink-0">
                 <button
                   type="button"
                   onMouseEnter={() => setActive(i)}
                   onFocus={() => setActive(i)}
                   onClick={() => setActive(i)}
                   aria-pressed={i === active}
-                  className={`flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left transition ${
+                  aria-label={d.name}
+                  className={`group relative block h-24 w-32 overflow-hidden rounded-xl transition ${
                     i === active
-                      ? "border-orange/60 bg-white/10"
-                      : "border-white/10 bg-white/[0.03] hover:border-white/25"
+                      ? "ring-2 ring-orange ring-offset-2 ring-offset-navy-950"
+                      : "opacity-70 ring-1 ring-white/20 hover:opacity-100"
                   }`}
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="font-mono text-[11px] font-bold tracking-wider text-orange-400">
+                  <Image src={d.img} alt="" fill className="object-cover" sizes="128px" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-navy-950/85 to-transparent" />
+                  <span className="absolute inset-x-0 bottom-0 flex items-center justify-between px-2 pb-1.5">
+                    <span className="font-heading text-xs font-bold text-white drop-shadow">
+                      {d.name}
+                    </span>
+                    <span className="font-mono text-[9px] font-bold text-orange-400">
                       {airportCode(d.name)}
                     </span>
-                    <span className="font-heading font-bold">{d.name}</span>
-                  </span>
-                  <span className="font-mono text-xs text-cream-50/55">
-                    {d.price}
                   </span>
                 </button>
               </li>
             ))}
           </ul>
-        </div>
 
-        <p className="font-mono text-[11px] text-cream-50/40">{c.destinos.note}</p>
+          <p className="font-mono text-[11px] text-cream-50/55">{c.destinos.note}</p>
+        </div>
       </div>
     </section>
   );
