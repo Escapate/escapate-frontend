@@ -1,9 +1,11 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Line, useTexture } from "@react-three/drei";
+import { OrbitControls, Line, useTexture, useGLTF } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
+
+const JET_MODEL = "/models/jet.glb";
 
 const GLOBE_R = 1.4;
 const ORBIT_R = 2.02;
@@ -40,52 +42,19 @@ function Earth() {
 }
 
 function Airplane() {
-  const body = "#F5F1E9";
-  const accent = "#E8732A";
-  // Nose points toward +Z (the direction of travel). Slight bank into the turn.
+  // Detailed low-poly jet (Poly by Google, CC-BY 3.0), texture optimized to 256².
+  // The model's nose already points toward +Z and it sits upright on +Y, matching
+  // the orbit convention below, so no reorientation is needed — only a slight bank.
+  const { scene } = useGLTF(JET_MODEL);
+  const model = useMemo(() => scene.clone(true), [scene]);
   return (
-    <group scale={0.19} rotation={[0, 0, -0.32]}>
-      {/* fuselage */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <capsuleGeometry args={[0.14, 1.05, 12, 24]} />
-        <meshStandardMaterial color={body} roughness={0.32} metalness={0.25} />
-      </mesh>
-      {/* nose cone */}
-      <mesh position={[0, 0, 0.82]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.14, 0.5, 24]} />
-        <meshStandardMaterial color={accent} roughness={0.3} metalness={0.2} />
-      </mesh>
-      {/* swept wings */}
-      <mesh position={[-0.44, 0, -0.06]} rotation={[0, 0.52, 0]}>
-        <boxGeometry args={[0.95, 0.035, 0.32]} />
-        <meshStandardMaterial color={body} roughness={0.5} />
-      </mesh>
-      <mesh position={[0.44, 0, -0.06]} rotation={[0, -0.52, 0]}>
-        <boxGeometry args={[0.95, 0.035, 0.32]} />
-        <meshStandardMaterial color={body} roughness={0.5} />
-      </mesh>
-      {/* orange stripe on fuselage */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <capsuleGeometry args={[0.145, 0.18, 8, 20]} />
-        <meshStandardMaterial color={accent} roughness={0.4} />
-      </mesh>
-      {/* horizontal stabilizers */}
-      <mesh position={[-0.2, 0, -0.7]} rotation={[0, 0.5, 0]}>
-        <boxGeometry args={[0.42, 0.03, 0.18]} />
-        <meshStandardMaterial color={body} roughness={0.5} />
-      </mesh>
-      <mesh position={[0.2, 0, -0.7]} rotation={[0, -0.5, 0]}>
-        <boxGeometry args={[0.42, 0.03, 0.18]} />
-        <meshStandardMaterial color={body} roughness={0.5} />
-      </mesh>
-      {/* vertical fin */}
-      <mesh position={[0, 0.15, -0.74]} rotation={[0.4, 0, 0]}>
-        <boxGeometry args={[0.035, 0.3, 0.24]} />
-        <meshStandardMaterial color={accent} roughness={0.4} />
-      </mesh>
+    <group scale={0.05} rotation={[0, 0, -0.32]}>
+      <primitive object={model} />
     </group>
   );
 }
+
+useGLTF.preload(JET_MODEL);
 
 function FlightPath() {
   const orbit = useRef<THREE.Group>(null!);
@@ -118,7 +87,9 @@ function FlightPath() {
       />
       <group ref={orbit}>
         <group position={[ORBIT_R, 0, 0]}>
-          <Airplane />
+          <Suspense fallback={null}>
+            <Airplane />
+          </Suspense>
         </group>
       </group>
     </group>
@@ -153,7 +124,7 @@ function Scene() {
 export default function GlobeCanvas() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 4.4], fov: 42 }}
+      camera={{ position: [0, 0, 6.4], fov: 42 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent" }}

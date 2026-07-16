@@ -1,0 +1,8 @@
+Modelos 3D
+
+jet.glb — "Jet" por Poly by Google
+  Fuente:   https://poly.pizza/m/bgUY8zN2Bq9
+  Licencia: Creative Commons Attribution 3.0 (CC-BY 3.0)
+            https://creativecommons.org/licenses/by/3.0/
+  Cambios:  textura baseColor reescalada de 2048x2048 a 256x256 para web
+            (GLB reconstruido: ~1.7 MB -> ~114 KB).
