@@ -73,7 +73,7 @@ export default function Destinos() {
           </div>
 
           {/* Selector: mini-cards con foto */}
-          <ul className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ul className="-mx-1 flex gap-3 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {items.map((d, i) => (
               <li key={d.img} className="shrink-0">
                 <button
