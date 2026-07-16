@@ -14,8 +14,10 @@ const tiles = [
 
 export default function Gallery() {
   const { c } = useI18n();
-  const mapsQuery = encodeURIComponent(`Escápate agencia de viajes · ${c.contact.address}`);
-  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+  // Ubicación real de "Escápate" (Cúcuta): 7.853932, -72.4663327
+  const mapEmbed =
+    "https://maps.google.com/maps?q=7.853932,-72.4663327&z=16&output=embed";
+  const mapsLink = "https://maps.app.goo.gl/YnDfD9VLLPeg2bBYA";
 
   return (
     <section
@@ -60,13 +62,12 @@ export default function Gallery() {
           <Reveal delay={0.1}>
             <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-navy-950 text-cream-50 shadow-[0_40px_80px_-40px_rgba(12,27,47,0.6)]">
               <div className="relative h-40 w-full">
-                {/* TODO: cuando haya dirección exacta, centrar el mapa en ella. */}
                 <iframe
                   title="Ubicación de Escápate en Cúcuta"
-                  src={`https://maps.google.com/maps?q=${mapsQuery}&z=13&output=embed`}
+                  src={mapEmbed}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="h-full w-full grayscale-[0.2]"
+                  className="h-full w-full"
                 />
               </div>
               <div className="flex flex-1 flex-col gap-4 p-6">

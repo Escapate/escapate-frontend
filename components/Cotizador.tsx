@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
-import { RouteTag, Perf } from "./ui";
+import { RouteTag, Perf, WhatsAppIcon } from "./ui";
 import {
   PlaneTakeoff,
   MapPin,
@@ -13,7 +13,6 @@ import {
   ChevronDown,
   Minus,
   Plus,
-  MessageCircle,
   Mail,
   Check,
 } from "lucide-react";
@@ -351,7 +350,7 @@ export default function Cotizador() {
             onClick={onWhatsApp}
             className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-wa px-5 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-[#06351c] shadow-[0_16px_34px_-16px_rgba(37,211,102,0.8)] transition hover:brightness-105"
           >
-            <MessageCircle className="h-5 w-5" />
+            <WhatsAppIcon className="h-5 w-5" />
             {q.whatsapp}
           </button>
           <button

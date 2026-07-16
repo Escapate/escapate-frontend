@@ -2,9 +2,9 @@
 
 import { useI18n } from "@/lib/i18n";
 import { EMAIL, INSTAGRAM, waLink } from "@/lib/content";
-import { Reveal, SectionHead } from "./ui";
+import { Reveal, SectionHead, WhatsAppIcon } from "./ui";
 import Cotizador from "./Cotizador";
-import { MessageCircle, MapPin, Clock, Mail, Instagram } from "lucide-react";
+import { MapPin, Clock, Mail, Instagram } from "lucide-react";
 
 export default function Contact() {
   const { c } = useI18n();
@@ -42,7 +42,7 @@ export default function Contact() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2.5 rounded-md bg-wa px-5 py-4 font-mono text-sm font-bold uppercase tracking-wider text-[#06351c] transition hover:brightness-105"
               >
-                <MessageCircle className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5" />
                 {c.contact.whatsapp}
               </a>
 
