@@ -110,6 +110,36 @@ function Options({
   );
 }
 
+function Chips({
+  options,
+  isActive,
+  onPick,
+}: {
+  options: readonly string[];
+  isActive: (i: number) => boolean;
+  onPick: (i: number) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o, i) => (
+        <button
+          key={o}
+          type="button"
+          aria-pressed={isActive(i)}
+          onClick={() => onPick(i)}
+          className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+            isActive(i)
+              ? "border-orange bg-orange/15 text-orange-600"
+              : "border-navy-900/15 text-navy-900/80 hover:border-navy-900/30"
+          }`}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const triggerCls =
   "flex w-full items-center justify-between rounded-lg border border-navy-900/15 bg-white p-3 text-left text-navy-900 transition hover:border-navy-900/30";
 
@@ -138,6 +168,10 @@ export default function Cotizador() {
   const [monthIdx, setMonthIdx] = useState<number | null>(null);
   const [departure, setDeparture] = useState("");
   const [depReturn, setDepReturn] = useState("");
+  const [hotelIdx, setHotelIdx] = useState<number | null>(null);
+  const [planIdx, setPlanIdx] = useState<number | null>(null);
+  const [prefsIdx, setPrefsIdx] = useState<number[]>([]);
+  const [otherPref, setOtherPref] = useState("");
 
   const from = q.cities[fromIdx] ?? q.cities[0];
   const dest = q.tours[destIdx] ?? q.tours[0];
@@ -447,6 +481,50 @@ export default function Cotizador() {
                     ))}
                   </select>
                 )}
+              </div>
+
+              {/* Hospedaje */}
+              <div className="grid gap-3">
+                <div>
+                  <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
+                    {q.hotel}
+                  </FieldLabel>
+                  <Chips
+                    options={q.hotelOptions}
+                    isActive={(i) => i === hotelIdx}
+                    onPick={(i) => setHotelIdx((cur) => (cur === i ? null : i))}
+                  />
+                </div>
+                <div>
+                  <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
+                    {q.plan}
+                  </FieldLabel>
+                  <Chips
+                    options={q.planOptions}
+                    isActive={(i) => i === planIdx}
+                    onPick={(i) => setPlanIdx((cur) => (cur === i ? null : i))}
+                  />
+                </div>
+                <div>
+                  <FieldLabel icon={<MapPin className="h-3.5 w-3.5 text-orange-500" />}>
+                    {q.prefs}
+                  </FieldLabel>
+                  <Chips
+                    options={q.prefsOptions}
+                    isActive={(i) => prefsIdx.includes(i)}
+                    onPick={(i) =>
+                      setPrefsIdx((cur) =>
+                        cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]
+                      )
+                    }
+                  />
+                  <input
+                    value={otherPref}
+                    onChange={(e) => setOtherPref(e.target.value)}
+                    placeholder={q.otherPrefPh}
+                    className={`mt-2 ${inputCls()}`}
+                  />
+                </div>
               </div>
 
               {/* Notas */}
