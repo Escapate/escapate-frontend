@@ -194,17 +194,44 @@ export default function Cotizador() {
     .join(", ");
 
   const m = q.msg;
-  const message = `${m.intro}
-• ${m.from}: ${from}
-• ${m.dest}: ${dest}
-• ${m.pax}: ${paxParts}
-• ${m.days}: ${days}${name ? `\n• ${m.name}: ${name}` : ""}`;
+  const lines: string[] = [
+    m.intro,
+    `• ${m.from}: ${from}`,
+    `• ${m.dest}: ${dest}`,
+    `• ${m.pax}: ${paxParts}`,
+    `• ${m.days}: ${days}`,
+  ];
+  if (name) lines.push(`• ${m.name}: ${name}`);
+  if (phone) lines.push(`• ${m.phone}: ${phone}`);
+  if (email) lines.push(`• ${m.email}: ${email}`);
+  if (hasDates) {
+    if (departure) lines.push(`• ${m.departure}: ${departure}`);
+    if (depReturn) lines.push(`• ${m.ret}: ${depReturn}`);
+  } else if (monthIdx !== null) {
+    lines.push(`• ${m.month}: ${q.months[monthIdx]}`);
+  }
+  if (hotelIdx !== null) lines.push(`• ${m.hotel}: ${q.hotelOptions[hotelIdx]}`);
+  if (planIdx !== null) lines.push(`• ${m.plan}: ${q.planOptions[planIdx]}`);
+  const prefsList = [...prefsIdx.map((i) => q.prefsOptions[i]), otherPref].filter(Boolean);
+  if (prefsList.length) lines.push(`• ${m.prefs}: ${prefsList.join(", ")}`);
+  if (notes) lines.push(`• ${m.notes}: ${notes}`);
+  const message = lines.join("\n");
 
   function onWhatsApp() {
     window.open(`${wa}?text=${encodeURIComponent(message)}`, "_blank");
   }
 
+  function validateEmail() {
+    const e: Record<string, boolean> = {};
+    if (!name.trim()) e.name = true;
+    if (!phone.trim()) e.phone = true;
+    if (!email.trim() || !email.includes("@")) e.email = true;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
+
   async function onEmail() {
+    if (!validateEmail()) return;
     if (!WEB3FORMS_KEY) {
       onWhatsApp();
       return;
@@ -217,11 +244,18 @@ export default function Cotizador() {
         body: JSON.stringify({
           access_key: WEB3FORMS_KEY,
           subject: "Nueva cotización · Escápate",
-          name: name || "Sin nombre",
+          name,
+          celular: phone,
+          correo: email,
           salida: from,
           destino: dest,
           pasajeros: paxParts,
           dias: days,
+          fechas: hasDates ? `${departure} → ${depReturn}` : (monthIdx !== null ? q.months[monthIdx] : ""),
+          hotel: hotelIdx !== null ? q.hotelOptions[hotelIdx] : "",
+          plan: planIdx !== null ? q.planOptions[planIdx] : "",
+          preferencias: prefsList.join(", "),
+          notas: notes,
           message,
         }),
       });
@@ -371,7 +405,7 @@ export default function Cotizador() {
           <div className="sm:col-span-2">
             <input
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: false })); }}
               placeholder={q.name}
               className={inputCls(errors.name)}
             />
@@ -382,7 +416,7 @@ export default function Cotizador() {
               type="tel"
               inputMode="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: false })); }}
               placeholder={q.phone}
               className={inputCls(errors.phone)}
             />
@@ -393,7 +427,7 @@ export default function Cotizador() {
               type="email"
               inputMode="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: false })); }}
               placeholder={q.emailField}
               className={inputCls(errors.email)}
             />
