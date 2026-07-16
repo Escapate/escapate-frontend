@@ -7,6 +7,8 @@ import {
 } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
+import StructuredData from "@/components/StructuredData";
+import { BUSINESS } from "@/lib/content";
 import "./globals.css";
 
 // Aplica el tema guardado antes del primer paint (evita parpadeo).
@@ -42,28 +44,54 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  // TODO: reemplazar por el dominio real de producción (Cloudflare Pages).
-  metadataBase: new URL("https://escapate.com"),
-  title: "Escápate · Agencia de viajes en Cúcuta",
+  metadataBase: new URL(BUSINESS.url),
+  title: {
+    default: "Escápate · Agencia de viajes en Cúcuta",
+    template: "%s · Escápate",
+  },
   description:
-    "Tu viaje empieza aquí. Diseñamos escapadas a tu medida: vuelos, hoteles y planes pensados para ti. Agencia de viajes en Cúcuta, Colombia.",
+    "Agencia de viajes en Cúcuta, Norte de Santander. Diseñamos escapadas a tu medida: " +
+    "vuelos, hoteles y paquetes turísticos nacionales e internacionales con asesoría personalizada.",
+  applicationName: "Escápate",
+  authors: [{ name: "Escápate" }],
+  creator: "Escápate",
+  publisher: "Escápate",
   keywords: [
-    "agencia de viajes",
-    "Cúcuta",
-    "viajes",
+    "agencia de viajes Cúcuta",
+    "viajes Cúcuta",
+    "agencia de viajes Norte de Santander",
     "paquetes turísticos",
+    "tiquetes aéreos Cúcuta",
+    "planes turísticos",
     "Escápate",
-    "tiquetes",
   ],
-  robots: { index: true, follow: true },
+  category: "travel",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Escápate · Agencia de viajes",
-    description: "Tu viaje empieza aquí. Escapadas a tu medida desde Cúcuta.",
+    title: "Escápate · Agencia de viajes en Cúcuta",
+    description:
+      "Tu viaje empieza aquí. Escapadas a tu medida desde Cúcuta: vuelos, hoteles y paquetes turísticos.",
+    url: BUSINESS.url,
     type: "website",
     locale: "es_CO",
     siteName: "Escápate",
     // La imagen social la genera app/opengraph-image.tsx (1200×630).
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Escápate · Agencia de viajes en Cúcuta",
+    description: "Tu viaje empieza aquí. Escapadas a tu medida desde Cúcuta.",
   },
 };
 
@@ -82,6 +110,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <StructuredData />
       </head>
       <body
         className={`${archivo.variable} ${bricolage.variable} ${hanken.variable} ${spaceMono.variable} font-sans antialiased`}

@@ -6,7 +6,7 @@ import { useTheme } from "@/lib/theme";
 import { INSTAGRAM, waLink } from "@/lib/content";
 import { LangToggle } from "./LangToggle";
 import { ThemeToggle } from "./ThemeToggle";
-import { Instagram, Facebook } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { WhatsAppIcon } from "./ui";
 
 export default function Footer() {
@@ -59,14 +59,6 @@ export default function Footer() {
               className="grid h-9 w-9 place-items-center rounded-full border border-inkB/15 text-inkB/70 transition hover:border-orange hover:text-orange"
             >
               <Instagram className="h-4 w-4" />
-            </a>
-            {/* TODO: URL real de Facebook o quitar este ícono. */}
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="grid h-9 w-9 place-items-center rounded-full border border-inkB/15 text-inkB/70 transition hover:border-orange hover:text-orange"
-            >
-              <Facebook className="h-4 w-4" />
             </a>
             <a
               href={wa}

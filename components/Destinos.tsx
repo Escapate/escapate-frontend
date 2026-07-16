@@ -29,7 +29,7 @@ export default function Destinos() {
         >
           <Image
             src={d.img}
-            alt=""
+            alt={`${d.name} · ${d.region}`}
             fill
             className="object-cover"
             sizes="100vw"

@@ -94,7 +94,6 @@ export const content = {
       body: "Somos un equipo de Cúcuta apasionado por viajar. Creemos en el trato cercano: te escuchamos, entendemos cómo sueñas tu escapada y nos encargamos de cada detalle para que tú solo te preocupes por disfrutar.",
       stats: [
         { n: "+10", label: "años de experiencia" },
-        { n: "+2.500", label: "viajeros felices" },
         { n: "+40", label: "destinos" },
         { n: "100%", label: "acompañamiento" },
       ],
@@ -236,7 +235,6 @@ export const content = {
       body: "We're a team from Cúcuta who love to travel. We believe in a personal touch: we listen, understand how you dream your escape, and take care of every detail so all you have to do is enjoy.",
       stats: [
         { n: "+10", label: "years of experience" },
-        { n: "+2,500", label: "happy travelers" },
         { n: "+40", label: "destinations" },
         { n: "100%", label: "support" },
       ],
