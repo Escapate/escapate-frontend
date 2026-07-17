@@ -16,7 +16,7 @@ const GLOBE_R = 1.4;
 const ORBIT_R = 2.02;
 
 // Clustering + control manual (ajuste fino en pnpm dev).
-const CLUSTER_DEG = 5; // separación angular para agrupar destinos cercanos (a zoom 1)
+const CLUSTER_DEG = 7; // separación angular para agrupar destinos cercanos (a zoom 1)
 const ZOOM_POW = 1.5; // el umbral baja como CLUSTER_DEG / zoom^ZOOM_POW → separa pares muy juntos sin agrandar tanto
 const BASE_TILT = 0.32; // inclinación base del globo
 const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
@@ -376,30 +376,34 @@ export default function GlobeCanvas({
   // En pantallas de alta densidad (móvil retina) el antialias es innecesario.
   const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
   return (
-    <Canvas
-      frameloop={frameloop}
-      camera={{ position: [0, 0, 6.4], fov: 42 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: !hiDpr, alpha: true }}
-      style={{ background: "transparent" }}
-      onPointerMissed={(e) => {
-        // El badge y el popover de los clústers son DOM (drei <Html>); un clic ahí dispara
-        // este "missed" (no impacta ningún mesh) y cerraría la card recién abierta. Solo
-        // cerramos cuando el clic cae en el lienzo 3D vacío (target = <canvas>).
-        if ((e.target as HTMLElement)?.tagName === "CANVAS") setActive(null);
-      }}
-    >
-      <Scene
-        clusters={clusters}
-        active={active}
-        setActive={setActive}
-        onCotizar={onCotizar}
-        cotizarLabel={cotizarLabel}
-        input={input}
-        zoom={zoom}
-        focusTarget={focusTarget}
-        focusNonce={focusNonce}
-      />
-    </Canvas>
+    // Se desborda del contenedor cuadrado para que la órbita + el avión queden visibles por
+    // todos lados; la cámara se retrae el mismo factor (position.z / fov) para compensarlo.
+    <div className="absolute inset-[-24%]">
+      <Canvas
+        frameloop={frameloop}
+        camera={{ position: [0, 0, 6.4], fov: 42 }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: !hiDpr, alpha: true }}
+        style={{ background: "transparent" }}
+        onPointerMissed={(e) => {
+          // El badge y el popover de los clústers son DOM (drei <Html>); un clic ahí dispara
+          // este "missed" (no impacta ningún mesh) y cerraría la card recién abierta. Solo
+          // cerramos cuando el clic cae en el lienzo 3D vacío (target = <canvas>).
+          if ((e.target as HTMLElement)?.tagName === "CANVAS") setActive(null);
+        }}
+      >
+        <Scene
+          clusters={clusters}
+          active={active}
+          setActive={setActive}
+          onCotizar={onCotizar}
+          cotizarLabel={cotizarLabel}
+          input={input}
+          zoom={zoom}
+          focusTarget={focusTarget}
+          focusNonce={focusNonce}
+        />
+      </Canvas>
+    </div>
   );
 }

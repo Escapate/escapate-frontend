@@ -9,6 +9,8 @@ import { useIsMobile } from "@/lib/use-is-mobile";
 
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
   ssr: false,
+  // Mientras carga el chunk mostramos el mismo fallback, que se posiciona solo dentro
+  // del contenedor inset-0 (GlobeCanvas lleva su propio desborde inset-[-24%] adentro).
   loading: () => <StaticGlobe />,
 });
 
@@ -102,26 +104,25 @@ export default function Globe({
   // Respeta prefers-reduced-motion: globo estático, sin three.js.
   if (reduced) return <StaticGlobe />;
 
-  // El canvas se desborda del contenedor cuadrado para que la órbita + el avión
-  // queden visibles por todos lados (la cámara se retrae el mismo factor en GlobeCanvas).
+  // El canvas se desborda del contenedor cuadrado (inset-[-24%], adentro de GlobeCanvas)
+  // para que la órbita + el avión queden visibles por todos lados; la cámara se retrae el
+  // mismo factor. El fallback llena el contenedor cuadrado tal cual (sin ese desborde).
   return (
     <>
       <div ref={ref} className="absolute inset-0" aria-hidden="true">
         {mounted ? (
-          <div className="absolute inset-[-24%]">
-            <GlobeCanvas
-              frameloop={paused || !inView ? "never" : "always"}
-              markers={markers}
-              onCotizar={onCotizar}
-              cotizarLabel={cotizarLabel}
-              input={input}
-              zoom={zoom}
-              focusId={focusId}
-              focusNonce={focusNonce}
-              active={active}
-              setActive={setActive}
-            />
-          </div>
+          <GlobeCanvas
+            frameloop={paused || !inView ? "never" : "always"}
+            markers={markers}
+            onCotizar={onCotizar}
+            cotizarLabel={cotizarLabel}
+            input={input}
+            zoom={zoom}
+            focusId={focusId}
+            focusNonce={focusNonce}
+            active={active}
+            setActive={setActive}
+          />
         ) : (
           <StaticGlobe />
         )}
