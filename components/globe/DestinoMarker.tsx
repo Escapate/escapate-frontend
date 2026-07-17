@@ -1,9 +1,9 @@
 "use client";
 
-import { Html } from "@react-three/drei";
+import { Billboard, Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { X } from "lucide-react";
-import { useMemo, useRef, useState, type RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
 
 export type DestinoMarkerData = {
@@ -13,25 +13,39 @@ export type DestinoMarkerData = {
   img: string;
 };
 
-// Naranja de marca. Proporciones/altura/emisivo/color son ajuste visual fino (calibrar en pnpm dev).
+// Naranja de marca. Proporciones/emisivo/color son ajuste visual fino (calibrar en pnpm dev).
 const PIN_COLOR = "#E8732A";
-const EYE_COLOR = "#FFF3E6";
-const PIN_UP = new THREE.Vector3(0, 1, 0);
-const LIFT = 0.05; // cuánto se eleva el pin al hover/activo (hacia afuera del globo)
+const HEAD_R = 0.06; // radio de la cabeza
+const HEAD_H = 0.12; // altura del centro de la cabeza sobre la punta
+const LIFT = 0.04; // cuánto salta el pin al hover/activo
 
-// Perfil (radio, altura) de la gota estilo Google Maps: punta afilada abajo → cabeza redonda arriba.
-const PIN_PROFILE: Array<[number, number]> = [
-  [0.0, 0.0],
-  [0.01, 0.015],
-  [0.024, 0.04],
-  [0.04, 0.075],
-  [0.052, 0.11],
-  [0.056, 0.14],
-  [0.05, 0.168],
-  [0.034, 0.188],
-  [0.014, 0.198],
-  [0.0, 0.202],
-];
+// Pin de ubicación estilo icono 3D: gota (cabeza redonda + punta abajo) con hueco real,
+// extruida y biselada para que se vea con volumen glossy. Se construye una sola vez (compartida).
+function buildPinGeometry(): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0); // punta (queda anclada en la superficie)
+  shape.quadraticCurveTo(HEAD_R * 0.55, HEAD_H * 0.35, HEAD_R, HEAD_H); // costado derecho
+  shape.absarc(0, HEAD_H, HEAD_R, 0, Math.PI, false); // arco superior de la cabeza
+  shape.quadraticCurveTo(-HEAD_R * 0.55, HEAD_H * 0.35, 0, 0); // costado izquierdo → punta
+
+  const hole = new THREE.Path();
+  hole.absarc(0, HEAD_H, HEAD_R * 0.42, 0, Math.PI * 2, true); // hueco tipo dona
+  shape.holes.push(hole);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.028,
+    bevelEnabled: true,
+    bevelThickness: 0.02,
+    bevelSize: 0.014,
+    bevelSegments: 4,
+    curveSegments: 32,
+  });
+  geo.translate(0, 0, -0.028); // centra el grosor alrededor de z=0 (mira a la cámara vía Billboard)
+  geo.computeVertexNormals();
+  return geo;
+}
+
+const PIN_GEOMETRY = buildPinGeometry();
 
 export default function DestinoMarker({
   data,
@@ -55,14 +69,6 @@ export default function DestinoMarker({
   const [hovered, setHovered] = useState(false);
   const liftRef = useRef<THREE.Group>(null!);
 
-  // Orienta el pin a lo largo de la normal de la superficie (apunta hacia afuera del globo).
-  const quaternion = useMemo(() => {
-    const normal = new THREE.Vector3(position[0], position[1], position[2]).normalize();
-    return new THREE.Quaternion().setFromUnitVectors(PIN_UP, normal);
-  }, [position]);
-
-  const profile = useMemo(() => PIN_PROFILE.map(([x, y]) => new THREE.Vector2(x, y)), []);
-
   // Elevación + escala animadas (damp = independiente del frame-rate).
   useFrame((_, dt) => {
     const g = liftRef.current;
@@ -76,10 +82,11 @@ export default function DestinoMarker({
 
   return (
     <group position={position}>
-      <group quaternion={quaternion}>
-        {/* Área de hit invisible (estática, cubre el pin incluso elevado) para hover/click. */}
+      {/* Billboard: el pin siempre mira a la cámara (look de icono de ubicación). */}
+      <Billboard>
+        {/* Área de hit invisible (estática) para hover/click. */}
         <mesh
-          position={[0, 0.11, 0]}
+          position={[0, HEAD_H, 0]}
           onPointerOver={(e) => {
             e.stopPropagation();
             setHovered(true);
@@ -95,39 +102,26 @@ export default function DestinoMarker({
             onActivate();
           }}
         >
-          <sphereGeometry args={[0.15, 12, 12]} />
+          <circleGeometry args={[0.12, 24]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
-        {/* Pin visible (se eleva/escala en liftRef). */}
+        {/* Pin visible (salta/escala en liftRef). */}
         <group ref={liftRef}>
-          {/* Cuerpo: gota revuelta, material glossy con emisivo para que resalte. */}
-          <mesh>
-            <latheGeometry args={[profile, 28]} />
+          <mesh geometry={PIN_GEOMETRY}>
             <meshStandardMaterial
               color={PIN_COLOR}
               emissive={PIN_COLOR}
-              emissiveIntensity={active || hovered ? 0.5 : 0.32}
-              roughness={0.3}
-              metalness={0.2}
-            />
-          </mesh>
-
-          {/* "Ojo" crema incrustado en la cabeza (detalle tipo Maps). */}
-          <mesh position={[0, 0.15, 0]}>
-            <sphereGeometry args={[0.02, 16, 16]} />
-            <meshStandardMaterial
-              color={EYE_COLOR}
-              emissive={EYE_COLOR}
-              emissiveIntensity={0.25}
-              roughness={0.5}
+              emissiveIntensity={active || hovered ? 0.4 : 0.2}
+              roughness={0.25}
+              metalness={0.1}
             />
           </mesh>
         </group>
 
         {active && (
           <Html
-            position={[0, 0.24, 0]}
+            position={[0, HEAD_H + 0.14, 0]}
             center
             distanceFactor={6}
             occlude={[occludeRef]}
@@ -163,7 +157,7 @@ export default function DestinoMarker({
             </div>
           </Html>
         )}
-      </group>
+      </Billboard>
     </group>
   );
 }

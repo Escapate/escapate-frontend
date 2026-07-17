@@ -295,14 +295,16 @@ quedó así:
   porque va anclada sobre el pin) + ✕ / clic-fuera (`onPointerMissed`) / otro-pin / Cotizar
   (móvil). Mientras la tarjeta está abierta el pin permanece elevado.
 
-**Modelo 3D del pin (estilo Google Maps, con detalle)**
-- Silueta de **gota** con `LatheGeometry` (perfil radio/altura revuelto): punta afilada clavada
-  en la superficie → cuello → cabeza redonda que cierra arriba. Un solo mesh suave.
+**Modelo 3D del pin (estilo icono de ubicación 3D, con hueco)**
+- Icono de ubicación: **gota** (cabeza redonda + punta abajo) con **hueco real** tipo dona,
+  construido con `THREE.Shape` + `shape.holes` + `ExtrudeGeometry` biselado → volumen glossy
+  con el agujero perforado de verdad. Geometría compartida (se construye una sola vez).
+- **Billboard** (drei `<Billboard>`): el pin **siempre mira a la cámara**, con la punta anclada
+  en la ubicación (como un pin de Google Maps flotando sobre el lugar). Así la silueta + el
+  hueco se ven bien desde cualquier ángulo. Va dentro del grupo que gira, pero el Billboard
+  contrarresta la rotación para mantenerse de frente; en la cara trasera lo oculta el globo por
+  z-test. La tarjeta usa `occludeRef` contra el mesh del globo.
 - Material **glossy** (`meshStandardMaterial`, roughness/metalness de plástico) + emisivo
-  (naranja de marca) → capta la luz direccional de la escena y resalta con brillo.
-- **"Ojo" crema** incrustado en la cabeza (el puntito claro típico del pin de Maps).
-- Orientado a la **normal** de la superficie (`quaternion` de +Y a `normalize(position)`), así
-  sobresale hacia afuera. Oclusión natural en la cara trasera por z-test de los meshes (la
-  tarjeta sí usa `occludeRef` contra el mesh del globo).
-- Proporciones (perfil de la gota, altura de elevación, emisivo, color, tamaño del ojo) son
-  **ajuste visual fino** que se calibra en `pnpm dev`, junto con `LNG_OFFSET`.
+  (naranja de marca) → capta la luz direccional de la escena y resalta.
+- Proporciones (perfil de la gota, tamaño del hueco, bisel, altura de salto, emisivo, color)
+  son **ajuste visual fino** que se calibra en `pnpm dev`, junto con `LNG_OFFSET`.
