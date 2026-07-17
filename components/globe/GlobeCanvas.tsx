@@ -24,6 +24,16 @@ const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
 const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
 
 type MarkerCotizar = { name: string; nights: string; price: string };
+type FocusTarget = { id: string; lat: number; lng: number };
+
+// Ángulos (spin en Y, tilt en X) que traen un lat/lng al frente, mirando a la cámara.
+function faceTarget(lat: number, lng: number): { spinY: number; tiltX: number } {
+  const [x, y, z] = latLngToVec3(lat, lng, 1);
+  return {
+    spinY: Math.atan2(-x, z),
+    tiltX: Math.atan2(y, Math.hypot(x, z)) - BASE_TILT,
+  };
+}
 
 function Earth({
   spinRef,
@@ -175,6 +185,8 @@ function Scene({
   cotizarLabel,
   input,
   zoom,
+  focusTarget,
+  focusNonce,
 }: {
   clusters: Cluster[];
   active: string | null;
@@ -183,12 +195,15 @@ function Scene({
   cotizarLabel: string;
   input?: RefObject<GlobeInput>;
   zoom: number;
+  focusTarget: FocusTarget | null;
+  focusNonce: number;
 }) {
   const spinRef = useRef<THREE.Group>(null!);
   const tiltRef = useRef<THREE.Group>(null!);
   const zoomRef = useRef<THREE.Group>(null!);
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const lastReset = useRef(0);
+  const fly = useRef({ nonce: 0, spinY: 0, tiltX: 0, id: "", active: false });
 
   useFrame((_, dt) => {
     const inp = input?.current;
@@ -196,8 +211,34 @@ function Scene({
     const tilt = tiltRef.current;
     const controls = controlsRef.current;
     const zoomed = zoom > 1.01;
-    // Al acercar, se detiene la rotación ambiente para que la zona ampliada no se escape.
-    const auto = (inp ? inp.autoRotate : true) && active === null && !zoomed;
+
+    // Vuelo a un destino (click en el menú de "Explorar"): calcula el destino angular y anima.
+    if (focusNonce !== fly.current.nonce) {
+      fly.current.nonce = focusNonce;
+      if (focusTarget) {
+        const t = faceTarget(focusTarget.lat, focusTarget.lng);
+        fly.current.spinY = t.spinY;
+        fly.current.tiltX = t.tiltX;
+        fly.current.id = focusTarget.id;
+        fly.current.active = true;
+      }
+    }
+    const flying = fly.current.active;
+    if (flying && spin && tilt) {
+      const k = 1 - Math.exp(-6 * dt);
+      let dy = fly.current.spinY - spin.rotation.y;
+      dy = Math.atan2(Math.sin(dy), Math.cos(dy)); // camino más corto
+      spin.rotation.y += dy * k;
+      const dx = fly.current.tiltX - tilt.rotation.x;
+      tilt.rotation.x += dx * k;
+      if (Math.abs(dy) < 0.01 && Math.abs(dx) < 0.01) {
+        fly.current.active = false;
+        setActive(fly.current.id); // al llegar, abre la card
+      }
+    }
+
+    // Al acercar (o en pleno vuelo), se detiene la rotación ambiente.
+    const auto = (inp ? inp.autoRotate : true) && active === null && !zoomed && !flying;
 
     // Zoom acotado: escala suave del globo hacia el nivel objetivo.
     if (zoomRef.current) {
@@ -272,6 +313,8 @@ export default function GlobeCanvas({
   cotizarLabel = "Cotizar",
   input,
   zoom = 1,
+  focusId = null,
+  focusNonce = 0,
 }: {
   frameloop?: "always" | "never";
   markers?: GlobeMarker[];
@@ -279,13 +322,30 @@ export default function GlobeCanvas({
   cotizarLabel?: string;
   input?: RefObject<GlobeInput>;
   zoom?: number;
+  focusId?: string | null;
+  focusNonce?: number;
 }) {
   const [active, setActive] = useState<string | null>(null);
   // El umbral baja con el zoom → los clústers se separan al acercar y se reagrupan al alejar.
-  const clusters = useMemo(
-    () => clusterMarkers(markers, CLUSTER_DEG / Math.pow(zoom, ZOOM_POW), GLOBE_R * 1.02),
-    [markers, zoom]
-  );
+  // El destino enfocado (fly-to) se saca del clustering y se renderiza suelto para que su card
+  // pueda abrirse aunque estuviera agrupado.
+  const clusters = useMemo(() => {
+    const base = focusId ? markers.filter((m) => m.id !== focusId) : markers;
+    const cl = clusterMarkers(base, CLUSTER_DEG / Math.pow(zoom, ZOOM_POW), GLOBE_R * 1.02);
+    if (focusId) {
+      const fm = markers.find((m) => m.id === focusId);
+      if (fm) {
+        cl.push({ id: fm.id, position: latLngToVec3(fm.lat, fm.lng, GLOBE_R * 1.02), members: [fm] });
+      }
+    }
+    return cl;
+  }, [markers, zoom, focusId]);
+
+  const focusTarget = useMemo<FocusTarget | null>(() => {
+    if (!focusId) return null;
+    const fm = markers.find((m) => m.id === focusId);
+    return fm ? { id: fm.id, lat: fm.lat, lng: fm.lng } : null;
+  }, [focusId, markers]);
   // En pantallas de alta densidad (móvil retina) el antialias es innecesario.
   const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
   return (
@@ -305,6 +365,8 @@ export default function GlobeCanvas({
         cotizarLabel={cotizarLabel}
         input={input}
         zoom={zoom}
+        focusTarget={focusTarget}
+        focusNonce={focusNonce}
       />
     </Canvas>
   );

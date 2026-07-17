@@ -43,7 +43,7 @@ export default function ClusterMarker({
                 type="button"
                 onClick={onClose}
                 aria-label="Cerrar"
-                className="grid h-7 w-7 place-items-center rounded-full bg-white/5 text-cream-50 transition hover:bg-white/15"
+                className="grid h-7 w-7 cursor-pointer place-items-center rounded-full bg-white/5 text-cream-50 transition hover:bg-white/15"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -64,7 +64,7 @@ export default function ClusterMarker({
                   <button
                     type="button"
                     onClick={() => onCotizar(m)}
-                    className="shrink-0 rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
+                    className="shrink-0 cursor-pointer rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
                   >
                     {cotizarLabel}
                   </button>
@@ -77,7 +77,7 @@ export default function ClusterMarker({
             type="button"
             onClick={onActivate}
             aria-label={`${members.length} destinos en esta zona, abrir lista`}
-            className="grid h-9 w-9 place-items-center rounded-full border-2 border-white/70 bg-orange text-sm font-black text-white shadow-[0_6px_16px_-4px_rgba(232,115,42,0.9)] outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-white"
+            className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border-2 border-white/70 bg-orange text-sm font-black text-white shadow-[0_6px_16px_-4px_rgba(232,115,42,0.9)] outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-white"
           >
             {members.length}
           </button>

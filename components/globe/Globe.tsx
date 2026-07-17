@@ -36,6 +36,8 @@ export default function Globe({
   input,
   zoom = 1,
   paused = false,
+  focusId = null,
+  focusNonce = 0,
 }: {
   markers?: GlobeMarker[];
   onCotizar?: (m: { name: string; nights: string; price: string }) => void;
@@ -43,6 +45,8 @@ export default function Globe({
   input?: RefObject<GlobeInput>;
   zoom?: number;
   paused?: boolean;
+  focusId?: string | null;
+  focusNonce?: number;
 }) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -104,6 +108,8 @@ export default function Globe({
             cotizarLabel={cotizarLabel}
             input={input}
             zoom={zoom}
+            focusId={focusId}
+            focusNonce={focusNonce}
           />
         </div>
       ) : (

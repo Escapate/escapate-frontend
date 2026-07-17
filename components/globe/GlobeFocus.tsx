@@ -29,6 +29,13 @@ export default function GlobeFocus({
 }) {
   const input = useRef<GlobeInput>({ azVel: 0, polVel: 0, autoRotate: true, resetToken: 0 });
   const [zoom, setZoom] = useState(ZOOM_MIN);
+  // Destino enfocado: al clickearlo en el menú, el globo vuela hacia él, pausa y abre su card.
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const [focusNonce, setFocusNonce] = useState(0);
+  const flyTo = useCallback((id: string) => {
+    setFocusId(id);
+    setFocusNonce((n) => n + 1);
+  }, []);
   const stageRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -121,17 +128,22 @@ export default function GlobeFocus({
       aria-label="Explorar destinos en el globo"
       className="fixed inset-0 z-[100] flex flex-col bg-navy-950/97 backdrop-blur-md lg:flex-row"
     >
-      {/* Escenario del globo */}
-      <div ref={stageRef} className="relative min-h-0 flex-1 touch-none">
+      {/* Escenario del globo (overflow-hidden → el globo no se desborda sobre el menú/la X). */}
+      <div
+        ref={stageRef}
+        className="relative min-h-[55vh] flex-1 touch-none overflow-hidden lg:min-h-0"
+      >
         <Globe
           markers={markers}
           onCotizar={cotizar}
           cotizarLabel={cotizarLabel}
           input={input}
           zoom={zoom}
+          focusId={focusId}
+          focusNonce={focusNonce}
         />
-        <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2">
-          <span className="rounded-full border border-white/12 bg-white/5 px-4 py-1.5 font-mono text-[11px] tracking-wide text-cream-50/60 backdrop-blur-sm">
+        <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2">
+          <span className="rounded-full border border-orange/30 bg-navy-950/80 px-4 py-1.5 font-mono text-[11px] tracking-wide text-cream-50/90 shadow-lg backdrop-blur">
             Rueda o pellizca para acercar · arrastra para girar
           </span>
         </div>
@@ -163,26 +175,35 @@ export default function GlobeFocus({
             type="button"
             onClick={onClose}
             aria-label="Cerrar el mapa"
-            className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-orange"
+            className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-orange"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
         <ul className="min-h-0 flex-1 divide-y divide-white/5 overflow-auto px-2 pb-3">
           {markers.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 px-3 py-2.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={m.img} alt={m.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-heading text-base font-bold leading-tight text-cream-50">
-                  {m.name}
-                </p>
-                <p className="truncate font-mono text-[11px] text-orange-400">{m.price}</p>
-              </div>
+            <li key={m.id} className="flex items-center gap-2 py-0.5">
+              <button
+                type="button"
+                onClick={() => flyTo(m.id)}
+                aria-label={`Ver ${m.name} en el globo`}
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-white/5"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.img} alt={m.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-heading text-base font-bold leading-tight text-cream-50">
+                    {m.name}
+                  </span>
+                  <span className="block truncate font-mono text-[11px] text-orange-400">
+                    {m.price}
+                  </span>
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={() => cotizar(m)}
-                className="shrink-0 rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
+                className="mr-2 shrink-0 cursor-pointer rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
               >
                 {cotizarLabel}
               </button>

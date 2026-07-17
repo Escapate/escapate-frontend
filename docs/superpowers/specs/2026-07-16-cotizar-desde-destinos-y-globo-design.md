@@ -340,6 +340,18 @@ quedó así:
 - El globo del hero se **congela** (`Globe paused` → `frameloop="never"`) mientras el enfoque
   está abierto. Cotizar desde el menú cierra el enfoque y lleva al formulario.
 - No se abre bajo `prefers-reduced-motion` (el hero muestra `StaticGlobe`).
+- **Ir al destino:** click en una fila del menú → el globo **vuela** a ese pin (anima `spin`/`tilt`
+  con `faceTarget(lat,lng)`), pausa y **abre su card**. El destino enfocado se saca del clustering
+  (`focusId`) para que su card pueda abrir aunque estuviera agrupado; un `focusNonce` re-dispara
+  el vuelo. El stage usa `overflow-hidden` para que el globo no se desborde sobre la X/el menú.
+
+## Detalles del hero (post-feedback)
+
+- El panel de controles del globo es **colapsable y viene cerrado** (un botón lo abre/cierra).
+- Los pines se **cullean por orientación**: un `DestinoMarker` solo se monta (y es clickeable)
+  si mira a la cámara (`normal·toCam > 0.12`) o está activo — así no quedan pines invisibles en
+  la cara trasera robando clicks, y cualquier pin visible es clickeable.
+- Todos los botones interactivos del globo usan `cursor-pointer` (Tailwind preflight no lo pone).
 
 ## Sistema de accesibilidad para mover el globo
 

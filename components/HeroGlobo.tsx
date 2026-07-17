@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import Globe, { type GlobeInput } from "./globe/Globe";
 import GlobeControls from "./globe/GlobeControls";
 import GlobeFocus from "./globe/GlobeFocus";
-import { ArrowRight, Hand, Maximize2 } from "lucide-react";
+import { ArrowRight, Hand, Maximize2, Move, X } from "lucide-react";
 import { DESTINO_GEO } from "@/lib/destino-geo";
 import { buildQuoteIntent } from "@/lib/quote-intent";
 import { useQuoteIntent } from "@/lib/quote-provider";
@@ -29,6 +29,8 @@ export default function HeroGlobo() {
   // Modo enfoque: globo a pantalla completa con zoom/pan y menú de destinos.
   const [focused, setFocused] = useState(false);
   const closeFocus = useCallback(() => setFocused(false), []);
+  // Panel de controles del globo en el hero: colapsable, cerrado por defecto.
+  const [controlsOpen, setControlsOpen] = useState(false);
   const markers = DESTINO_GEO.flatMap((geo) => {
     const info = c.destinos.items.find((d) => d.id === geo.id);
     if (!info) return [];
@@ -156,13 +158,22 @@ export default function HeroGlobo() {
                 <button
                   type="button"
                   onClick={() => setFocused(true)}
-                  className="absolute right-1 top-1 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-navy-950/60 px-3 py-1.5 font-mono text-[11px] tracking-wide text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
+                  className="absolute right-1 top-1 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/15 bg-navy-950/60 px-3 py-1.5 font-mono text-[11px] tracking-wide text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
                 >
                   <Maximize2 className="h-3.5 w-3.5" />
                   Explorar
                 </button>
-                <div className="absolute bottom-1 right-1 z-20">
-                  <GlobeControls input={globeInput} />
+                <div className="absolute bottom-1 right-1 z-20 flex flex-col items-end gap-1.5">
+                  {controlsOpen && <GlobeControls input={globeInput} />}
+                  <button
+                    type="button"
+                    onClick={() => setControlsOpen((o) => !o)}
+                    aria-expanded={controlsOpen}
+                    aria-label={controlsOpen ? "Ocultar controles del globo" : "Mostrar controles del globo"}
+                    className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-white/15 bg-navy-950/60 text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
+                  >
+                    {controlsOpen ? <X className="h-4 w-4" /> : <Move className="h-4 w-4" />}
+                  </button>
                 </div>
               </>
             )}

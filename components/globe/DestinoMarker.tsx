@@ -53,6 +53,11 @@ function buildPinGeometry(): THREE.ExtrudeGeometry {
 
 const PIN_GEOMETRY = buildPinGeometry();
 
+// Temporales reutilizados por frame (los useFrame corren en serie → seguro compartirlos).
+const _pos = new THREE.Vector3();
+const _normal = new THREE.Vector3();
+const _toCam = new THREE.Vector3();
+
 export default function DestinoMarker({
   data,
   position,
@@ -73,10 +78,28 @@ export default function DestinoMarker({
   occludeRef: RefObject<THREE.Object3D>;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const visibleRef = useRef(true);
+  const rootRef = useRef<THREE.Group>(null!);
   const liftRef = useRef<THREE.Group>(null!);
 
-  // Elevación + escala animadas (damp = independiente del frame-rate).
-  useFrame((_, dt) => {
+  useFrame((state, dt) => {
+    // Culling por orientación: el pin solo se muestra (y es clickeable) si mira a la cámara;
+    // los de la cara trasera se quitan (nada de pines invisibles que roben el click). El pin
+    // activo siempre se muestra para no ocultar su tarjeta abierta.
+    const root = rootRef.current;
+    if (root) {
+      root.getWorldPosition(_pos);
+      _normal.copy(_pos).normalize();
+      _toCam.copy(state.camera.position).sub(_pos).normalize();
+      const show = active || _normal.dot(_toCam) > 0.12;
+      if (show !== visibleRef.current) {
+        visibleRef.current = show;
+        setVisible(show);
+      }
+    }
+
+    // Elevación + escala animadas (damp = independiente del frame-rate).
     const g = liftRef.current;
     if (!g) return;
     const up = hovered || active;
@@ -87,9 +110,10 @@ export default function DestinoMarker({
   });
 
   return (
-    <group position={position}>
-      {/* Billboard: el pin siempre mira a la cámara (look de icono de ubicación). */}
-      <Billboard>
+    <group ref={rootRef} position={position}>
+      {/* Solo se monta (visible + clickeable) cuando mira a la cámara. */}
+      {visible && (
+        <Billboard>
         {/* Área de hit invisible (estática) para hover/click. */}
         <mesh
           position={[0, HEAD_H, 0]}
@@ -162,7 +186,7 @@ export default function DestinoMarker({
                 <button
                   type="button"
                   onClick={onCotizar}
-                  className="mt-2 w-full rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
+                  className="mt-2 w-full cursor-pointer rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
                 >
                   {cotizarLabel}
                 </button>
@@ -170,7 +194,8 @@ export default function DestinoMarker({
             </div>
           </Html>
         )}
-      </Billboard>
+        </Billboard>
+      )}
     </group>
   );
 }

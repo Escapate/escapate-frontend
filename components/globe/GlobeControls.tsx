@@ -17,7 +17,7 @@ import type { GlobeInput } from "./Globe";
 type Dir = "left" | "right" | "up" | "down";
 
 const btnCls =
-  "grid h-8 w-8 place-items-center rounded-lg border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange active:scale-95";
+  "grid h-8 w-8 cursor-pointer place-items-center rounded-lg border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange active:scale-95";
 
 /**
  * Controles accesibles para mover el globo: pad direccional (mantener para girar),
