@@ -22,6 +22,7 @@ const BASE_TILT = 0.32; // inclinación base del globo
 const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
 const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
 const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
+const INTERACT_PAUSE_MS = 6000; // tras interactuar, la rotación ambiente se pausa este tiempo
 
 type MarkerCotizar = { name: string; nights: string; price: string };
 type FocusTarget = { id: string; lat: number; lng: number };
@@ -207,6 +208,8 @@ function Scene({
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const lastReset = useRef(0);
   const fly = useRef({ nonce: 0, spinY: 0, tiltX: 0, id: "", active: false });
+  const lastInteract = useRef(-Infinity);
+  const dragging = useRef(false);
 
   useFrame((_, dt) => {
     const inp = input?.current;
@@ -243,8 +246,15 @@ function Scene({
       }
     }
 
-    // Al acercar (o en pleno vuelo), se detiene la rotación ambiente.
-    const auto = (inp ? inp.autoRotate : true) && active === null && !zoomed && !flying;
+    // Pausa tras interactuar: arrastrar o usar los controles detiene la rotación ambiente unos
+    // segundos (mejor UX — el globo no se "escapa" apenas sueltas).
+    const now = performance.now();
+    if (inp && (inp.azVel !== 0 || inp.polVel !== 0)) lastInteract.current = now;
+    const interacting = dragging.current || now - lastInteract.current < INTERACT_PAUSE_MS;
+
+    // Al acercar, en pleno vuelo o justo tras interactuar, se detiene la rotación ambiente.
+    const auto =
+      (inp ? inp.autoRotate : true) && active === null && !zoomed && !flying && !interacting;
 
     // Zoom acotado: escala suave del globo hacia el nivel objetivo.
     if (zoomRef.current) {
@@ -300,6 +310,13 @@ function Scene({
       {zoom <= 1.01 && <FlightPath />}
       <OrbitControls
         ref={controlsRef}
+        onStart={() => {
+          dragging.current = true;
+        }}
+        onEnd={() => {
+          dragging.current = false;
+          lastInteract.current = performance.now();
+        }}
         enableZoom={false}
         enablePan={false}
         autoRotateSpeed={0.55}
