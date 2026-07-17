@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import Globe, { type GlobeInput } from "./globe/Globe";
 import GlobeControls from "./globe/GlobeControls";
@@ -28,6 +28,7 @@ export default function HeroGlobo() {
   });
   // Modo enfoque: globo a pantalla completa con zoom/pan y menú de destinos.
   const [focused, setFocused] = useState(false);
+  const closeFocus = useCallback(() => setFocused(false), []);
   const markers = DESTINO_GEO.flatMap((geo) => {
     const info = c.destinos.items.find((d) => d.id === geo.id);
     if (!info) return [];
@@ -173,7 +174,7 @@ export default function HeroGlobo() {
           markers={markers}
           onCotizar={handleCotizar}
           cotizarLabel={c.nav.cta}
-          onClose={() => setFocused(false)}
+          onClose={closeFocus}
         />
       )}
     </section>

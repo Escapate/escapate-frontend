@@ -30,6 +30,7 @@ export default function GlobeFocus({
   const input = useRef<GlobeInput>({ azVel: 0, polVel: 0, autoRotate: true, resetToken: 0 });
   const [zoom, setZoom] = useState(ZOOM_MIN);
   const stageRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const zoomIn = useCallback(() => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2))), []);
@@ -44,11 +45,31 @@ export default function GlobeFocus({
     [onCotizar, onClose]
   );
 
-  // Escape para cerrar + foco inicial en el botón cerrar + bloqueo de scroll del fondo.
+  // Escape para cerrar + foco inicial en cerrar + trampa de foco (aria-modal) + scroll bloqueado.
   useEffect(() => {
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab") {
+        const root = dialogRef.current;
+        if (!root) return;
+        const f = root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
+        );
+        if (f.length === 0) return;
+        const first = f[0];
+        const last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
@@ -94,6 +115,7 @@ export default function GlobeFocus({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Explorar destinos en el globo"
