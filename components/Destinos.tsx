@@ -1,13 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { SectionHead, RouteTag } from "./ui";
 import { airportCode } from "@/lib/airports";
 import { useQuoteIntent } from "@/lib/quote-provider";
 import { buildQuoteIntent } from "@/lib/quote-intent";
 import { ArrowUpRight } from "lucide-react";
+
+const ADVANCE_MS = 4000; // avance automático al siguiente destino
+const HOVER_RESUME_MS = 3000; // retoma 3 s después de quitar el mouse (sin click)
+const CLICK_RESUME_MS = 15000; // retoma 15 s después de quitar el mouse (con click)
 
 export default function Destinos() {
   const { c } = useI18n();
@@ -16,10 +20,90 @@ export default function Destinos() {
   const { requestQuote } = useQuoteIntent();
   const [active, setActive] = useState(0);
   const feat = items[active];
+  const count = items.length;
+
+  // El precio viene como "desde $890.000": separo la etiqueta del monto.
+  const dollarIdx = feat.price.indexOf("$");
+  const priceFrom = dollarIdx > 0 ? feat.price.slice(0, dollarIdx).trim() : "";
+  const priceAmount = dollarIdx >= 0 ? feat.price.slice(dollarIdx) : feat.price;
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const resumeTimer = useRef<ReturnType<typeof setTimeout>>();
+  const clickedRef = useRef(false);
+  const [hovering, setHovering] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Programa la reanudación del autoplay pasados `ms`.
+  function scheduleResume(ms: number) {
+    clearTimeout(resumeTimer.current);
+    setCooldown(true);
+    resumeTimer.current = setTimeout(() => setCooldown(false), ms);
+  }
+
+  // Mientras el mouse está encima: pausa. Al salir, el retomar depende de si hubo click.
+  function handleEnter() {
+    clearTimeout(resumeTimer.current);
+    setCooldown(false);
+    clickedRef.current = false;
+    setHovering(true);
+  }
+  function handleLeave() {
+    setHovering(false);
+    scheduleResume(clickedRef.current ? CLICK_RESUME_MS : HOVER_RESUME_MS);
+  }
+
+  // Click en una card: fija el destino y hace que al salir el retomar sea el largo (15 s).
+  function selectAndPause(i: number) {
+    setActive(i);
+    clickedRef.current = true;
+    scheduleResume(CLICK_RESUME_MS);
+  }
+  useEffect(() => () => clearTimeout(resumeTimer.current), []);
+
+  // Respeta la preferencia del sistema de menos movimiento.
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Solo corre el autoplay cuando la sección está a la vista.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Autoplay: avanza al siguiente destino salvo que esté pausado.
+  useEffect(() => {
+    if (reducedMotion || hovering || cooldown || !visible || count <= 1) return;
+    const id = setInterval(() => setActive((i) => (i + 1) % count), ADVANCE_MS);
+    return () => clearInterval(id);
+  }, [reducedMotion, hovering, cooldown, visible, count]);
+
+  // Centra la mini-card activa en la tira (por si no cabe completa).
+  useEffect(() => {
+    if (!visible) return;
+    const li = listRef.current?.children[active] as HTMLElement | undefined;
+    li?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [active, visible]);
 
   return (
     <section
+      ref={sectionRef}
       id="destinos"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
       className="screen relative flex flex-col overflow-hidden bg-navy-950 text-cream-50"
     >
       {/* Fondo: foto del destino activo (más visible que antes) */}
@@ -50,11 +134,12 @@ export default function Destinos() {
           eyebrow={c.destinos.eyebrow}
           title={c.destinos.title}
           slot="onDark"
+          className="w-fit rounded-2xl bg-black/35 px-5 py-4 backdrop-blur-sm"
         />
 
         <div className="flex flex-col gap-7">
           {/* Featured */}
-          <div>
+          <div className="w-fit rounded-2xl bg-black/25 p-5 backdrop-blur-sm sm:p-6">
             <RouteTag to={feat.name} />
             <h3 className="mt-4 font-display text-[clamp(2.75rem,7vw,5.5rem)] font-black uppercase leading-[0.9] tracking-tightest drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
               {feat.name}
@@ -63,29 +148,42 @@ export default function Destinos() {
               {feat.region} · {feat.nights}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
-              <span className="rounded-md bg-orange px-4 py-2 font-mono text-lg font-bold text-white shadow-[0_12px_28px_-12px_rgba(232,115,42,0.9)]">
-                {feat.price}
-              </span>
+              <div className="flex flex-col leading-none">
+                {priceFrom && (
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-orange-400">
+                    {priceFrom}
+                  </span>
+                )}
+                <span className="font-mono text-4xl font-black tabular-nums text-cream-50 drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] sm:text-5xl">
+                  {priceAmount}
+                </span>
+                <span className="mt-1 font-mono text-[11px] font-medium tracking-wide text-cream-50/70">
+                  {c.destinos.perPerson}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => requestQuote(buildQuoteIntent(feat, q.prefillNote))}
-                className="group inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/5 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:border-white hover:bg-white/15"
+                className="group inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/5 px-6 py-3 text-base font-semibold backdrop-blur transition hover:border-white hover:bg-white/15 sm:text-lg"
               >
                 {c.hero.ctaPrimary}
-                <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowUpRight className="h-5 w-5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </button>
             </div>
           </div>
 
           {/* Selector: mini-cards con foto */}
-          <ul className="-mx-1 flex gap-3 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ul
+            ref={listRef}
+            className="-mx-1 flex gap-3 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {items.map((d, i) => (
               <li key={d.img} className="shrink-0">
                 <button
                   type="button"
                   onMouseEnter={() => setActive(i)}
                   onFocus={() => setActive(i)}
-                  onClick={() => setActive(i)}
+                  onClick={() => selectAndPause(i)}
                   aria-pressed={i === active}
                   aria-label={d.name}
                   className={`group relative block h-24 w-32 overflow-hidden rounded-xl transition ${
@@ -109,7 +207,9 @@ export default function Destinos() {
             ))}
           </ul>
 
-          <p className="font-mono text-[11px] text-cream-50/55">{c.destinos.note}</p>
+          <p className="w-fit rounded-lg bg-black/30 px-2.5 py-1 font-mono text-[11px] text-cream-50/70 backdrop-blur-sm">
+            {c.destinos.note}
+          </p>
         </div>
       </div>
     </section>

@@ -86,6 +86,7 @@ export const content = {
       eyebrow: "Destinos",
       title: "A dónde te llevamos",
       note: "Precios de referencia por persona. Cuéntanos tus fechas y armamos el plan exacto.",
+      perPerson: "por persona",
       groups: { colombia: "Colombia", internacional: "Internacional" },
       items: [
         { id: "cartagena", group: "colombia", name: "Cartagena", region: "Caribe colombiano", nights: "4 noches", price: "desde $890.000", img: "/destinos/cartagena.jpg" },
@@ -260,6 +261,7 @@ export const content = {
       eyebrow: "Destinations",
       title: "Where we take you",
       note: "Reference prices per person. Tell us your dates and we'll build the exact plan.",
+      perPerson: "per person",
       groups: { colombia: "Colombia", internacional: "International" },
       items: [
         { id: "cartagena", group: "colombia", name: "Cartagena", region: "Colombian Caribbean", nights: "4 nights", price: "from $890,000", img: "/destinos/cartagena.jpg" },
