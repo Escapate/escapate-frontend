@@ -12,6 +12,7 @@ next-env.d.ts.timestamp
 
 # env
 .env*
+!.env.example
 
 # misc
 .DS_Store

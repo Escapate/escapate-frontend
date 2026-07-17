@@ -1,7 +1,11 @@
 export const WHATSAPP_NUMBER = "573102108900"; // +57 310 210 8900
 export const INSTAGRAM = "escapate.cuc";
 export const EMAIL = "reservas@escapate.tours";
-export const WEB3FORMS_KEY = ""; // TODO: pega tu access key de https://web3forms.com
+// Access key de Web3Forms. Se lee de la env var NEXT_PUBLIC_WEB3FORMS_KEY (ver .env.example).
+// Ojo: en un export estático NO es secreta — termina en el bundle del navegador. La env var
+// es solo higiene (no commitear, rotar fácil). El blindaje real va en el panel de Web3Forms:
+// restringir la key al dominio escapate.tours + captcha/honeypot.
+export const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 
 /** Enlace de WhatsApp con un mensaje opcional prellenado. */
 export function waLink(message?: string) {
