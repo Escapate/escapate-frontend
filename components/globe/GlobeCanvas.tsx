@@ -16,7 +16,8 @@ const GLOBE_R = 1.4;
 const ORBIT_R = 2.02;
 
 // Clustering + control manual (ajuste fino en pnpm dev).
-const CLUSTER_DEG = 5; // separación angular para agrupar destinos cercanos
+const CLUSTER_DEG = 5; // separación angular para agrupar destinos cercanos (a zoom 1)
+const ZOOM_POW = 1.5; // el umbral baja como CLUSTER_DEG / zoom^ZOOM_POW → separa pares muy juntos sin agrandar tanto
 const BASE_TILT = 0.32; // inclinación base del globo
 const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
 const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
@@ -173,6 +174,7 @@ function Scene({
   onCotizar,
   cotizarLabel,
   input,
+  zoom,
 }: {
   clusters: Cluster[];
   active: string | null;
@@ -180,9 +182,11 @@ function Scene({
   onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel: string;
   input?: RefObject<GlobeInput>;
+  zoom: number;
 }) {
   const spinRef = useRef<THREE.Group>(null!);
   const tiltRef = useRef<THREE.Group>(null!);
+  const zoomRef = useRef<THREE.Group>(null!);
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const lastReset = useRef(0);
 
@@ -191,7 +195,14 @@ function Scene({
     const spin = spinRef.current;
     const tilt = tiltRef.current;
     const controls = controlsRef.current;
-    const auto = (inp ? inp.autoRotate : true) && active === null;
+    const zoomed = zoom > 1.01;
+    // Al acercar, se detiene la rotación ambiente para que la zona ampliada no se escape.
+    const auto = (inp ? inp.autoRotate : true) && active === null && !zoomed;
+
+    // Zoom acotado: escala suave del globo hacia el nivel objetivo.
+    if (zoomRef.current) {
+      zoomRef.current.scale.setScalar(THREE.MathUtils.damp(zoomRef.current.scale.x, zoom, 6, dt));
+    }
 
     // Rotación ambiente (el mapa se desliza).
     if (auto && spin) spin.rotation.y += dt * 0.04;
@@ -224,18 +235,21 @@ function Scene({
       <ambientLight intensity={1.05} />
       <directionalLight position={[4, 3, 5]} intensity={1.5} />
       <pointLight position={[-4, -1, -2]} intensity={0.5} color="#E8732A" />
-      <Suspense fallback={null}>
-        <Earth
-          spinRef={spinRef}
-          tiltRef={tiltRef}
-          clusters={clusters}
-          active={active}
-          setActive={setActive}
-          onCotizar={onCotizar}
-          cotizarLabel={cotizarLabel}
-        />
-      </Suspense>
-      <FlightPath />
+      <group ref={zoomRef}>
+        <Suspense fallback={null}>
+          <Earth
+            spinRef={spinRef}
+            tiltRef={tiltRef}
+            clusters={clusters}
+            active={active}
+            setActive={setActive}
+            onCotizar={onCotizar}
+            cotizarLabel={cotizarLabel}
+          />
+        </Suspense>
+      </group>
+      {/* El avión/órbita se ocultan al acercar (se verían desproporcionados). */}
+      {zoom <= 1.01 && <FlightPath />}
       <OrbitControls
         ref={controlsRef}
         enableZoom={false}
@@ -257,17 +271,20 @@ export default function GlobeCanvas({
   onCotizar,
   cotizarLabel = "Cotizar",
   input,
+  zoom = 1,
 }: {
   frameloop?: "always" | "never";
   markers?: GlobeMarker[];
   onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel?: string;
   input?: RefObject<GlobeInput>;
+  zoom?: number;
 }) {
   const [active, setActive] = useState<string | null>(null);
+  // El umbral baja con el zoom → los clústers se separan al acercar y se reagrupan al alejar.
   const clusters = useMemo(
-    () => clusterMarkers(markers, CLUSTER_DEG, GLOBE_R * 1.02),
-    [markers]
+    () => clusterMarkers(markers, CLUSTER_DEG / Math.pow(zoom, ZOOM_POW), GLOBE_R * 1.02),
+    [markers, zoom]
   );
   // En pantallas de alta densidad (móvil retina) el antialias es innecesario.
   const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
@@ -287,6 +304,7 @@ export default function GlobeCanvas({
         onCotizar={onCotizar}
         cotizarLabel={cotizarLabel}
         input={input}
+        zoom={zoom}
       />
     </Canvas>
   );

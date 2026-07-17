@@ -320,6 +320,13 @@ quedó así:
   nítido y accesible) que al tocarlo despliega un **popover con la lista** (miniatura + nombre +
   precio + Cotizar por destino). Se oculta en la cara trasera con `occlude`.
 - Umbral (`CLUSTER_DEG`) es ajuste fino. Escala solo si el cliente llena muchos de los 50.
+- **Zoom para romper clústers** (acotado, no dolly de cámara): un nivel de `zoom` (estado en
+  `HeroGlobo`, 1..`ZOOM_MAX`) escala el globo dentro de límites y baja el umbral como
+  `CLUSTER_DEG / zoom^ZOOM_POW` → los grupos se separan al acercar y se reagrupan al alejar.
+  Al acercar se pausa la rotación ambiente (la zona no se escapa) y se oculta el avión/órbita.
+  Controles accesibles **+/−** en `GlobeControls` (con teclado `+`/`−` y límites), y "recentrar"
+  vuelve el zoom a 1. `ZOOM_MAX`/`ZOOM_POW`/paso son ajuste fino. El popover del clúster sigue
+  siendo el respaldo para los pares que queden juntos aun al zoom máximo.
 
 ## Sistema de accesibilidad para mover el globo
 

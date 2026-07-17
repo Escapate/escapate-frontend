@@ -7,6 +7,8 @@ import {
   ChevronUp,
   Pause,
   Play,
+  Plus,
+  Minus,
   RotateCcw,
 } from "lucide-react";
 import { useCallback, useEffect, useState, type RefObject } from "react";
@@ -24,7 +26,21 @@ const btnCls =
  * Funciona con mouse/touch (mantener presionado), con Enter/Espacio en cada botón y con
  * las flechas del teclado cuando el panel tiene foco.
  */
-export default function GlobeControls({ input }: { input: RefObject<GlobeInput> }) {
+export default function GlobeControls({
+  input,
+  onZoomIn,
+  onZoomOut,
+  onReset,
+  canZoomIn = true,
+  canZoomOut = true,
+}: {
+  input: RefObject<GlobeInput>;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onReset: () => void;
+  canZoomIn?: boolean;
+  canZoomOut?: boolean;
+}) {
   const [playing, setPlaying] = useState(true);
 
   const start = useCallback(
@@ -65,7 +81,8 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
 
   const reset = useCallback(() => {
     if (input.current) input.current.resetToken += 1;
-  }, [input]);
+    onReset();
+  }, [input, onReset]);
 
   const keyToDir: Record<string, Dir> = {
     ArrowLeft: "left",
@@ -109,6 +126,14 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
         if (dir) {
           e.preventDefault();
           start(dir);
+          return;
+        }
+        if (e.key === "+" || e.key === "=") {
+          e.preventDefault();
+          if (canZoomIn) onZoomIn();
+        } else if (e.key === "-" || e.key === "_") {
+          e.preventDefault();
+          if (canZoomOut) onZoomOut();
         }
       }}
       onKeyUp={(e) => {
@@ -134,9 +159,25 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
       </button>
       {dirButton("right", "Girar el globo a la derecha", <ChevronRight className="h-4 w-4" />)}
 
-      <span aria-hidden="true" />
+      <button
+        type="button"
+        aria-label="Alejar el globo"
+        onClick={onZoomOut}
+        disabled={!canZoomOut}
+        className={`${btnCls} disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-cream-50`}
+      >
+        <Minus className="h-4 w-4" />
+      </button>
       {dirButton("down", "Girar el globo hacia abajo", <ChevronDown className="h-4 w-4" />)}
-      <span aria-hidden="true" />
+      <button
+        type="button"
+        aria-label="Acercar el globo"
+        onClick={onZoomIn}
+        disabled={!canZoomIn}
+        className={`${btnCls} disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-cream-50`}
+      >
+        <Plus className="h-4 w-4" />
+      </button>
     </div>
   );
 }
