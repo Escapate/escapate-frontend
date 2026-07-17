@@ -23,6 +23,9 @@ const HEAD_R = 0.06; // radio de la cabeza
 const HEAD_H = 0.12; // altura del centro de la cabeza sobre la punta
 const HOLE_RATIO = 0.7; // tamaño del hueco respecto al radio de la cabeza
 const LIFT = 0.06; // cuánto salta el pin al hover/activo (sube por encima del montón)
+// Umbral de "mira a la cámara" para mostrar el pin (0 = hasta el borde, 1 = solo de frente).
+// Más alto → oculta los pines cerca del borde/vistos desde arriba (que no se pueden clickear bien).
+const FACE_MIN = 0.35;
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Pin de ubicación estilo icono 3D: gota (cabeza redonda + punta abajo) con hueco real,
@@ -100,7 +103,7 @@ export default function DestinoMarker({
       root.getWorldPosition(_pos);
       _normal.copy(_pos).normalize();
       _toCam.copy(state.camera.position).sub(_pos).normalize();
-      const show = active || _normal.dot(_toCam) > 0.12;
+      const show = active || _normal.dot(_toCam) > FACE_MIN;
       if (show !== visibleRef.current) {
         visibleRef.current = show;
         setVisible(show);
