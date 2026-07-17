@@ -197,6 +197,8 @@ export default function Cotizador() {
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  // Honeypot antispam: un humano nunca lo ve ni lo llena; si viene con valor, es un bot.
+  const botRef = useRef<HTMLInputElement>(null);
 
   const [menu, setMenu] = useState<Menu>(null);
   // Salida/destino: texto libre con recomendaciones (combobox) → admite cualquier ciudad.
@@ -297,36 +299,22 @@ export default function Cotizador() {
       onWhatsApp();
       return;
     }
+    // Honeypot: si el campo oculto trae valor, es un bot. Fingimos éxito y no enviamos
+    // (no gasta cuota ni delata la trampa). Un humano nunca llega hasta acá.
+    if (botRef.current?.value) {
+      setStatus("ok");
+      return;
+    }
     setStatus("sending");
     try {
-      const fechas = hasDates
-        ? [departure, depReturn].filter(Boolean).join(" → ")
-        : monthIdx !== null
-          ? q.months[monthIdx]
-          : "";
-
-      const payload: Record<string, string | number> = {
+      // Enviamos solo `message`: ya trae el resumen completo y legible (origen, destino,
+      // pasajeros, días, fechas, contacto, hotel, plan, preferencias, notas). Así el correo
+      // llega como un único bloque entendible en vez de una lista de campos sueltos.
+      const payload = {
         access_key: WEB3FORMS_KEY,
         subject: "Nueva cotización · Escápate",
-        name,
-        salida: from,
-        destino: dest,
-        pasajeros: paxParts,
-        dias: days,
         message,
       };
-      const optional: Record<string, string> = {
-        celular: phone,
-        correo: email,
-        fechas,
-        hotel: hotelIdx !== null ? q.hotelOptions[hotelIdx] : "",
-        plan: planIdx !== null ? q.planOptions[planIdx] : "",
-        preferencias: prefsList.join(", "),
-        notas: notes,
-      };
-      for (const [key, value] of Object.entries(optional)) {
-        if (value) payload[key] = value;
-      }
 
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -487,6 +475,17 @@ export default function Cotizador() {
             )}
           </div>
         </div>
+
+        {/* Honeypot antispam: oculto para humanos, solo lo llenan bots. Ver onEmail(). */}
+        <input
+          ref={botRef}
+          type="text"
+          name="botcheck"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="hidden"
+        />
 
         {/* Resumen bonito (talón del pase) */}
         <div className="mt-4 rounded-xl border border-navy-900/10 bg-navy-950/[0.03] p-4">
