@@ -142,7 +142,8 @@ export default function GlobeFocus({
           focusId={focusId}
           focusNonce={focusNonce}
         />
-        <div className="pointer-events-none absolute left-1/2 top-4 z-10 -translate-x-1/2">
+        {/* Hint oculto en celular (no hay rueda; el gesto de pellizco/arrastre se descubre solo). */}
+        <div className="pointer-events-none absolute left-1/2 top-4 z-10 hidden -translate-x-1/2 sm:block">
           <span className="rounded-full border border-orange/30 bg-navy-950/80 px-4 py-1.5 font-mono text-[11px] tracking-wide text-cream-50/90 shadow-lg backdrop-blur">
             Rueda o pellizca para acercar · arrastra para girar
           </span>
@@ -155,6 +156,7 @@ export default function GlobeFocus({
             onReset={reset}
             canZoomIn={zoom < ZOOM_MAX}
             canZoomOut={zoom > ZOOM_MIN}
+            showPad={false}
           />
         </div>
       </div>
@@ -180,7 +182,7 @@ export default function GlobeFocus({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <ul className="min-h-0 flex-1 divide-y divide-white/5 overflow-auto px-2 pb-3">
+        <ul className="min-h-0 flex-1 divide-y divide-white/5 overflow-auto px-2 pb-24 lg:pb-3">
           {markers.map((m) => (
             <li key={m.id} className="flex items-center gap-2 py-0.5">
               <button

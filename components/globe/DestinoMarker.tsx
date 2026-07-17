@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { X } from "lucide-react";
 import { useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
+import { useIsMobile } from "@/lib/use-is-mobile";
 
 export type DestinoMarkerData = {
   id: string;
@@ -88,6 +89,7 @@ export default function DestinoMarker({
   // Posición de la card respecto al pin (auto-flip estilo select según la altura en pantalla).
   const [placement, setPlacement] = useState<"up" | "down">("up");
   const placementRef = useRef<"up" | "down">("up");
+  const isMobile = useIsMobile();
   const hoveredRef = useRef(false);
   const visibleRef = useRef(true);
   const rootRef = useRef<THREE.Group>(null!);
@@ -198,7 +200,8 @@ export default function DestinoMarker({
         </group>
         </group>
 
-        {active && (
+        {active && !isMobile && (
+          // Desktop: card flotante anclada al pin (en móvil, Globe renderiza un modal fijo).
           // Sin distanceFactor → tamaño constante en pantalla (igual sin importar el zoom).
           <Html position={[0, HEAD_H, 0]} occlude={[occludeRef]} zIndexRange={[40, 0]}>
             <div

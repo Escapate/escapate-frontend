@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Line, useTexture, useGLTF } from "@react-three/drei";
-import { Suspense, useMemo, useRef, useState, type ElementRef, type RefObject } from "react";
+import { Suspense, useMemo, useRef, type ElementRef, type RefObject } from "react";
 import * as THREE from "three";
 import { latLngToVec3 } from "@/lib/destino-geo";
 import { clusterMarkers, type Cluster } from "@/lib/cluster";
@@ -339,6 +339,8 @@ export default function GlobeCanvas({
   zoom = 1,
   focusId = null,
   focusNonce = 0,
+  active,
+  setActive,
 }: {
   frameloop?: "always" | "never";
   markers?: GlobeMarker[];
@@ -348,8 +350,9 @@ export default function GlobeCanvas({
   zoom?: number;
   focusId?: string | null;
   focusNonce?: number;
+  active: string | null;
+  setActive: (id: string | null) => void;
 }) {
-  const [active, setActive] = useState<string | null>(null);
   // El umbral baja con el zoom → los clústers se separan al acercar y se reagrupan al alejar.
   // El destino enfocado (fly-to) se saca del clustering y se renderiza suelto para que su card
   // pueda abrirse aunque estuviera agrupado.

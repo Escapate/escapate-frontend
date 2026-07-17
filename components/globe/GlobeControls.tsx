@@ -33,6 +33,7 @@ export default function GlobeControls({
   onReset,
   canZoomIn = true,
   canZoomOut = true,
+  showPad = true,
 }: {
   input: RefObject<GlobeInput>;
   onZoomIn?: () => void;
@@ -40,6 +41,7 @@ export default function GlobeControls({
   onReset?: () => void;
   canZoomIn?: boolean;
   canZoomOut?: boolean;
+  showPad?: boolean;
 }) {
   // Se inicializa desde el flag compartido para no desincronizarse al re-montar el panel
   // (los controles del hero son colapsables → se montan/desmontan).
@@ -120,6 +122,60 @@ export default function GlobeControls({
     </button>
   );
 
+  const zoomCls = `${btnCls} disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-cream-50`;
+  const pauseBtn = (
+    <button
+      type="button"
+      aria-label={playing ? "Pausar la rotación" : "Reanudar la rotación"}
+      onClick={togglePlay}
+      className={btnCls}
+    >
+      {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+    </button>
+  );
+  const resetBtn = (
+    <button type="button" aria-label="Recentrar el globo" onClick={reset} className={btnCls}>
+      <RotateCcw className="h-4 w-4" />
+    </button>
+  );
+  const zoomOutBtn = hasZoom ? (
+    <button type="button" aria-label="Alejar el globo" onClick={onZoomOut} disabled={!canZoomOut} className={zoomCls}>
+      <Minus className="h-4 w-4" />
+    </button>
+  ) : null;
+  const zoomInBtn = hasZoom ? (
+    <button type="button" aria-label="Acercar el globo" onClick={onZoomIn} disabled={!canZoomIn} className={zoomCls}>
+      <Plus className="h-4 w-4" />
+    </button>
+  ) : null;
+
+  const onZoomKeys = (e: React.KeyboardEvent) => {
+    if (e.key === "+" || e.key === "=") {
+      e.preventDefault();
+      if (canZoomIn) onZoomIn?.();
+    } else if (e.key === "-" || e.key === "_") {
+      e.preventDefault();
+      if (canZoomOut) onZoomOut?.();
+    }
+  };
+
+  // Modo compacto (p. ej. Explorar): solo zoom, recentrar y pausa (sin pad direccional).
+  if (!showPad) {
+    return (
+      <div
+        role="group"
+        aria-label="Controles del globo"
+        onKeyDown={onZoomKeys}
+        className="pointer-events-auto flex items-center gap-1 rounded-xl border border-white/15 bg-navy-950/60 p-1.5 backdrop-blur"
+      >
+        {zoomOutBtn}
+        {zoomInBtn}
+        {resetBtn}
+        {pauseBtn}
+      </div>
+    );
+  }
+
   return (
     <div
       role="group"
@@ -131,13 +187,7 @@ export default function GlobeControls({
           start(dir);
           return;
         }
-        if (e.key === "+" || e.key === "=") {
-          e.preventDefault();
-          if (canZoomIn) onZoomIn?.();
-        } else if (e.key === "-" || e.key === "_") {
-          e.preventDefault();
-          if (canZoomOut) onZoomOut?.();
-        }
+        onZoomKeys(e);
       }}
       onKeyUp={(e) => {
         const dir = keyToDir[e.key];
@@ -147,48 +197,15 @@ export default function GlobeControls({
     >
       <span aria-hidden="true" />
       {dirButton("up", "Girar el globo hacia arriba", <ChevronUp className="h-4 w-4" />)}
-      <button
-        type="button"
-        aria-label={playing ? "Pausar la rotación" : "Reanudar la rotación"}
-        onClick={togglePlay}
-        className={btnCls}
-      >
-        {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-      </button>
+      {pauseBtn}
 
       {dirButton("left", "Girar el globo a la izquierda", <ChevronLeft className="h-4 w-4" />)}
-      <button type="button" aria-label="Recentrar el globo" onClick={reset} className={btnCls}>
-        <RotateCcw className="h-4 w-4" />
-      </button>
+      {resetBtn}
       {dirButton("right", "Girar el globo a la derecha", <ChevronRight className="h-4 w-4" />)}
 
-      {hasZoom ? (
-        <button
-          type="button"
-          aria-label="Alejar el globo"
-          onClick={onZoomOut}
-          disabled={!canZoomOut}
-          className={`${btnCls} disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-cream-50`}
-        >
-          <Minus className="h-4 w-4" />
-        </button>
-      ) : (
-        <span aria-hidden="true" />
-      )}
+      {zoomOutBtn ?? <span aria-hidden="true" />}
       {dirButton("down", "Girar el globo hacia abajo", <ChevronDown className="h-4 w-4" />)}
-      {hasZoom ? (
-        <button
-          type="button"
-          aria-label="Acercar el globo"
-          onClick={onZoomIn}
-          disabled={!canZoomIn}
-          className={`${btnCls} disabled:cursor-default disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-cream-50`}
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      ) : (
-        <span aria-hidden="true" />
-      )}
+      {zoomInBtn ?? <span aria-hidden="true" />}
     </div>
   );
 }

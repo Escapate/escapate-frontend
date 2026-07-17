@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "framer-motion";
 import StaticGlobe from "./StaticGlobe";
+import PinCardModal from "./PinCardModal";
+import { useIsMobile } from "@/lib/use-is-mobile";
 
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
   ssr: false,
@@ -53,6 +55,11 @@ export default function Globe({
   const [ready, setReady] = useState(false); // el navegador ya está ocioso
   const [inView, setInView] = useState(true); // el hero está en pantalla
   const [mounted, setMounted] = useState(false); // el canvas ya se enganchó
+  // Estado activo (card abierta) subido aquí para poder renderizar, en móvil, un modal fijo
+  // fuera del canvas (el <Html> de drei transforma su contenedor → position:fixed no funciona).
+  const isMobile = useIsMobile();
+  const [active, setActive] = useState<string | null>(null);
+  const activeMarker = active ? markers.find((m) => m.id === active) ?? null : null;
 
   // (1) Diferir el "upgrade" a WebGL hasta que el navegador esté ocioso. Así
   // three.js (~233 KB gz) no compite con la carga crítica: el globo estático ya
@@ -98,23 +105,39 @@ export default function Globe({
   // El canvas se desborda del contenedor cuadrado para que la órbita + el avión
   // queden visibles por todos lados (la cámara se retrae el mismo factor en GlobeCanvas).
   return (
-    <div ref={ref} className="absolute inset-0" aria-hidden="true">
-      {mounted ? (
-        <div className="absolute inset-[-24%]">
-          <GlobeCanvas
-            frameloop={paused || !inView ? "never" : "always"}
-            markers={markers}
-            onCotizar={onCotizar}
-            cotizarLabel={cotizarLabel}
-            input={input}
-            zoom={zoom}
-            focusId={focusId}
-            focusNonce={focusNonce}
-          />
-        </div>
-      ) : (
-        <StaticGlobe />
+    <>
+      <div ref={ref} className="absolute inset-0" aria-hidden="true">
+        {mounted ? (
+          <div className="absolute inset-[-24%]">
+            <GlobeCanvas
+              frameloop={paused || !inView ? "never" : "always"}
+              markers={markers}
+              onCotizar={onCotizar}
+              cotizarLabel={cotizarLabel}
+              input={input}
+              zoom={zoom}
+              focusId={focusId}
+              focusNonce={focusNonce}
+              active={active}
+              setActive={setActive}
+            />
+          </div>
+        ) : (
+          <StaticGlobe />
+        )}
+      </div>
+      {/* En móvil: modal fijo centrado (fuera del canvas, no aria-hidden). */}
+      {isMobile && activeMarker && (
+        <PinCardModal
+          marker={activeMarker}
+          cotizarLabel={cotizarLabel ?? "Cotizar"}
+          onClose={() => setActive(null)}
+          onCotizar={() => {
+            onCotizar?.(activeMarker);
+            setActive(null);
+          }}
+        />
       )}
-    </div>
+    </>
   );
 }
