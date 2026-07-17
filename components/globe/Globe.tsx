@@ -35,12 +35,14 @@ export default function Globe({
   cotizarLabel,
   input,
   zoom = 1,
+  paused = false,
 }: {
   markers?: GlobeMarker[];
   onCotizar?: (m: { name: string; nights: string; price: string }) => void;
   cotizarLabel?: string;
   input?: RefObject<GlobeInput>;
   zoom?: number;
+  paused?: boolean;
 }) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -96,7 +98,7 @@ export default function Globe({
       {mounted ? (
         <div className="absolute inset-[-24%]">
           <GlobeCanvas
-            frameloop={inView ? "always" : "never"}
+            frameloop={paused || !inView ? "never" : "always"}
             markers={markers}
             onCotizar={onCotizar}
             cotizarLabel={cotizarLabel}

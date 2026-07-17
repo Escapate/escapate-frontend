@@ -1,19 +1,15 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import Globe, { type GlobeInput } from "./globe/Globe";
 import GlobeControls from "./globe/GlobeControls";
-import { ArrowRight, Hand } from "lucide-react";
+import GlobeFocus from "./globe/GlobeFocus";
+import { ArrowRight, Hand, Maximize2 } from "lucide-react";
 import { DESTINO_GEO } from "@/lib/destino-geo";
 import { buildQuoteIntent } from "@/lib/quote-intent";
 import { useQuoteIntent } from "@/lib/quote-provider";
-
-// Zoom acotado para romper clústers (ajuste fino en pnpm dev).
-const ZOOM_MIN = 1;
-const ZOOM_MAX = 2.5;
-const ZOOM_STEP = 0.5;
 
 // Variante del hero que conserva el globo 3D (en vez de la tarjeta boarding-pass),
 // estilizado dentro del tema editorial "Pase de Abordar".
@@ -30,17 +26,8 @@ export default function HeroGlobo() {
     autoRotate: true,
     resetToken: 0,
   });
-  // Nivel de zoom (estado React → recalcula el clustering al cambiar).
-  const [zoom, setZoom] = useState(ZOOM_MIN);
-  const zoomIn = useCallback(
-    () => setZoom((z) => Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2))),
-    []
-  );
-  const zoomOut = useCallback(
-    () => setZoom((z) => Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2))),
-    []
-  );
-  const resetGlobe = useCallback(() => setZoom(ZOOM_MIN), []);
+  // Modo enfoque: globo a pantalla completa con zoom/pan y menú de destinos.
+  const [focused, setFocused] = useState(false);
   const markers = DESTINO_GEO.flatMap((geo) => {
     const info = c.destinos.items.find((d) => d.id === geo.id);
     if (!info) return [];
@@ -154,7 +141,7 @@ export default function HeroGlobo() {
               onCotizar={handleCotizar}
               cotizarLabel={c.nav.cta}
               input={globeInput}
-              zoom={zoom}
+              paused={focused}
             />
             <div className="pointer-events-none absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
               <Hand className="h-3.5 w-3.5 text-orange-400" />
@@ -162,22 +149,33 @@ export default function HeroGlobo() {
                 {c.hero.dragHint}
               </span>
             </div>
-            {/* Controles accesibles (fuera del subárbol aria-hidden del globo). */}
+            {/* Controles accesibles + "Explorar" (fuera del subárbol aria-hidden del globo). */}
             {!reduced && (
-              <div className="absolute bottom-1 right-1 z-20">
-                <GlobeControls
-                  input={globeInput}
-                  onZoomIn={zoomIn}
-                  onZoomOut={zoomOut}
-                  onReset={resetGlobe}
-                  canZoomIn={zoom < ZOOM_MAX}
-                  canZoomOut={zoom > ZOOM_MIN}
-                />
-              </div>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setFocused(true)}
+                  className="absolute right-1 top-1 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-navy-950/60 px-3 py-1.5 font-mono text-[11px] tracking-wide text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  Explorar
+                </button>
+                <div className="absolute bottom-1 right-1 z-20">
+                  <GlobeControls input={globeInput} />
+                </div>
+              </>
             )}
           </div>
         </div>
       </div>
+      {focused && !reduced && (
+        <GlobeFocus
+          markers={markers}
+          onCotizar={handleCotizar}
+          cotizarLabel={c.nav.cta}
+          onClose={() => setFocused(false)}
+        />
+      )}
     </section>
   );
 }

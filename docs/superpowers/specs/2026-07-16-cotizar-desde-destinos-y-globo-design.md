@@ -320,13 +320,26 @@ quedó así:
   nítido y accesible) que al tocarlo despliega un **popover con la lista** (miniatura + nombre +
   precio + Cotizar por destino). Se oculta en la cara trasera con `occlude`.
 - Umbral (`CLUSTER_DEG`) es ajuste fino. Escala solo si el cliente llena muchos de los 50.
-- **Zoom para romper clústers** (acotado, no dolly de cámara): un nivel de `zoom` (estado en
-  `HeroGlobo`, 1..`ZOOM_MAX`) escala el globo dentro de límites y baja el umbral como
-  `CLUSTER_DEG / zoom^ZOOM_POW` → los grupos se separan al acercar y se reagrupan al alejar.
-  Al acercar se pausa la rotación ambiente (la zona no se escapa) y se oculta el avión/órbita.
-  Controles accesibles **+/−** en `GlobeControls` (con teclado `+`/`−` y límites), y "recentrar"
-  vuelve el zoom a 1. `ZOOM_MAX`/`ZOOM_POW`/paso son ajuste fino. El popover del clúster sigue
-  siendo el respaldo para los pares que queden juntos aun al zoom máximo.
+- **El hero no hace zoom** (evita el recorte del globo dentro del cuadro fijo). El zoom vive en
+  el **modo enfoque** (ver abajo), donde hay espacio.
+- Mecánica de zoom (usada por el modo enfoque): un nivel de `zoom` escala el globo y baja el
+  umbral como `CLUSTER_DEG / zoom^ZOOM_POW` → los clústers se separan al acercar y se reagrupan
+  al alejar; al acercar se pausa la rotación ambiente y se oculta el avión/órbita. El popover
+  del clúster sigue siendo el respaldo para pares que queden juntos aun al zoom máximo.
+
+## Modo enfoque (`GlobeFocus`) — explorar el globo
+
+- Un botón **"Explorar"** en el hero abre `components/globe/GlobeFocus.tsx`: overlay a pantalla
+  completa (`role="dialog"` aria-modal) con el globo **grande** (espacio real para zoom/pan sin
+  el recorte del hero) + un **menú lateral con todos los destinos** (miniatura, nombre, precio,
+  Cotizar).
+- Zoom por **botones +/−** (accesibles, teclado `+`/`−`), **rueda del mouse** y **pellizco de
+  dos dedos** (listeners nativos con `{ passive: false }` para `preventDefault`; solo dentro del
+  overlay, así no secuestra el scroll de la página). Pan/giro con arrastre y con los controles.
+- Accesibilidad: foco inicial en cerrar, **Escape** cierra, scroll del fondo bloqueado.
+- El globo del hero se **congela** (`Globe paused` → `frameloop="never"`) mientras el enfoque
+  está abierto. Cotizar desde el menú cierra el enfoque y lleva al formulario.
+- No se abre bajo `prefers-reduced-motion` (el hero muestra `StaticGlobe`).
 
 ## Sistema de accesibilidad para mover el globo
 
