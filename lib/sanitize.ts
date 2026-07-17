@@ -9,6 +9,21 @@ export function onlyDigits(s: string): string {
   return s.replace(/\D/g, "");
 }
 
+// Caracteres válidos mientras se escribe un teléfono: dígitos, espacios y los
+// símbolos de formato + - ( ). Se usa para borrar en vivo letras y basura (mismo
+// criterio que el form hermano de rifas). El saneo final a solo dígitos lo hace
+// sanitizePhone al enviar.
+const PHONE_INPUT_DISALLOWED = /[^\d\s+\-()]/g;
+
+/**
+ * Filtra en tiempo real lo que se escribe en el campo de celular: deja pasar
+ * dígitos, espacios y + - ( ), y borra el resto.
+ * filterPhoneInput("300abc123") → "300123"
+ */
+export function filterPhoneInput(s: string): string {
+  return s.replace(PHONE_INPUT_DISALLOWED, "");
+}
+
 /**
  * Normaliza un teléfono internacional: conserva un "+" inicial si lo hay y
  * descarta todo lo demás que no sea dígito.

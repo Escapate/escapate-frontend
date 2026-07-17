@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   onlyDigits,
+  filterPhoneInput,
   sanitizePhone,
   isValidPhone,
   sanitizeEmail,
@@ -12,6 +13,16 @@ describe("onlyDigits", () => {
     expect(onlyDigits("300 123 4567")).toBe("3001234567");
     expect(onlyDigits("+57-300.123")).toBe("57300123");
     expect(onlyDigits("")).toBe("");
+  });
+});
+
+describe("filterPhoneInput", () => {
+  it("permite dígitos, espacios, + - ( ) y borra el resto en vivo", () => {
+    expect(filterPhoneInput("+57 (300) 123-4567")).toBe("+57 (300) 123-4567");
+  });
+  it("descarta letras y otros caracteres mientras se escribe", () => {
+    expect(filterPhoneInput("300abc123")).toBe("300123");
+    expect(filterPhoneInput("tel: 3001234567")).toBe(" 3001234567");
   });
 });
 

@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useQuoteIntent } from "@/lib/quote-provider";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
-import { sanitizePhone, isValidPhone, sanitizeEmail, isValidEmail } from "@/lib/sanitize";
+import { filterPhoneInput, sanitizePhone, isValidPhone, sanitizeEmail, isValidEmail } from "@/lib/sanitize";
 import { RouteTag, Perf, WhatsAppIcon } from "./ui";
 import {
   PlaneTakeoff,
@@ -446,7 +446,7 @@ export default function Cotizador() {
               type="tel"
               inputMode="tel"
               value={phone}
-              onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: "" })); }}
+              onChange={(e) => { setPhone(filterPhoneInput(e.target.value)); if (errors.phone) setErrors((p) => ({ ...p, phone: "" })); }}
               placeholder={q.phone}
               className={inputCls(!!errors.phone)}
               aria-invalid={!!errors.phone}
