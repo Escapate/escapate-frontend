@@ -9,7 +9,7 @@ export default function Services() {
   return (
     <section
       id="servicios"
-      className="screen relative flex flex-col justify-center overflow-hidden bg-sectionB py-24 text-inkB"
+      className="relative flex flex-col justify-center overflow-hidden bg-sectionB py-16 text-inkB sm:min-h-[100svh] sm:py-24"
     >
       <div className="dotgrid pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 sm:px-8">

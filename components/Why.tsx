@@ -10,7 +10,7 @@ export default function Why() {
   const { c } = useI18n();
 
   return (
-    <section className="screen relative flex flex-col justify-center overflow-hidden bg-sectionB py-24 text-inkB">
+    <section className="relative flex flex-col justify-center overflow-hidden bg-sectionB py-16 text-inkB sm:min-h-[100svh] sm:py-24">
       <div className="dotgrid pointer-events-none absolute inset-0 opacity-30" aria-hidden="true" />
       <div
         className="pointer-events-none absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-orange/10 blur-[120px]"
