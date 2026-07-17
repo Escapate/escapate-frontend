@@ -30,6 +30,7 @@ function Earth({
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   const spin = useRef<THREE.Group>(null!);
+  const earthRef = useRef<THREE.Mesh>(null!);
   const paused = active !== null;
 
   useFrame((_, dt) => {
@@ -39,7 +40,7 @@ function Earth({
   return (
     <group rotation={[0.32, 0, 0]}>
       <group ref={spin}>
-        <mesh>
+        <mesh ref={earthRef}>
           {/* 64 segmentos se ven idénticos a este tamaño (~460px) con menos vértices. */}
           <sphereGeometry args={[GLOBE_R, 64, 64]} />
           <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
@@ -47,7 +48,7 @@ function Earth({
         {markers.map((m) => (
           <DestinoMarker
             key={m.id}
-            data={{ id: m.id, name: m.name, price: m.price, img: m.img, nights: m.nights }}
+            data={{ id: m.id, name: m.name, price: m.price, img: m.img }}
             position={latLngToVec3(m.lat, m.lng, GLOBE_R * 1.02)}
             active={active === m.id}
             onActivate={() => setActive(m.id)}
@@ -57,6 +58,7 @@ function Earth({
               setActive(null);
             }}
             cotizarLabel={cotizarLabel}
+            occludeRef={earthRef}
           />
         ))}
       </group>

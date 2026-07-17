@@ -2,13 +2,14 @@
 
 import { Html } from "@react-three/drei";
 import { X } from "lucide-react";
+import type { RefObject } from "react";
+import type * as THREE from "three";
 
 export type DestinoMarkerData = {
   id: string;
   name: string;
   price: string;
   img: string;
-  nights: string;
 };
 
 export default function DestinoMarker({
@@ -19,6 +20,7 @@ export default function DestinoMarker({
   onClose,
   onCotizar,
   cotizarLabel,
+  occludeRef,
 }: {
   data: DestinoMarkerData;
   position: [number, number, number];
@@ -27,6 +29,7 @@ export default function DestinoMarker({
   onClose: () => void;
   onCotizar: () => void;
   cotizarLabel: string;
+  occludeRef: RefObject<THREE.Object3D>;
 }) {
   return (
     <group position={position}>
@@ -52,7 +55,7 @@ export default function DestinoMarker({
       </mesh>
 
       {active && (
-        <Html center distanceFactor={6} occlude zIndexRange={[40, 0]}>
+        <Html center distanceFactor={6} occlude={[occludeRef]} zIndexRange={[40, 0]}>
           <div className="w-44 overflow-hidden rounded-xl border border-white/15 bg-navy-950/95 text-cream-50 shadow-2xl backdrop-blur">
             <div className="relative h-24 w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
