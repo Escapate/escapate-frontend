@@ -10,7 +10,25 @@ const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
   loading: () => <StaticGlobe />,
 });
 
-export default function Globe() {
+export type GlobeMarker = {
+  id: string;
+  name: string;
+  price: string;
+  img: string;
+  nights: string;
+  lat: number;
+  lng: number;
+};
+
+export default function Globe({
+  markers = [],
+  onCotizar,
+  cotizarLabel,
+}: {
+  markers?: GlobeMarker[];
+  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  cotizarLabel?: string;
+}) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false); // el navegador ya está ocioso
@@ -64,7 +82,12 @@ export default function Globe() {
     <div ref={ref} className="absolute inset-0" aria-hidden="true">
       {mounted ? (
         <div className="absolute inset-[-24%]">
-          <GlobeCanvas frameloop={inView ? "always" : "never"} />
+          <GlobeCanvas
+            frameloop={inView ? "always" : "never"}
+            markers={markers}
+            onCotizar={onCotizar}
+            cotizarLabel={cotizarLabel}
+          />
         </div>
       ) : (
         <StaticGlobe />

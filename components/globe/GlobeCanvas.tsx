@@ -2,32 +2,65 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Line, useTexture, useGLTF } from "@react-three/drei";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { latLngToVec3 } from "@/lib/destino-geo";
+import DestinoMarker from "./DestinoMarker";
+import type { GlobeMarker } from "./Globe";
 
 const JET_MODEL = "/models/jet.glb";
 
 const GLOBE_R = 1.4;
 const ORBIT_R = 2.02;
 
-function Earth() {
+function Earth({
+  markers,
+  active,
+  setActive,
+  onCotizar,
+  cotizarLabel,
+}: {
+  markers: GlobeMarker[];
+  active: string | null;
+  setActive: (id: string | null) => void;
+  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  cotizarLabel: string;
+}) {
   const tex = useTexture("/textures/world-map.png");
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
-  const ref = useRef<THREE.Mesh>(null!);
+  const spin = useRef<THREE.Group>(null!);
+  const paused = active !== null;
 
   useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.y += dt * 0.04;
+    if (!paused && spin.current) spin.current.rotation.y += dt * 0.04;
   });
 
   return (
     <group rotation={[0.32, 0, 0]}>
-      <mesh ref={ref}>
-        {/* 64 segmentos se ven idénticos a este tamaño (~460px) con menos vértices. */}
-        <sphereGeometry args={[GLOBE_R, 64, 64]} />
-        <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
-      </mesh>
-      {/* soft atmospheric halo — es un halo difuso, los segmentos casi no importan */}
+      <group ref={spin}>
+        <mesh>
+          {/* 64 segmentos se ven idénticos a este tamaño (~460px) con menos vértices. */}
+          <sphereGeometry args={[GLOBE_R, 64, 64]} />
+          <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
+        </mesh>
+        {markers.map((m) => (
+          <DestinoMarker
+            key={m.id}
+            data={{ id: m.id, name: m.name, price: m.price, img: m.img, nights: m.nights }}
+            position={latLngToVec3(m.lat, m.lng, GLOBE_R * 1.02)}
+            active={active === m.id}
+            onActivate={() => setActive(m.id)}
+            onClose={() => setActive(null)}
+            onCotizar={() => {
+              onCotizar?.(m);
+              setActive(null);
+            }}
+            cotizarLabel={cotizarLabel}
+          />
+        ))}
+      </group>
+      {/* halo atmosférico (estático) */}
       <mesh scale={1.16}>
         <sphereGeometry args={[GLOBE_R, 32, 32]} />
         <meshBasicMaterial
@@ -97,20 +130,38 @@ function FlightPath() {
   );
 }
 
-function Scene() {
+function Scene({
+  markers,
+  active,
+  setActive,
+  onCotizar,
+  cotizarLabel,
+}: {
+  markers: GlobeMarker[];
+  active: string | null;
+  setActive: (id: string | null) => void;
+  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  cotizarLabel: string;
+}) {
   return (
     <>
       <ambientLight intensity={1.05} />
       <directionalLight position={[4, 3, 5]} intensity={1.5} />
       <pointLight position={[-4, -1, -2]} intensity={0.5} color="#E8732A" />
       <Suspense fallback={null}>
-        <Earth />
+        <Earth
+          markers={markers}
+          active={active}
+          setActive={setActive}
+          onCotizar={onCotizar}
+          cotizarLabel={cotizarLabel}
+        />
       </Suspense>
       <FlightPath />
       <OrbitControls
         enableZoom={false}
         enablePan={false}
-        autoRotate
+        autoRotate={active === null}
         autoRotateSpeed={0.55}
         enableDamping
         dampingFactor={0.08}
@@ -124,9 +175,16 @@ function Scene() {
 
 export default function GlobeCanvas({
   frameloop = "always",
+  markers = [],
+  onCotizar,
+  cotizarLabel = "Cotizar",
 }: {
   frameloop?: "always" | "never";
+  markers?: GlobeMarker[];
+  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  cotizarLabel?: string;
 }) {
+  const [active, setActive] = useState<string | null>(null);
   // En pantallas de alta densidad (móvil retina) el antialias es innecesario —
   // los píxeles ya son densos — y ahorra fill-rate.
   const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
@@ -137,8 +195,15 @@ export default function GlobeCanvas({
       dpr={[1, 1.5]}
       gl={{ antialias: !hiDpr, alpha: true }}
       style={{ background: "transparent" }}
+      onPointerMissed={() => setActive(null)}
     >
-      <Scene />
+      <Scene
+        markers={markers}
+        active={active}
+        setActive={setActive}
+        onCotizar={onCotizar}
+        cotizarLabel={cotizarLabel}
+      />
     </Canvas>
   );
 }

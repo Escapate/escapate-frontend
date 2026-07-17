@@ -4,6 +4,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import Globe from "./globe/Globe";
 import { ArrowRight, Hand } from "lucide-react";
+import { DESTINO_GEO } from "@/lib/destino-geo";
+import { buildQuoteIntent } from "@/lib/quote-intent";
+import { useQuoteIntent } from "@/lib/quote-provider";
 
 // Variante del hero que conserva el globo 3D (en vez de la tarjeta boarding-pass),
 // estilizado dentro del tema editorial "Pase de Abordar".
@@ -11,6 +14,25 @@ export default function HeroGlobo() {
   const { c } = useI18n();
   const reduced = useReducedMotion();
   const stats = c.about.stats.slice(0, 3);
+
+  const { requestQuote } = useQuoteIntent();
+  const markers = DESTINO_GEO.flatMap((geo) => {
+    const info = c.destinos.items.find((d) => d.id === geo.id);
+    if (!info) return [];
+    return [
+      {
+        id: geo.id,
+        name: info.name,
+        price: info.price,
+        img: info.img,
+        nights: info.nights,
+        lat: geo.lat,
+        lng: geo.lng,
+      },
+    ];
+  });
+  const handleCotizar = (m: { name: string; nights: string; price: string }) =>
+    requestQuote(buildQuoteIntent(m, c.quote.prefillNote));
 
   const rise = (delay: number) =>
     reduced
@@ -102,7 +124,7 @@ export default function HeroGlobo() {
         {/* Globo 3D */}
         <div className="order-1 lg:order-2">
           <div className="relative mx-auto aspect-square w-[80vw] max-w-[460px] lg:w-full lg:max-w-[520px]">
-            <Globe />
+            <Globe markers={markers} onCotizar={handleCotizar} cotizarLabel={c.nav.cta} />
             <div className="pointer-events-none absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
               <Hand className="h-3.5 w-3.5 text-orange-400" />
               <span className="font-mono text-[11px] tracking-wide text-cream-50/60">
