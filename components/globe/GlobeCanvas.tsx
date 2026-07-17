@@ -112,6 +112,9 @@ function Earth({
 }
 
 function Airplane() {
+  // Detailed low-poly jet (Poly by Google, CC-BY 3.0), texture optimized to 256².
+  // The model's nose already points toward +Z and it sits upright on +Y, matching
+  // the orbit convention below, so no reorientation is needed — only a slight bank.
   const { scene } = useGLTF(JET_MODEL);
   const model = useMemo(() => scene.clone(true), [scene]);
   return (
@@ -136,6 +139,7 @@ function FlightPath() {
   }, []);
 
   useFrame((_, dt) => {
+    // Negative so the nose (+Z) leads the direction of travel.
     if (orbit.current) orbit.current.rotation.y -= dt * 0.5;
   });
 

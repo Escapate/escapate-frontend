@@ -9,7 +9,7 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useState, type RefObject } from "react";
 import type { GlobeInput } from "./Globe";
 
 type Dir = "left" | "right" | "up" | "down";
@@ -26,13 +26,11 @@ const btnCls =
  */
 export default function GlobeControls({ input }: { input: RefObject<GlobeInput> }) {
   const [playing, setPlaying] = useState(true);
-  const heldRef = useRef(false);
 
   const start = useCallback(
     (dir: Dir) => {
       const inp = input.current;
       if (!inp) return;
-      heldRef.current = true;
       if (dir === "left") inp.azVel = -1;
       else if (dir === "right") inp.azVel = 1;
       else if (dir === "up") inp.polVel = -1;
@@ -41,17 +39,21 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
     [input]
   );
 
-  const stop = useCallback(() => {
-    heldRef.current = false;
-    const inp = input.current;
-    if (!inp) return;
-    inp.azVel = 0;
-    inp.polVel = 0;
-  }, [input]);
+  // Detiene solo el eje soltado (o ambos si no se pasa `dir`) → permite girar en diagonal
+  // (dos direcciones a la vez) sin que soltar una mate la otra.
+  const stop = useCallback(
+    (dir?: Dir) => {
+      const inp = input.current;
+      if (!inp) return;
+      if (!dir || dir === "left" || dir === "right") inp.azVel = 0;
+      if (!dir || dir === "up" || dir === "down") inp.polVel = 0;
+    },
+    [input]
+  );
 
   // Seguridad: si el componente se desmonta mientras se mantenía una tecla/botón, no dejar
   // el globo girando.
-  useEffect(() => stop, [stop]);
+  useEffect(() => () => stop(), [stop]);
 
   const togglePlay = useCallback(() => {
     setPlaying((p) => {
@@ -81,9 +83,9 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
         e.preventDefault();
         start(dir);
       }}
-      onPointerUp={stop}
-      onPointerLeave={() => heldRef.current && stop()}
-      onPointerCancel={stop}
+      onPointerUp={() => stop(dir)}
+      onPointerLeave={() => stop(dir)}
+      onPointerCancel={() => stop(dir)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -91,7 +93,7 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
         }
       }}
       onKeyUp={(e) => {
-        if (e.key === "Enter" || e.key === " ") stop();
+        if (e.key === "Enter" || e.key === " ") stop(dir);
       }}
     >
       {icon}
@@ -110,7 +112,8 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
         }
       }}
       onKeyUp={(e) => {
-        if (e.key in keyToDir) stop();
+        const dir = keyToDir[e.key];
+        if (dir) stop(dir);
       }}
       className="pointer-events-auto grid grid-cols-3 gap-1 rounded-xl border border-white/15 bg-navy-950/60 p-1.5 backdrop-blur"
     >
@@ -119,7 +122,6 @@ export default function GlobeControls({ input }: { input: RefObject<GlobeInput> 
       <button
         type="button"
         aria-label={playing ? "Pausar la rotación" : "Reanudar la rotación"}
-        aria-pressed={!playing}
         onClick={togglePlay}
         className={btnCls}
       >
