@@ -1,8 +1,9 @@
 "use client";
 
 import { Html } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { X } from "lucide-react";
-import { useMemo, type RefObject } from "react";
+import { useMemo, useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
 
 export type DestinoMarkerData = {
@@ -12,9 +13,25 @@ export type DestinoMarkerData = {
   img: string;
 };
 
-// Naranja de marca. Proporciones/altura/color son ajuste visual fino (calibrar en pnpm dev).
+// Naranja de marca. Proporciones/altura/emisivo/color son ajuste visual fino (calibrar en pnpm dev).
 const PIN_COLOR = "#E8732A";
+const EYE_COLOR = "#FFF3E6";
 const PIN_UP = new THREE.Vector3(0, 1, 0);
+const LIFT = 0.05; // cuánto se eleva el pin al hover/activo (hacia afuera del globo)
+
+// Perfil (radio, altura) de la gota estilo Google Maps: punta afilada abajo → cabeza redonda arriba.
+const PIN_PROFILE: Array<[number, number]> = [
+  [0.0, 0.0],
+  [0.01, 0.015],
+  [0.024, 0.04],
+  [0.04, 0.075],
+  [0.052, 0.11],
+  [0.056, 0.14],
+  [0.05, 0.168],
+  [0.034, 0.188],
+  [0.014, 0.198],
+  [0.0, 0.202],
+];
 
 export default function DestinoMarker({
   data,
@@ -35,58 +52,82 @@ export default function DestinoMarker({
   cotizarLabel: string;
   occludeRef: RefObject<THREE.Object3D>;
 }) {
+  const [hovered, setHovered] = useState(false);
+  const liftRef = useRef<THREE.Group>(null!);
+
   // Orienta el pin a lo largo de la normal de la superficie (apunta hacia afuera del globo).
   const quaternion = useMemo(() => {
     const normal = new THREE.Vector3(position[0], position[1], position[2]).normalize();
     return new THREE.Quaternion().setFromUnitVectors(PIN_UP, normal);
   }, [position]);
 
+  const profile = useMemo(() => PIN_PROFILE.map(([x, y]) => new THREE.Vector2(x, y)), []);
+
+  // Elevación + escala animadas (damp = independiente del frame-rate).
+  useFrame((_, dt) => {
+    const g = liftRef.current;
+    if (!g) return;
+    const up = hovered || active;
+    g.position.y = THREE.MathUtils.damp(g.position.y, up ? LIFT : 0, 9, dt);
+    const target = active ? 1.22 : hovered ? 1.12 : 1;
+    const s = THREE.MathUtils.damp(g.scale.x, target, 9, dt);
+    g.scale.setScalar(s);
+  });
+
   return (
     <group position={position}>
-      <group quaternion={quaternion} scale={active ? 1.2 : 1}>
-        {/* Área de hit invisible que cubre todo el pin (facilita hover/tap). */}
+      <group quaternion={quaternion}>
+        {/* Área de hit invisible (estática, cubre el pin incluso elevado) para hover/click. */}
         <mesh
-          position={[0, 0.09, 0]}
+          position={[0, 0.11, 0]}
           onPointerOver={(e) => {
             e.stopPropagation();
-            onActivate();
+            setHovered(true);
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            setHovered(false);
+            document.body.style.cursor = "auto";
           }}
           onClick={(e) => {
             e.stopPropagation();
             onActivate();
           }}
         >
-          <sphereGeometry args={[0.12, 12, 12]} />
+          <sphereGeometry args={[0.15, 12, 12]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
 
-        {/* Cuerpo del pin: cono con la punta clavada en la superficie (y≈0). */}
-        <mesh position={[0, 0.075, 0]} rotation={[Math.PI, 0, 0]}>
-          <coneGeometry args={[0.05, 0.15, 20]} />
-          <meshStandardMaterial
-            color={PIN_COLOR}
-            emissive={PIN_COLOR}
-            emissiveIntensity={0.35}
-            roughness={0.4}
-            metalness={0.1}
-          />
-        </mesh>
+        {/* Pin visible (se eleva/escala en liftRef). */}
+        <group ref={liftRef}>
+          {/* Cuerpo: gota revuelta, material glossy con emisivo para que resalte. */}
+          <mesh>
+            <latheGeometry args={[profile, 28]} />
+            <meshStandardMaterial
+              color={PIN_COLOR}
+              emissive={PIN_COLOR}
+              emissiveIntensity={active || hovered ? 0.5 : 0.32}
+              roughness={0.3}
+              metalness={0.2}
+            />
+          </mesh>
 
-        {/* Cabeza esférica brillante. */}
-        <mesh position={[0, 0.15, 0]}>
-          <sphereGeometry args={[0.055, 20, 20]} />
-          <meshStandardMaterial
-            color={PIN_COLOR}
-            emissive={PIN_COLOR}
-            emissiveIntensity={active ? 0.7 : 0.45}
-            roughness={0.35}
-            metalness={0.1}
-          />
-        </mesh>
+          {/* "Ojo" crema incrustado en la cabeza (detalle tipo Maps). */}
+          <mesh position={[0, 0.15, 0]}>
+            <sphereGeometry args={[0.02, 16, 16]} />
+            <meshStandardMaterial
+              color={EYE_COLOR}
+              emissive={EYE_COLOR}
+              emissiveIntensity={0.25}
+              roughness={0.5}
+            />
+          </mesh>
+        </group>
 
         {active && (
           <Html
-            position={[0, 0.22, 0]}
+            position={[0, 0.24, 0]}
             center
             distanceFactor={6}
             occlude={[occludeRef]}

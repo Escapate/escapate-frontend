@@ -281,15 +281,28 @@ ancla (lat negativa = Sur, lng negativa = Oeste).
 
 ## Refinamiento (post-review, 2026-07-16)
 
-Tras la revisión y una pasada visual del cliente, dos ajustes en `components/globe/DestinoMarker.tsx`:
+Tras varias pasadas visuales del cliente, el marcador (`components/globe/DestinoMarker.tsx`)
+quedó así:
 
-1. **La tarjeta se oculta al salir el mouse.** `onMouseLeave={onClose}` en el `div` raíz de
-   la tarjeta. Como la tarjeta va centrada/anclada sobre el pin, no hay "hover-gap". En touch
-   (sin hover) se mantienen ✕ / clic-fuera (`onPointerMissed`) / otro-pin / Cotizar.
-2. **Marcadores = pin 3D estilo Google Maps** (los puntos planos no resaltaban). Cada pin es
-   un cono con la punta clavada en la superficie + cabeza esférica, con `meshStandardMaterial`
-   emisivo (naranja de marca) para que resalte. Se orienta a la **normal** de la superficie
-   (`quaternion` de +Y a `normalize(position)`), así sobresale hacia afuera. Escala ~1.2 al
-   activarse. Oclusión natural en la cara trasera vía z-test de los meshes (no necesita el
-   `occludeRef`, que sigue siendo sólo para la tarjeta). Proporciones (altura, radio de cabeza,
-   color/emisivo) son **ajuste visual fino** que se calibra en `pnpm dev`, como `LNG_OFFSET`.
+**Modelo de interacción**
+- **Abrir = click/tap** en el pin (igual en desktop y móvil). El hover ya **no** abre — así el
+  globo sigue girando hasta que el usuario decide tocar un pin (evita aperturas accidentales y
+  congelar la rotación al barrer el mouse).
+- **Hover (desktop) = el pin se eleva** suavemente hacia afuera + escala + cursor de mano
+  (afordancia de "clickeable", que compensa la pérdida del descubrimiento por hover). Animado
+  con `useFrame` + `THREE.MathUtils.damp` (sin dependencias nuevas).
+- **Cerrar la tarjeta**: `onMouseLeave` del `div` de la tarjeta (desktop; sin "hover-gap"
+  porque va anclada sobre el pin) + ✕ / clic-fuera (`onPointerMissed`) / otro-pin / Cotizar
+  (móvil). Mientras la tarjeta está abierta el pin permanece elevado.
+
+**Modelo 3D del pin (estilo Google Maps, con detalle)**
+- Silueta de **gota** con `LatheGeometry` (perfil radio/altura revuelto): punta afilada clavada
+  en la superficie → cuello → cabeza redonda que cierra arriba. Un solo mesh suave.
+- Material **glossy** (`meshStandardMaterial`, roughness/metalness de plástico) + emisivo
+  (naranja de marca) → capta la luz direccional de la escena y resalta con brillo.
+- **"Ojo" crema** incrustado en la cabeza (el puntito claro típico del pin de Maps).
+- Orientado a la **normal** de la superficie (`quaternion` de +Y a `normalize(position)`), así
+  sobresale hacia afuera. Oclusión natural en la cara trasera por z-test de los meshes (la
+  tarjeta sí usa `occludeRef` contra el mesh del globo).
+- Proporciones (perfil de la gota, altura de elevación, emisivo, color, tamaño del ojo) son
+  **ajuste visual fino** que se calibra en `pnpm dev`, junto con `LNG_OFFSET`.
