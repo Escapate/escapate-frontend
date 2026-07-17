@@ -41,7 +41,9 @@ export default function GlobeControls({
   canZoomIn?: boolean;
   canZoomOut?: boolean;
 }) {
-  const [playing, setPlaying] = useState(true);
+  // Se inicializa desde el flag compartido para no desincronizarse al re-montar el panel
+  // (los controles del hero son colapsables → se montan/desmontan).
+  const [playing, setPlaying] = useState(() => input.current?.autoRotate ?? true);
   const hasZoom = !!(onZoomIn && onZoomOut);
 
   const start = useCallback(

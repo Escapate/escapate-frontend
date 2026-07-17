@@ -79,6 +79,7 @@ export default function DestinoMarker({
 }) {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(true);
+  const hoveredRef = useRef(false);
   const visibleRef = useRef(true);
   const rootRef = useRef<THREE.Group>(null!);
   const liftRef = useRef<THREE.Group>(null!);
@@ -96,6 +97,13 @@ export default function DestinoMarker({
       if (show !== visibleRef.current) {
         visibleRef.current = show;
         setVisible(show);
+        // Al ocultarse un pin que estaba hovereado, limpiar hover/cursor (su onPointerOut
+        // puede no dispararse porque el mesh se desmonta).
+        if (!show && hoveredRef.current) {
+          hoveredRef.current = false;
+          setHovered(false);
+          document.body.style.cursor = "auto";
+        }
       }
     }
 
@@ -119,11 +127,13 @@ export default function DestinoMarker({
           position={[0, HEAD_H, 0]}
           onPointerOver={(e) => {
             e.stopPropagation();
+            hoveredRef.current = true;
             setHovered(true);
             document.body.style.cursor = "pointer";
           }}
           onPointerOut={(e) => {
             e.stopPropagation();
+            hoveredRef.current = false;
             setHovered(false);
             document.body.style.cursor = "auto";
           }}

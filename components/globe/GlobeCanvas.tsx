@@ -218,9 +218,12 @@ function Scene({
       if (focusTarget) {
         const t = faceTarget(focusTarget.lat, focusTarget.lng);
         fly.current.spinY = t.spinY;
-        fly.current.tiltX = t.tiltX;
+        fly.current.tiltX = THREE.MathUtils.clamp(t.tiltX, -TILT_RANGE, TILT_RANGE);
         fly.current.id = focusTarget.id;
         fly.current.active = true;
+        // Re-centra la cámara: el drag de OrbitControls es independiente del spin/tilt, así
+        // que sin esto un destino podía quedar en la cara trasera tras arrastrar el globo.
+        controls?.reset();
       }
     }
     const flying = fly.current.active;
