@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useQuoteIntent } from "@/lib/quote-provider";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
+import { sanitizePhone, isValidPhone, sanitizeEmail, isValidEmail } from "@/lib/sanitize";
 import { RouteTag, Perf, WhatsAppIcon } from "./ui";
 import {
   PlaneTakeoff,
@@ -211,7 +212,8 @@ export default function Cotizador() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  // Cada campo guarda el mensaje de error a mostrar (cadena vacía = sin error).
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>("idle");
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState("");
@@ -261,9 +263,9 @@ export default function Cotizador() {
     `• ${m.pax}: ${paxParts}`,
     `• ${m.days}: ${days}`,
   ];
-  if (name) lines.push(`• ${m.name}: ${name}`);
-  if (phone) lines.push(`• ${m.phone}: ${phone}`);
-  if (email) lines.push(`• ${m.email}: ${email}`);
+  if (name.trim()) lines.push(`• ${m.name}: ${name.trim()}`);
+  if (phone.trim()) lines.push(`• ${m.phone}: ${sanitizePhone(phone)}`);
+  if (email.trim()) lines.push(`• ${m.email}: ${sanitizeEmail(email)}`);
   if (hasDates) {
     if (departure) lines.push(`• ${m.departure}: ${departure}`);
     if (depReturn) lines.push(`• ${m.ret}: ${depReturn}`);
@@ -282,10 +284,10 @@ export default function Cotizador() {
   }
 
   function validateEmail() {
-    const e: Record<string, boolean> = {};
-    if (!name.trim()) e.name = true;
-    if (!phone.trim()) e.phone = true;
-    if (!email.trim() || !email.includes("@")) e.email = true;
+    const e: Record<string, string> = {};
+    if (!name.trim()) e.name = q.required;
+    if (!isValidPhone(phone)) e.phone = phone.trim() ? q.invalidPhone : q.required;
+    if (!isValidEmail(email)) e.email = email.trim() ? q.invalidEmail : q.required;
     setErrors(e);
     if (e.name) nameRef.current?.focus();
     else if (e.phone) phoneRef.current?.focus();
@@ -426,15 +428,15 @@ export default function Cotizador() {
             <input
               ref={nameRef}
               value={name}
-              onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: false })); }}
+              onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: "" })); }}
               placeholder={q.name}
-              className={inputCls(errors.name)}
+              className={inputCls(!!errors.name)}
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? "quote-name-error" : undefined}
             />
             {errors.name && (
               <p id="quote-name-error" role="alert" className="mt-1 text-xs text-red-600">
-                {q.required}
+                {errors.name}
               </p>
             )}
           </div>
@@ -444,15 +446,15 @@ export default function Cotizador() {
               type="tel"
               inputMode="tel"
               value={phone}
-              onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: false })); }}
+              onChange={(e) => { setPhone(e.target.value); if (errors.phone) setErrors((p) => ({ ...p, phone: "" })); }}
               placeholder={q.phone}
-              className={inputCls(errors.phone)}
+              className={inputCls(!!errors.phone)}
               aria-invalid={!!errors.phone}
               aria-describedby={errors.phone ? "quote-phone-error" : undefined}
             />
             {errors.phone && (
               <p id="quote-phone-error" role="alert" className="mt-1 text-xs text-red-600">
-                {q.required}
+                {errors.phone}
               </p>
             )}
           </div>
@@ -462,15 +464,15 @@ export default function Cotizador() {
               type="email"
               inputMode="email"
               value={email}
-              onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: false })); }}
+              onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: "" })); }}
               placeholder={q.emailField}
-              className={inputCls(errors.email)}
+              className={inputCls(!!errors.email)}
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "quote-email-error" : undefined}
             />
             {errors.email && (
               <p id="quote-email-error" role="alert" className="mt-1 text-xs text-red-600">
-                {q.required}
+                {errors.email}
               </p>
             )}
           </div>
