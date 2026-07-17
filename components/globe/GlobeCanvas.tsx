@@ -43,6 +43,7 @@ function Earth({
   setActive,
   onCotizar,
   cotizarLabel,
+  zoom,
 }: {
   spinRef: RefObject<THREE.Group>;
   tiltRef: RefObject<THREE.Group>;
@@ -51,6 +52,7 @@ function Earth({
   setActive: (id: string | null) => void;
   onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel: string;
+  zoom: number;
 }) {
   const tex = useTexture("/textures/world-map.png");
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -87,6 +89,7 @@ function Earth({
                 }}
                 cotizarLabel={cotizarLabel}
                 occludeRef={earthRef}
+                zoom={zoom}
               />
             ) : (
               <ClusterMarker
@@ -289,6 +292,7 @@ function Scene({
             setActive={setActive}
             onCotizar={onCotizar}
             cotizarLabel={cotizarLabel}
+            zoom={zoom}
           />
         </Suspense>
       </group>

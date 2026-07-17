@@ -67,6 +67,7 @@ export default function DestinoMarker({
   onCotizar,
   cotizarLabel,
   occludeRef,
+  zoom,
 }: {
   data: DestinoMarkerData;
   position: [number, number, number];
@@ -76,12 +77,14 @@ export default function DestinoMarker({
   onCotizar: () => void;
   cotizarLabel: string;
   occludeRef: RefObject<THREE.Object3D>;
+  zoom: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(true);
   const hoveredRef = useRef(false);
   const visibleRef = useRef(true);
   const rootRef = useRef<THREE.Group>(null!);
+  const sizeRef = useRef<THREE.Group>(null!);
   const liftRef = useRef<THREE.Group>(null!);
 
   useFrame((state, dt) => {
@@ -107,6 +110,11 @@ export default function DestinoMarker({
       }
     }
 
+    // Contra-escala por zoom: el pin mantiene su tamaño en pantalla mientras el globo crece
+    // (como Google Maps) → al acercar se nota la separación entre pines cercanos.
+    const sz = sizeRef.current;
+    if (sz) sz.scale.setScalar(THREE.MathUtils.damp(sz.scale.x, 1 / zoom, 6, dt));
+
     // Elevación + escala animadas (damp = independiente del frame-rate).
     const g = liftRef.current;
     if (!g) return;
@@ -122,6 +130,8 @@ export default function DestinoMarker({
       {/* Solo se monta (visible + clickeable) cuando mira a la cámara. */}
       {visible && (
         <Billboard>
+        {/* Tamaño constante en pantalla (Google Maps): contra-escala 1/zoom sobre hit + pin. */}
+        <group ref={sizeRef}>
         {/* Área de hit invisible (estática) para hover/click. */}
         <mesh
           position={[0, HEAD_H, 0]}
@@ -164,6 +174,7 @@ export default function DestinoMarker({
               metalness={0.1}
             />
           </mesh>
+        </group>
         </group>
 
         {active && (
