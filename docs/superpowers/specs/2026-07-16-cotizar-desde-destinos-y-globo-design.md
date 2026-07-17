@@ -119,28 +119,30 @@ No cambia nada más de la lógica de envío (WhatsApp / Web3Forms). La nota ya s
 
 ### C. Feature 2 — Marcadores en el globo
 
-**Datos.**
+**Datos — separación coordenadas vs. info.**
 
-- Agregar `id` estable a cada item de `destinos.items` en `content.ts` (mismo `id` en ES y
-  EN). Ids sugeridos: `cartagena`, `san-andres`, `santa-marta`, `eje-cafetero`, `cancun`,
-  `punta-cana`, `espana`, `europa`.
-- Nuevo `lib/destino-geo.ts`: mapa `id → { lat, lng }` para los 8 destinos:
+El "mapa maestro" de coordenadas y la info del destino son fuentes **separadas**, unidas por
+`id`. Un pin **se renderiza solo si hay info** para ese `id`.
 
-  | id | lat | lng |
-  |---|---|---|
-  | cartagena | 10.39 | -75.51 |
-  | san-andres | 12.58 | -81.70 |
-  | santa-marta | 11.24 | -74.20 |
-  | eje-cafetero | 4.81 | -75.69 |
-  | cancun | 21.16 | -86.85 |
-  | punta-cana | 18.58 | -68.40 |
-  | espana | 40.42 | -3.70 |
-  | europa | 48.85 | 2.35 |
+- Nuevo `lib/destino-geo.ts`: lista maestra de **50 destinos populares** con
+  `{ id, name, lat, lng }` (ver Apéndice). `name` aquí es solo etiqueta de documentación /
+  fallback; el nombre visible en la tarjeta viene de la info localizada.
+- **Info** = existe un item en `destinos.items` (`content.ts`) con ese mismo `id`, que aporta
+  el nombre localizado, `img`, `price` y `nights`. Para esto se agrega un `id` estable a cada
+  item de `destinos.items` (mismo `id` en ES y EN).
+- **Condición de render:** `markers = DESTINO_GEO` **join** `destinos.items` por `id`,
+  filtrando a los que tienen match. Hoy tienen info los 8 paquetes actuales
+  (`cartagena`, `san-andres`, `santa-marta`, `eje-cafetero`, `cancun`, `punta-cana`,
+  `espana`, `europa`) → esos 8 pintan pin. Los otros 42 quedan como coordenadas listas: en
+  cuanto el cliente agregue un destino a `content.ts` con un `id` de la lista, su pin
+  aparece solo, sin tocar el globo.
 
 **Flujo de props.** `HeroGlobo` (fuera del `<Canvas>`, con contexto disponible):
 
-- Construye `markers = c.destinos.items.map(d => ({ id, name, price, img, nights, coords: GEO[d.id] }))`
-  (omite los que no tengan coords, por robustez).
+- Construye `markers` recorriendo `DESTINO_GEO` (las 50 coordenadas) y uniéndolas con
+  `c.destinos.items` por `id`; **solo entran las que tienen info** (match). Cada marker:
+  `{ id, name, price, img, nights, coords: { lat, lng } }` con name/price/img/nights de la
+  info localizada.
 - Define `handleCotizar(marker)` que llama
   `requestQuote({ dest: marker.name, days: parseNights(marker.nights)+1, note: `${q.prefillNote} ${marker.name} · ${marker.nights}, ${marker.price}` })`
   — **exactamente el mismo formato de payload y de nota que la feature 1**. Para evitar
@@ -216,3 +218,63 @@ No cambia nada más de la lógica de envío (WhatsApp / Web3Forms). La nota ya s
   requiere ajuste visual iterativo. Es el único punto con incertidumbre real.
 - **Boundary de contexto en R3F:** mitigado pasando datos + callback como props (no se
   intenta consumir contexto dentro del `<Canvas>`).
+
+## Apéndice — `lib/destino-geo.ts` (50 destinos populares)
+
+Lista maestra `{ id, name, lat, lng }`. Las 8 primeras (con **★**) hoy tienen info en
+`content.ts` → pintan pin. Las otras 42 son coordenadas listas: agregar el destino a
+`content.ts` con el mismo `id` hace aparecer el pin. Coordenadas aproximadas de la ciudad
+ancla (lat negativa = Sur, lng negativa = Oeste).
+
+| id | name | lat | lng |
+|---|---|---|---|
+| cartagena ★ | Cartagena | 10.39 | -75.51 |
+| san-andres ★ | San Andrés | 12.58 | -81.70 |
+| santa-marta ★ | Santa Marta | 11.24 | -74.20 |
+| eje-cafetero ★ | Eje Cafetero (Pereira) | 4.81 | -75.69 |
+| cancun ★ | Cancún | 21.16 | -86.85 |
+| punta-cana ★ | Punta Cana | 18.58 | -68.40 |
+| espana ★ | España (Madrid) | 40.42 | -3.70 |
+| europa ★ | Europa (París) | 48.85 | 2.35 |
+| rome | Roma | 41.90 | 12.50 |
+| london | Londres | 51.51 | -0.13 |
+| barcelona | Barcelona | 41.39 | 2.17 |
+| lisbon | Lisboa | 38.72 | -9.14 |
+| amsterdam | Ámsterdam | 52.37 | 4.90 |
+| venice | Venecia | 45.44 | 12.32 |
+| santorini | Santorini | 36.39 | 25.46 |
+| istanbul | Estambul | 41.01 | 28.98 |
+| prague | Praga | 50.08 | 14.44 |
+| vienna | Viena | 48.21 | 16.37 |
+| athens | Atenas | 37.98 | 23.73 |
+| swiss-alps | Alpes Suizos | 46.82 | 8.23 |
+| new-york | Nueva York | 40.71 | -74.01 |
+| miami | Miami | 25.76 | -80.19 |
+| orlando | Orlando | 28.54 | -81.38 |
+| los-angeles | Los Ángeles | 34.05 | -118.24 |
+| las-vegas | Las Vegas | 36.17 | -115.14 |
+| toronto | Toronto | 43.65 | -79.38 |
+| mexico-city | Ciudad de México | 19.43 | -99.13 |
+| rio-de-janeiro | Río de Janeiro | -22.91 | -43.17 |
+| buenos-aires | Buenos Aires | -34.60 | -58.38 |
+| lima | Lima | -12.05 | -77.04 |
+| cusco | Cusco (Machu Picchu) | -13.53 | -71.97 |
+| santiago | Santiago de Chile | -33.45 | -70.67 |
+| aruba | Aruba | 12.52 | -69.97 |
+| havana | La Habana | 23.11 | -82.37 |
+| panama-city | Ciudad de Panamá | 8.98 | -79.52 |
+| san-jose-cr | San José (Costa Rica) | 9.93 | -84.09 |
+| galapagos | Galápagos | -0.95 | -90.97 |
+| dubai | Dubái | 25.20 | 55.27 |
+| tokyo | Tokio | 35.68 | 139.65 |
+| kyoto | Kioto | 35.01 | 135.77 |
+| bangkok | Bangkok | 13.76 | 100.50 |
+| bali | Bali | -8.34 | 115.09 |
+| singapore | Singapur | 1.35 | 103.82 |
+| phuket | Phuket | 7.88 | 98.39 |
+| hong-kong | Hong Kong | 22.32 | 114.17 |
+| maldives | Maldivas | 3.20 | 73.22 |
+| cape-town | Ciudad del Cabo | -33.92 | 18.42 |
+| marrakech | Marrakech | 31.63 | -7.98 |
+| cairo | El Cairo | 30.04 | 31.24 |
+| sydney | Sídney | -33.87 | 151.21 |
