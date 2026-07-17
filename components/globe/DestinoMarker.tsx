@@ -118,7 +118,9 @@ export default function DestinoMarker({
       if (active) {
         _ndc.copy(_pos).project(state.camera);
         const topFrac = (1 - _ndc.y) / 2; // 0 = borde superior, 1 = borde inferior
-        const p = topFrac < 0.4 ? "down" : "up";
+        // Preferencia hacia abajo (30/70): solo abre hacia arriba si el pin está en el 30%
+        // inferior de la pantalla (donde abrir hacia abajo se saldría).
+        const p = topFrac < 0.7 ? "down" : "up";
         if (p !== placementRef.current) {
           placementRef.current = p;
           setPlacement(p);
