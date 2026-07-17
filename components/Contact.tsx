@@ -22,7 +22,7 @@ export default function Contact() {
           className="mx-auto"
         />
 
-        <div className="mx-auto mt-12 w-full max-w-3xl">
+        <div className="mx-auto mt-12 w-full max-w-4xl">
           <Reveal>
             <Cotizador />
           </Reveal>

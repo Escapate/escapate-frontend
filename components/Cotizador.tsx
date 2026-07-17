@@ -211,7 +211,7 @@ export default function Cotizador() {
   const [status, setStatus] = useState<Status>("idle");
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState("");
-  const [hasDates, setHasDates] = useState(false);
+  const [hasDates, setHasDates] = useState(true);
   const [monthIdx, setMonthIdx] = useState<number | null>(null);
   const [departure, setDeparture] = useState("");
   const [depReturn, setDepReturn] = useState("");
@@ -354,7 +354,7 @@ export default function Cotizador() {
 
       {/* campos */}
       <div className="px-5 py-6 sm:px-6">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Ciudad de salida */}
           <div>
             <FieldLabel icon={<PlaneTakeoff className="h-3.5 w-3.5 text-orange-500" />}>
@@ -505,7 +505,7 @@ export default function Cotizador() {
           {open && (
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {/* Fechas */}
-              <div>
+              <div className="sm:col-start-1 sm:row-start-1">
                 <label className="flex cursor-pointer items-center justify-between">
                   <FieldLabel icon={<CalendarDays className="h-3.5 w-3.5 text-orange-500" />}>
                     {q.hasDates}
@@ -562,7 +562,7 @@ export default function Cotizador() {
               </div>
 
               {/* Hospedaje */}
-              <div className="grid gap-3">
+              <div className="grid gap-3 sm:col-start-2 sm:row-start-1 sm:row-span-2">
                 <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-navy-900/70">
                   <MapPin className="h-3.5 w-3.5 text-orange-500" />
                   {q.lodging}
@@ -610,7 +610,7 @@ export default function Cotizador() {
               </div>
 
               {/* Notas */}
-              <div className="sm:col-span-2">
+              <div className="sm:col-start-1 sm:row-start-2">
                 <FieldLabel icon={<StickyNote className="h-3.5 w-3.5 text-orange-500" />}>
                   {q.notes}
                 </FieldLabel>
