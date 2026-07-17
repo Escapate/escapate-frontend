@@ -8,6 +8,7 @@ import {
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import StructuredData from "@/components/StructuredData";
+import SmoothHashScroll from "@/components/SmoothHashScroll";
 import { BUSINESS } from "@/lib/content";
 import "./globals.css";
 
@@ -115,6 +116,7 @@ export default function RootLayout({
       <body
         className={`${archivo.variable} ${bricolage.variable} ${hanken.variable} ${spaceMono.variable} font-sans antialiased`}
       >
+        <SmoothHashScroll />
         <ThemeProvider>
           <I18nProvider>{children}</I18nProvider>
         </ThemeProvider>
