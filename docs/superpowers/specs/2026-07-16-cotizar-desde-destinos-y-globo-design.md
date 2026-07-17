@@ -278,3 +278,18 @@ ancla (lat negativa = Sur, lng negativa = Oeste).
 | marrakech | Marrakech | 31.63 | -7.98 |
 | cairo | El Cairo | 30.04 | 31.24 |
 | sydney | Sídney | -33.87 | 151.21 |
+
+## Refinamiento (post-review, 2026-07-16)
+
+Tras la revisión y una pasada visual del cliente, dos ajustes en `components/globe/DestinoMarker.tsx`:
+
+1. **La tarjeta se oculta al salir el mouse.** `onMouseLeave={onClose}` en el `div` raíz de
+   la tarjeta. Como la tarjeta va centrada/anclada sobre el pin, no hay "hover-gap". En touch
+   (sin hover) se mantienen ✕ / clic-fuera (`onPointerMissed`) / otro-pin / Cotizar.
+2. **Marcadores = pin 3D estilo Google Maps** (los puntos planos no resaltaban). Cada pin es
+   un cono con la punta clavada en la superficie + cabeza esférica, con `meshStandardMaterial`
+   emisivo (naranja de marca) para que resalte. Se orienta a la **normal** de la superficie
+   (`quaternion` de +Y a `normalize(position)`), así sobresale hacia afuera. Escala ~1.2 al
+   activarse. Oclusión natural en la cara trasera vía z-test de los meshes (no necesita el
+   `occludeRef`, que sigue siendo sólo para la tarjeta). Proporciones (altura, radio de cabeza,
+   color/emisivo) son **ajuste visual fino** que se calibra en `pnpm dev`, como `LNG_OFFSET`.
