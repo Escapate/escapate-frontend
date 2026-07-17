@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useQuoteIntent } from "@/lib/quote-provider";
 import { WHATSAPP_NUMBER, WEB3FORMS_KEY } from "@/lib/content";
 import { RouteTag, Perf, WhatsAppIcon } from "./ui";
 import {
@@ -190,6 +191,7 @@ const triggerCls =
 export default function Cotizador() {
   const { c } = useI18n();
   const q = c.quote;
+  const { intent } = useQuoteIntent();
   const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
   const ref = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -227,6 +229,18 @@ export default function Cotizador() {
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
+
+  // Siembra el formulario cuando llega una intención de cotización (Destinos / globo).
+  useEffect(() => {
+    if (!intent) return;
+    setDest(intent.dest);
+    setDays(intent.days);
+    if (intent.note) {
+      setNotes(intent.note);
+      setOpen(true); // abre "Más detalles" para que la nota se vea
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intent?.seq]);
 
   const total = adults + children + seniors;
   const paxParts = [

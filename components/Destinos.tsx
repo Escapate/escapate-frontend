@@ -5,11 +5,15 @@ import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { SectionHead, RouteTag } from "./ui";
 import { airportCode } from "@/lib/airports";
+import { useQuoteIntent } from "@/lib/quote-provider";
+import { buildQuoteIntent } from "@/lib/quote-intent";
 import { ArrowUpRight } from "lucide-react";
 
 export default function Destinos() {
   const { c } = useI18n();
   const items = c.destinos.items;
+  const q = c.quote;
+  const { requestQuote } = useQuoteIntent();
   const [active, setActive] = useState(0);
   const feat = items[active];
 
@@ -62,13 +66,14 @@ export default function Destinos() {
               <span className="rounded-md bg-orange px-4 py-2 font-mono text-lg font-bold text-white shadow-[0_12px_28px_-12px_rgba(232,115,42,0.9)]">
                 {feat.price}
               </span>
-              <a
-                href="#contacto"
+              <button
+                type="button"
+                onClick={() => requestQuote(buildQuoteIntent(feat, q.prefillNote))}
                 className="group inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/5 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:border-white hover:bg-white/15"
               >
                 {c.hero.ctaPrimary}
                 <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </a>
+              </button>
             </div>
           </div>
 
