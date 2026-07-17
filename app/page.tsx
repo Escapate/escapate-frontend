@@ -10,24 +10,27 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import FloatingMap from "@/components/FloatingMap";
+import { QuoteIntentProvider } from "@/lib/quote-provider";
 
 export default function Home() {
   return (
-    <main className="relative">
-      <Navbar />
-      {/* Secuencia de tonos (intercambio de colores): navy → navy(foto) →
-          crema → navy → crema → navy → crema → navy → navy(footer). */}
-      <Hero />
-      <Destinos />
-      <About />
-      <Services />
-      <Gallery />
-      <Why />
-      <Testimonials />
-      <Contact />
-      <Footer />
-      <FloatingWhatsApp />
-      <FloatingMap />
-    </main>
+    <QuoteIntentProvider>
+      <main className="relative">
+        <Navbar />
+        {/* Secuencia de tonos (intercambio de colores): navy → navy(foto) →
+            crema → navy → crema → navy → crema → navy → navy(footer). */}
+        <Hero />
+        <Destinos />
+        <About />
+        <Services />
+        <Gallery />
+        <Why />
+        <Testimonials />
+        <Contact />
+        <Footer />
+        <FloatingWhatsApp />
+        <FloatingMap />
+      </main>
+    </QuoteIntentProvider>
   );
 }
