@@ -39,25 +39,43 @@ export default function GlobeFocus({
   const stageRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const pushedRef = useRef(false);
 
   const zoomIn = useCallback(() => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2))), []);
   const zoomOut = useCallback(() => setZoom((z) => clamp(+(z - ZOOM_STEP).toFixed(2))), []);
   const reset = useCallback(() => setZoom(ZOOM_MIN), []);
 
+  // Cerrar consumiendo la entrada de historial (→ dispara popstate → onClose). Así el botón
+  // "atrás" del navegador y el ✕/Escape terminan en el mismo lugar (el hero), sin salir del sitio.
+  const requestClose = useCallback(() => {
+    if (typeof window !== "undefined") window.history.back();
+  }, []);
+
   const cotizar = useCallback(
     (m: { name: string; nights: string; price: string }) => {
       onCotizar(m);
-      onClose();
+      requestClose();
     },
-    [onCotizar, onClose]
+    [onCotizar, requestClose]
   );
+
+  // Historial: al abrir se empuja una entrada; el back del navegador (popstate) cierra el overlay.
+  useEffect(() => {
+    if (!pushedRef.current) {
+      window.history.pushState({ globeFocus: true }, "");
+      pushedRef.current = true;
+    }
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [onClose]);
 
   // Escape para cerrar + foco inicial en cerrar + trampa de foco (aria-modal) + scroll bloqueado.
   useEffect(() => {
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        requestClose();
         return;
       }
       if (e.key === "Tab") {
@@ -85,7 +103,7 @@ export default function GlobeFocus({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [onClose]);
+  }, [requestClose]);
 
   // Zoom con rueda del mouse y pellizco (listeners nativos con { passive: false } para poder
   // preventDefault y no hacer scroll/zoom de la página).
@@ -175,7 +193,7 @@ export default function GlobeFocus({
           <button
             ref={closeRef}
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Cerrar el mapa"
             className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-orange"
           >
