@@ -503,7 +503,7 @@ export default function Cotizador() {
           </button>
 
           {open && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:grid-rows-[auto_1fr]">
               {/* Fechas */}
               <div className="sm:col-start-1 sm:row-start-1">
                 <label className="flex cursor-pointer items-center justify-between">
@@ -609,8 +609,8 @@ export default function Cotizador() {
                 </div>
               </div>
 
-              {/* Notas */}
-              <div className="sm:col-start-1 sm:row-start-2">
+              {/* Notas (estira para emparejar la altura con hospedaje) */}
+              <div className="flex flex-col sm:col-start-1 sm:row-start-2">
                 <FieldLabel icon={<StickyNote className="h-3.5 w-3.5 text-orange-500" />}>
                   {q.notes}
                 </FieldLabel>
@@ -619,7 +619,7 @@ export default function Cotizador() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={q.notesPh}
                   rows={3}
-                  className={`${inputCls()} resize-none`}
+                  className={`${inputCls()} resize-none sm:min-h-[6rem] sm:flex-1`}
                 />
               </div>
             </div>
