@@ -13,14 +13,20 @@ export type DestinoMarkerData = {
   img: string;
 };
 
-// Naranja de marca. Proporciones/emisivo/color son ajuste visual fino (calibrar en pnpm dev).
+// ── Ajuste visual fino (probar en pnpm dev) ──────────────────────────────────
+// Color del pin. Alternativas que pegan sobre el globo navy:
+//   naranja de marca "#E8732A" · rojo pin clásico "#FF4D4D" · coral "#FF6B4A"
+//   ámbar "#F5B301" · turquesa "#22C1B6" · fucsia "#FF3D8B"
 const PIN_COLOR = "#E8732A";
+const OUTLINE_COLOR = "#0A1524"; // contorno/relleno del hueco (navy oscuro) → separa pines solapados
 const HEAD_R = 0.06; // radio de la cabeza
 const HEAD_H = 0.12; // altura del centro de la cabeza sobre la punta
-const LIFT = 0.04; // cuánto salta el pin al hover/activo
+const HOLE_RATIO = 0.55; // tamaño del hueco respecto al radio de la cabeza
+const LIFT = 0.06; // cuánto salta el pin al hover/activo (sube por encima del montón)
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Pin de ubicación estilo icono 3D: gota (cabeza redonda + punta abajo) con hueco real,
-// extruida y biselada para que se vea con volumen glossy. Se construye una sola vez (compartida).
+// extruida y biselada para que se vea con volumen glossy. Geometría compartida (una sola vez).
 function buildPinGeometry(): THREE.ExtrudeGeometry {
   const shape = new THREE.Shape();
   shape.moveTo(0, 0); // punta (queda anclada en la superficie)
@@ -29,7 +35,7 @@ function buildPinGeometry(): THREE.ExtrudeGeometry {
   shape.quadraticCurveTo(-HEAD_R * 0.55, HEAD_H * 0.35, 0, 0); // costado izquierdo → punta
 
   const hole = new THREE.Path();
-  hole.absarc(0, HEAD_H, HEAD_R * 0.42, 0, Math.PI * 2, true); // hueco tipo dona
+  hole.absarc(0, HEAD_H, HEAD_R * HOLE_RATIO, 0, Math.PI * 2, true); // hueco tipo dona
   shape.holes.push(hole);
 
   const geo = new THREE.ExtrudeGeometry(shape, {
@@ -40,7 +46,7 @@ function buildPinGeometry(): THREE.ExtrudeGeometry {
     bevelSegments: 4,
     curveSegments: 32,
   });
-  geo.translate(0, 0, -0.028); // centra el grosor alrededor de z=0 (mira a la cámara vía Billboard)
+  geo.translate(0, 0, -0.028); // centra el grosor (mira a la cámara vía Billboard)
   geo.computeVertexNormals();
   return geo;
 }
@@ -75,7 +81,7 @@ export default function DestinoMarker({
     if (!g) return;
     const up = hovered || active;
     g.position.y = THREE.MathUtils.damp(g.position.y, up ? LIFT : 0, 9, dt);
-    const target = active ? 1.22 : hovered ? 1.12 : 1;
+    const target = active ? 1.28 : hovered ? 1.18 : 1;
     const s = THREE.MathUtils.damp(g.scale.x, target, 9, dt);
     g.scale.setScalar(s);
   });
@@ -108,6 +114,13 @@ export default function DestinoMarker({
 
         {/* Pin visible (salta/escala en liftRef). */}
         <group ref={liftRef}>
+          {/* Contorno oscuro: copia un poco más ancha, detrás → borde que separa pines
+              solapados + rellena el hueco de oscuro (look clásico). */}
+          <mesh geometry={PIN_GEOMETRY} position={[0, 0, -0.02]} scale={[1.16, 1.16, 1]}>
+            <meshBasicMaterial color={OUTLINE_COLOR} />
+          </mesh>
+
+          {/* Cuerpo glossy con emisivo. */}
           <mesh geometry={PIN_GEOMETRY}>
             <meshStandardMaterial
               color={PIN_COLOR}
