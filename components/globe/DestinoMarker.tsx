@@ -17,11 +17,11 @@ export type DestinoMarkerData = {
 // Color del pin. Alternativas que pegan sobre el globo navy:
 //   naranja de marca "#E8732A" · rojo pin clásico "#FF4D4D" · coral "#FF6B4A"
 //   ámbar "#F5B301" · turquesa "#22C1B6" · fucsia "#FF3D8B"
-const PIN_COLOR = "#E8732A";
+const PIN_COLOR = "#FF6B4A";
 const OUTLINE_COLOR = "#0A1524"; // contorno/relleno del hueco (navy oscuro) → separa pines solapados
 const HEAD_R = 0.06; // radio de la cabeza
 const HEAD_H = 0.12; // altura del centro de la cabeza sobre la punta
-const HOLE_RATIO = 0.55; // tamaño del hueco respecto al radio de la cabeza
+const HOLE_RATIO = 0.7; // tamaño del hueco respecto al radio de la cabeza
 const LIFT = 0.06; // cuánto salta el pin al hover/activo (sube por encima del montón)
 // ─────────────────────────────────────────────────────────────────────────────
 

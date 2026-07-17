@@ -2,65 +2,99 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Line, useTexture, useGLTF } from "@react-three/drei";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState, type ElementRef, type RefObject } from "react";
 import * as THREE from "three";
 import { latLngToVec3 } from "@/lib/destino-geo";
+import { clusterMarkers, type Cluster } from "@/lib/cluster";
 import DestinoMarker from "./DestinoMarker";
-import type { GlobeMarker } from "./Globe";
+import ClusterMarker from "./ClusterMarker";
+import type { GlobeMarker, GlobeInput } from "./Globe";
 
 const JET_MODEL = "/models/jet.glb";
 
 const GLOBE_R = 1.4;
 const ORBIT_R = 2.02;
 
+// Clustering + control manual (ajuste fino en pnpm dev).
+const CLUSTER_DEG = 5; // separación angular para agrupar destinos cercanos
+const BASE_TILT = 0.32; // inclinación base del globo
+const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
+const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
+const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
+
+type MarkerCotizar = { name: string; nights: string; price: string };
+
 function Earth({
-  markers,
+  spinRef,
+  tiltRef,
+  clusters,
   active,
   setActive,
   onCotizar,
   cotizarLabel,
 }: {
-  markers: GlobeMarker[];
+  spinRef: RefObject<THREE.Group>;
+  tiltRef: RefObject<THREE.Group>;
+  clusters: Cluster[];
   active: string | null;
   setActive: (id: string | null) => void;
-  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel: string;
 }) {
   const tex = useTexture("/textures/world-map.png");
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
-  const spin = useRef<THREE.Group>(null!);
   const earthRef = useRef<THREE.Mesh>(null!);
-  const paused = active !== null;
-
-  useFrame((_, dt) => {
-    if (!paused && spin.current) spin.current.rotation.y += dt * 0.04;
-  });
 
   return (
-    <group rotation={[0.32, 0, 0]}>
-      <group ref={spin}>
-        <mesh ref={earthRef}>
-          {/* 64 segmentos se ven idénticos a este tamaño (~460px) con menos vértices. */}
-          <sphereGeometry args={[GLOBE_R, 64, 64]} />
-          <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
-        </mesh>
-        {markers.map((m) => (
-          <DestinoMarker
-            key={m.id}
-            data={{ id: m.id, name: m.name, price: m.price, img: m.img }}
-            position={latLngToVec3(m.lat, m.lng, GLOBE_R * 1.02)}
-            active={active === m.id}
-            onActivate={() => setActive(m.id)}
-            onClose={() => setActive(null)}
-            onCotizar={() => {
-              onCotizar?.(m);
-              setActive(null);
-            }}
-            cotizarLabel={cotizarLabel}
-            occludeRef={earthRef}
-          />
-        ))}
+    <group rotation={[BASE_TILT, 0, 0]}>
+      {/* tilt manual (latitud) — sin prop de rotación para que no se resetee al re-render */}
+      <group ref={tiltRef}>
+        {/* spin (longitud) — mutado en el useFrame de Scene */}
+        <group ref={spinRef}>
+          <mesh ref={earthRef}>
+            <sphereGeometry args={[GLOBE_R, 64, 64]} />
+            <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
+          </mesh>
+          {clusters.map((cl) =>
+            cl.members.length === 1 ? (
+              <DestinoMarker
+                key={cl.id}
+                data={{
+                  id: cl.members[0].id,
+                  name: cl.members[0].name,
+                  price: cl.members[0].price,
+                  img: cl.members[0].img,
+                }}
+                position={cl.position}
+                active={active === cl.members[0].id}
+                onActivate={() => setActive(cl.members[0].id)}
+                onClose={() => setActive(null)}
+                onCotizar={() => {
+                  onCotizar?.(cl.members[0]);
+                  setActive(null);
+                }}
+                cotizarLabel={cotizarLabel}
+                occludeRef={earthRef}
+              />
+            ) : (
+              <ClusterMarker
+                key={cl.id}
+                position={cl.position}
+                members={cl.members}
+                active={active === cl.id}
+                onActivate={() => setActive(cl.id)}
+                onClose={() => setActive(null)}
+                onCotizar={(m) => {
+                  onCotizar?.(m);
+                  setActive(null);
+                }}
+                cotizarLabel={cotizarLabel}
+                occludeRef={earthRef}
+              />
+            )
+          )}
+        </group>
       </group>
       {/* halo atmosférico (estático) */}
       <mesh scale={1.16}>
@@ -78,9 +112,6 @@ function Earth({
 }
 
 function Airplane() {
-  // Detailed low-poly jet (Poly by Google, CC-BY 3.0), texture optimized to 256².
-  // The model's nose already points toward +Z and it sits upright on +Y, matching
-  // the orbit convention below, so no reorientation is needed — only a slight bank.
   const { scene } = useGLTF(JET_MODEL);
   const model = useMemo(() => scene.clone(true), [scene]);
   return (
@@ -105,7 +136,6 @@ function FlightPath() {
   }, []);
 
   useFrame((_, dt) => {
-    // Negative so the nose (+Z) leads the direction of travel.
     if (orbit.current) orbit.current.rotation.y -= dt * 0.5;
   });
 
@@ -133,18 +163,58 @@ function FlightPath() {
 }
 
 function Scene({
-  markers,
+  clusters,
   active,
   setActive,
   onCotizar,
   cotizarLabel,
+  input,
 }: {
-  markers: GlobeMarker[];
+  clusters: Cluster[];
   active: string | null;
   setActive: (id: string | null) => void;
-  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel: string;
+  input?: RefObject<GlobeInput>;
 }) {
+  const spinRef = useRef<THREE.Group>(null!);
+  const tiltRef = useRef<THREE.Group>(null!);
+  const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
+  const lastReset = useRef(0);
+
+  useFrame((_, dt) => {
+    const inp = input?.current;
+    const spin = spinRef.current;
+    const tilt = tiltRef.current;
+    const controls = controlsRef.current;
+    const auto = (inp ? inp.autoRotate : true) && active === null;
+
+    // Rotación ambiente (el mapa se desliza).
+    if (auto && spin) spin.rotation.y += dt * 0.04;
+
+    if (inp) {
+      // Recentrar.
+      if (inp.resetToken !== lastReset.current) {
+        lastReset.current = inp.resetToken;
+        if (spin) spin.rotation.y = 0;
+        if (tilt) tilt.rotation.x = 0;
+        controls?.reset();
+      }
+      // Giro manual (mantener presionado / flechas).
+      if (inp.azVel && spin) spin.rotation.y += inp.azVel * MANUAL_AZ * dt;
+      if (inp.polVel && tilt) {
+        tilt.rotation.x = THREE.MathUtils.clamp(
+          tilt.rotation.x + inp.polVel * MANUAL_POL * dt,
+          -TILT_RANGE,
+          TILT_RANGE
+        );
+      }
+    }
+
+    // La órbita de cámara (autoRotate) sigue el play/pausa y se detiene con una tarjeta abierta.
+    if (controls) controls.autoRotate = auto;
+  });
+
   return (
     <>
       <ambientLight intensity={1.05} />
@@ -152,7 +222,9 @@ function Scene({
       <pointLight position={[-4, -1, -2]} intensity={0.5} color="#E8732A" />
       <Suspense fallback={null}>
         <Earth
-          markers={markers}
+          spinRef={spinRef}
+          tiltRef={tiltRef}
+          clusters={clusters}
           active={active}
           setActive={setActive}
           onCotizar={onCotizar}
@@ -161,9 +233,9 @@ function Scene({
       </Suspense>
       <FlightPath />
       <OrbitControls
+        ref={controlsRef}
         enableZoom={false}
         enablePan={false}
-        autoRotate={active === null}
         autoRotateSpeed={0.55}
         enableDamping
         dampingFactor={0.08}
@@ -180,15 +252,20 @@ export default function GlobeCanvas({
   markers = [],
   onCotizar,
   cotizarLabel = "Cotizar",
+  input,
 }: {
   frameloop?: "always" | "never";
   markers?: GlobeMarker[];
-  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
+  onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel?: string;
+  input?: RefObject<GlobeInput>;
 }) {
   const [active, setActive] = useState<string | null>(null);
-  // En pantallas de alta densidad (móvil retina) el antialias es innecesario —
-  // los píxeles ya son densos — y ahorra fill-rate.
+  const clusters = useMemo(
+    () => clusterMarkers(markers, CLUSTER_DEG, GLOBE_R * 1.02),
+    [markers]
+  );
+  // En pantallas de alta densidad (móvil retina) el antialias es innecesario.
   const hiDpr = typeof window !== "undefined" && window.devicePixelRatio >= 2;
   return (
     <Canvas
@@ -200,11 +277,12 @@ export default function GlobeCanvas({
       onPointerMissed={() => setActive(null)}
     >
       <Scene
-        markers={markers}
+        clusters={clusters}
         active={active}
         setActive={setActive}
         onCotizar={onCotizar}
         cotizarLabel={cotizarLabel}
+        input={input}
       />
     </Canvas>
   );

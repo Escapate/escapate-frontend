@@ -308,3 +308,29 @@ quedó así:
   (naranja de marca) → capta la luz direccional de la escena y resalta.
 - Proporciones (perfil de la gota, tamaño del hueco, bisel, altura de salto, emisivo, color)
   son **ajuste visual fino** que se calibra en `pnpm dev`, junto con `LNG_OFFSET`.
+
+## Sistema de clústers (destinos cercanos)
+
+- `lib/cluster.ts` — `clusterMarkers(markers, thresholdDeg, radius)` **puro y testeado**: agrupa
+  por **cercanía angular sobre la esfera** (estable con la rotación, a diferencia de agrupar
+  por distancia en pantalla). Greedy de una pasada; el centroide se proyecta al radio de render.
+  Devuelve `Cluster { id, position, members }` (1+ miembros).
+- `GlobeCanvas` calcula los clústers (`useMemo`) y renderiza: 1 miembro → `DestinoMarker` (pin);
+  2+ → `components/globe/ClusterMarker.tsx`, un **badge con el número** (drei `<Html>`, DOM →
+  nítido y accesible) que al tocarlo despliega un **popover con la lista** (miniatura + nombre +
+  precio + Cotizar por destino). Se oculta en la cara trasera con `occlude`.
+- Umbral (`CLUSTER_DEG`) es ajuste fino. Escala solo si el cliente llena muchos de los 50.
+
+## Sistema de accesibilidad para mover el globo
+
+- `components/globe/GlobeControls.tsx` — panel DOM con **botones reales** (ARIA): pad
+  direccional (mantener para girar), play/pausa de la rotación y recentrar. Funciona con
+  mouse/touch (mantener), Enter/Espacio en cada botón, y **flechas del teclado** con el panel
+  enfocado. Se renderiza **fuera** del subárbol `aria-hidden` del globo (el canvas sigue siendo
+  decorativo) y solo cuando no hay `prefers-reduced-motion`.
+- Canal: un objeto mutable compartido `GlobeInput { azVel, polVel, autoRotate, resetToken }`
+  (ref creado en `HeroGlobo`) que los controles escriben y el canvas lee **cada frame** — evita
+  el cruce de contexto de react-three-fiber y no dispara re-renders por frame.
+- En el canvas: el giro manual se aplica a un grupo `spin` (longitud) y a un grupo `tilt`
+  propio (latitud, sin prop de rotación para no resetearse), acotado; play/pausa controla la
+  rotación ambiente + el `autoRotate` de `OrbitControls`; recentrar vuelve a la vista inicial.

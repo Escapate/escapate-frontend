@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "framer-motion";
 import StaticGlobe from "./StaticGlobe";
 
@@ -20,14 +20,25 @@ export type GlobeMarker = {
   lng: number;
 };
 
+// Intención de control del globo, escrita por GlobeControls (DOM) y leída por el canvas
+// cada frame. Es un objeto mutable compartido (no estado React) → sin re-renders por frame.
+export type GlobeInput = {
+  azVel: number; // -1 (izq) .. 1 (der)
+  polVel: number; // -1 (arriba) .. 1 (abajo)
+  autoRotate: boolean;
+  resetToken: number;
+};
+
 export default function Globe({
   markers = [],
   onCotizar,
   cotizarLabel,
+  input,
 }: {
   markers?: GlobeMarker[];
   onCotizar?: (m: { name: string; nights: string; price: string }) => void;
   cotizarLabel?: string;
+  input?: RefObject<GlobeInput>;
 }) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -87,6 +98,7 @@ export default function Globe({
             markers={markers}
             onCotizar={onCotizar}
             cotizarLabel={cotizarLabel}
+            input={input}
           />
         </div>
       ) : (
