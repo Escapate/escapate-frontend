@@ -382,7 +382,12 @@ export default function GlobeCanvas({
       dpr={[1, 1.5]}
       gl={{ antialias: !hiDpr, alpha: true }}
       style={{ background: "transparent" }}
-      onPointerMissed={() => setActive(null)}
+      onPointerMissed={(e) => {
+        // El badge y el popover de los clústers son DOM (drei <Html>); un clic ahí dispara
+        // este "missed" (no impacta ningún mesh) y cerraría la card recién abierta. Solo
+        // cerramos cuando el clic cae en el lienzo 3D vacío (target = <canvas>).
+        if ((e.target as HTMLElement)?.tagName === "CANVAS") setActive(null);
+      }}
     >
       <Scene
         clusters={clusters}

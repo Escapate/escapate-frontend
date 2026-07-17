@@ -25,8 +25,8 @@ export default function PinCardModal({
         onClick={onClose}
         className="absolute inset-0 cursor-pointer bg-navy-950/70 backdrop-blur-sm"
       />
-      <div className="relative w-full max-w-xs overflow-hidden rounded-2xl border border-white/15 bg-navy-950/95 text-cream-50 shadow-2xl">
-        <div className="relative h-44 w-full">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/15 bg-navy-950/95 text-cream-50 shadow-2xl">
+        <div className="relative h-52 w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={marker.img} alt={marker.name} className="h-full w-full object-cover" />
           <button
@@ -38,13 +38,13 @@ export default function PinCardModal({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-5">
-          <p className="font-heading text-xl font-bold leading-tight">{marker.name}</p>
-          <p className="mt-1 font-mono text-sm text-orange-400">{marker.price}</p>
+        <div className="p-6">
+          <p className="font-heading text-2xl font-bold leading-tight">{marker.name}</p>
+          <p className="mt-1.5 font-heading text-base font-semibold text-cream-50">{marker.price}</p>
           <button
             type="button"
             onClick={onCotizar}
-            className="mt-4 w-full cursor-pointer rounded-lg bg-orange px-3 py-2.5 text-sm font-bold text-white transition hover:bg-orange-600"
+            className="mt-5 w-full cursor-pointer rounded-lg bg-orange px-3 py-3 text-base font-bold text-white transition hover:bg-orange-600"
           >
             {cotizarLabel}
           </button>

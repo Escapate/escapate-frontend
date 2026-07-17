@@ -202,20 +202,20 @@ export default function GlobeFocus({
         </div>
         <ul className="min-h-0 flex-1 divide-y divide-white/5 overflow-auto px-2 pb-24 lg:pb-3">
           {markers.map((m) => (
-            <li key={m.id} className="flex items-center gap-2 py-0.5">
+            <li key={m.id} className="flex items-center gap-2 py-1">
               <button
                 type="button"
                 onClick={() => flyTo(m.id)}
                 aria-label={`Ver ${m.name} en el globo`}
-                className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-white/5"
+                className="flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left transition hover:bg-white/5"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.img} alt={m.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+                <img src={m.img} alt={m.name} className="h-20 w-20 shrink-0 rounded-lg object-cover lg:h-16 lg:w-16" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-heading text-base font-bold leading-tight text-cream-50">
+                  <span className="block truncate font-heading text-xl font-bold leading-tight text-cream-50 lg:text-lg">
                     {m.name}
                   </span>
-                  <span className="block truncate font-mono text-[11px] text-orange-400">
+                  <span className="mt-0.5 block font-heading text-base font-semibold text-cream-50 lg:text-sm">
                     {m.price}
                   </span>
                 </span>
@@ -223,7 +223,7 @@ export default function GlobeFocus({
               <button
                 type="button"
                 onClick={() => cotizar(m)}
-                className="mr-2 shrink-0 cursor-pointer rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
+                className="mr-2 shrink-0 cursor-pointer rounded-lg bg-orange px-3 py-2 text-sm font-bold text-white transition hover:bg-orange-600"
               >
                 {cotizarLabel}
               </button>

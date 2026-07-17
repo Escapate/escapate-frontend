@@ -229,7 +229,7 @@ export default function DestinoMarker({
               </div>
               <div className="p-4">
                 <p className="font-heading text-lg font-bold leading-tight">{data.name}</p>
-                <p className="mt-1 font-mono text-xs text-orange-400">{data.price}</p>
+                <p className="mt-1 font-heading text-sm font-semibold text-cream-50">{data.price}</p>
                 <button
                   type="button"
                   onClick={onCotizar}
