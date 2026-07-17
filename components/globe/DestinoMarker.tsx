@@ -57,6 +57,7 @@ const PIN_GEOMETRY = buildPinGeometry();
 const _pos = new THREE.Vector3();
 const _normal = new THREE.Vector3();
 const _toCam = new THREE.Vector3();
+const _ndc = new THREE.Vector3();
 
 export default function DestinoMarker({
   data,
@@ -81,6 +82,9 @@ export default function DestinoMarker({
 }) {
   const [hovered, setHovered] = useState(false);
   const [visible, setVisible] = useState(true);
+  // Posición de la card respecto al pin (auto-flip estilo select según la altura en pantalla).
+  const [placement, setPlacement] = useState<"up" | "down">("up");
+  const placementRef = useRef<"up" | "down">("up");
   const hoveredRef = useRef(false);
   const visibleRef = useRef(true);
   const rootRef = useRef<THREE.Group>(null!);
@@ -106,6 +110,18 @@ export default function DestinoMarker({
           hoveredRef.current = false;
           setHovered(false);
           document.body.style.cursor = "auto";
+        }
+      }
+
+      // Auto-flip de la card: si el pin está en la franja superior de la pantalla, la card
+      // se abre hacia abajo; si no, hacia arriba (evita que se salga por el borde).
+      if (active) {
+        _ndc.copy(_pos).project(state.camera);
+        const topFrac = (1 - _ndc.y) / 2; // 0 = borde superior, 1 = borde inferior
+        const p = topFrac < 0.4 ? "down" : "up";
+        if (p !== placementRef.current) {
+          placementRef.current = p;
+          setPlacement(p);
         }
       }
     }
@@ -178,36 +194,38 @@ export default function DestinoMarker({
         </group>
 
         {active && (
-          <Html
-            position={[0, HEAD_H + 0.14, 0]}
-            center
-            distanceFactor={6}
-            occlude={[occludeRef]}
-            zIndexRange={[40, 0]}
-          >
+          // Sin distanceFactor → tamaño constante en pantalla (igual sin importar el zoom).
+          <Html position={[0, HEAD_H, 0]} occlude={[occludeRef]} zIndexRange={[40, 0]}>
             <div
               onMouseLeave={onClose}
-              className="w-44 overflow-hidden rounded-xl border border-white/15 bg-navy-950/95 text-cream-50 shadow-2xl backdrop-blur"
+              style={{
+                // Auto-flip: se ancla en el pin y sale hacia arriba o hacia abajo (estilo select).
+                transform:
+                  placement === "up"
+                    ? "translate(-50%, calc(-100% - 16px))"
+                    : "translate(-50%, 16px)",
+              }}
+              className="w-64 overflow-hidden rounded-2xl border border-white/15 bg-navy-950/95 text-cream-50 shadow-2xl backdrop-blur"
             >
-              <div className="relative h-24 w-full">
+              <div className="relative h-32 w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={data.img} alt={data.name} className="h-full w-full object-cover" />
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Cerrar"
-                  className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-navy-950/70 text-cream-50 transition hover:bg-navy-950"
+                  className="absolute right-2 top-2 grid h-7 w-7 cursor-pointer place-items-center rounded-full bg-navy-950/70 text-cream-50 transition hover:bg-navy-950"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="p-3">
-                <p className="font-heading text-sm font-bold">{data.name}</p>
-                <p className="mt-0.5 font-mono text-[11px] text-orange-400">{data.price}</p>
+              <div className="p-4">
+                <p className="font-heading text-lg font-bold leading-tight">{data.name}</p>
+                <p className="mt-1 font-mono text-xs text-orange-400">{data.price}</p>
                 <button
                   type="button"
                   onClick={onCotizar}
-                  className="mt-2 w-full cursor-pointer rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-white transition hover:bg-orange-600"
+                  className="mt-3 w-full cursor-pointer rounded-lg bg-orange px-3 py-2 text-sm font-bold text-white transition hover:bg-orange-600"
                 >
                   {cotizarLabel}
                 </button>
