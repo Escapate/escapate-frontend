@@ -21,6 +21,10 @@ const ZOOM_POW = 1.5; // el umbral baja como CLUSTER_DEG / zoom^ZOOM_POW → sep
 const BASE_TILT = 0.10; // inclinación base del globo
 const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
 const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
+// Sensibilidad del arrastre (órbita de cámara). Se divide por la escala real del zoom en el
+// useFrame: al acercar, el globo crece → el mismo giro de cámara barre más superficie en
+// pantalla, así que bajamos la sensibilidad para mantener el arrastre ~1:1 y con mejor manejo.
+const BASE_ROTATE_SPEED = 0.4;
 const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
 const INTERACT_PAUSE_MS = 6000; // tras interactuar, la rotación ambiente se pausa este tiempo
 
@@ -303,10 +307,16 @@ function Scene({
     if (zoomRef.current) {
       zoomRef.current.scale.setScalar(THREE.MathUtils.damp(zoomRef.current.scale.x, zoom, 6, dt));
     }
+    const scale = zoomRef.current ? zoomRef.current.scale.x : 1;
+
+    // Arrastre menos sensible cuanto más cerca: mantiene el barrido en pantalla ~constante y
+    // hace el globo más fácil de manejar al acercar. Atado a la escala real (animada) para que
+    // la sensibilidad cambie suave junto con el zoom.
+    if (controls) controls.rotateSpeed = BASE_ROTATE_SPEED / Math.max(1, scale);
 
     // Fronteras: fade atado a la escala real (no al zoom objetivo) → acompaña la animación.
     if (borderMatRef.current) {
-      const s = zoomRef.current ? zoomRef.current.scale.x : 1;
+      const s = scale;
       const t = THREE.MathUtils.clamp(
         (s - BORDER_FADE_START) / (BORDER_FADE_END - BORDER_FADE_START),
         0,
@@ -378,7 +388,7 @@ function Scene({
         autoRotateSpeed={0.55}
         enableDamping
         dampingFactor={0.08}
-        rotateSpeed={0.4}
+        rotateSpeed={BASE_ROTATE_SPEED}
         minPolarAngle={Math.PI * 0.28}
         maxPolarAngle={Math.PI * 0.72}
       />
