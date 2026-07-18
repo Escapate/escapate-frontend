@@ -9,17 +9,21 @@ export function Reveal({
   children,
   delay = 0,
   className = "",
+  slide = true,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  /* slide=false → solo fade (sin translateY). Útil cuando el contenido es un
+     ancla de scroll: el transform desplazaría el destino y recortaría el título. */
+  slide?: boolean;
 }) {
   const reduced = useReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 22 }}
+      initial={{ opacity: 0, y: slide ? 22 : 0 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-70px" }}
       transition={{
@@ -65,6 +69,7 @@ export function SectionHead({
   font = "display",
   align = "left",
   className = "",
+  titleId,
 }: {
   eyebrow: string;
   title: string;
@@ -72,6 +77,9 @@ export function SectionHead({
   font?: "display" | "heading";
   align?: "left" | "center";
   className?: string;
+  /* id opcional sobre el <h2>: sirve como ancla de scroll para que los enlaces
+     caigan en el título (no en el borde de la sección). */
+  titleId?: string;
 }) {
   const titleCls =
     font === "display"
@@ -79,10 +87,12 @@ export function SectionHead({
       : "font-heading font-extrabold tracking-tight";
   return (
     <Reveal
+      slide={!titleId}
       className={`${align === "center" ? "flex flex-col items-center text-center" : ""} ${className}`}
     >
       <Eyebrow>{eyebrow}</Eyebrow>
       <h2
+        id={titleId}
         className={`mt-3 max-w-2xl text-balance text-[clamp(1.9rem,4.2vw,3.2rem)] leading-[1.02] ${titleCls} ${inkCls[slot]}`}
       >
         {title}
