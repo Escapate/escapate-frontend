@@ -24,6 +24,13 @@ const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
 const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
 const INTERACT_PAUSE_MS = 6000; // tras interactuar, la rotación ambiente se pausa este tiempo
 
+// Fronteras de país: invisibles en la vista lejana (para no ensuciar el look limpio) y
+// van apareciendo con el zoom. El fade se ata a la escala REAL (amortiguada), no al zoom
+// objetivo, para que acompañe la animación del acercamiento.
+const BORDER_FADE_START = 0.8; // por debajo de esta escala: sin fronteras
+const BORDER_FADE_END = 2; // a esta escala: fronteras al máximo
+const BORDER_MAX_OPACITY = 0.72;
+
 type MarkerCotizar = { name: string; nights: string; price: string };
 type FocusTarget = { id: string; lat: number; lng: number };
 
@@ -45,6 +52,7 @@ function Earth({
   onCotizar,
   cotizarLabel,
   zoom,
+  borderMatRef,
 }: {
   spinRef: RefObject<THREE.Group>;
   tiltRef: RefObject<THREE.Group>;
@@ -54,10 +62,16 @@ function Earth({
   onCotizar?: (m: MarkerCotizar) => void;
   cotizarLabel: string;
   zoom: number;
+  borderMatRef: RefObject<THREE.MeshBasicMaterial>;
 }) {
-  const tex = useTexture("/textures/world-map.png");
+  const [tex, borderTex] = useTexture([
+    "/textures/world-map.png",
+    "/textures/world-borders.png",
+  ]);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
+  borderTex.colorSpace = THREE.SRGBColorSpace;
+  borderTex.anisotropy = 8;
   const earthRef = useRef<THREE.Mesh>(null!);
 
   return (
@@ -69,6 +83,18 @@ function Earth({
           <mesh ref={earthRef}>
             <sphereGeometry args={[GLOBE_R, 64, 64]} />
             <meshStandardMaterial map={tex} roughness={0.92} metalness={0.05} />
+          </mesh>
+          {/* Fronteras de país: esfera apenas mayor, sin luz (color constante y legible).
+              La opacidad la maneja el useFrame de Scene según el zoom (arranca en 0). */}
+          <mesh renderOrder={1}>
+            <sphereGeometry args={[GLOBE_R * 1.002, 64, 64]} />
+            <meshBasicMaterial
+              ref={borderMatRef}
+              map={borderTex}
+              transparent
+              opacity={0}
+              depthWrite={false}
+            />
           </mesh>
           {clusters.map((cl) =>
             cl.members.length === 1 ? (
@@ -205,6 +231,7 @@ function Scene({
   const spinRef = useRef<THREE.Group>(null!);
   const tiltRef = useRef<THREE.Group>(null!);
   const zoomRef = useRef<THREE.Group>(null!);
+  const borderMatRef = useRef<THREE.MeshBasicMaterial>(null!);
   const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
   const lastReset = useRef(0);
   const fly = useRef({ nonce: 0, spinY: 0, tiltX: 0, id: "", active: false });
@@ -261,6 +288,18 @@ function Scene({
       zoomRef.current.scale.setScalar(THREE.MathUtils.damp(zoomRef.current.scale.x, zoom, 6, dt));
     }
 
+    // Fronteras: fade atado a la escala real (no al zoom objetivo) → acompaña la animación.
+    if (borderMatRef.current) {
+      const s = zoomRef.current ? zoomRef.current.scale.x : 1;
+      const t = THREE.MathUtils.clamp(
+        (s - BORDER_FADE_START) / (BORDER_FADE_END - BORDER_FADE_START),
+        0,
+        1
+      );
+      borderMatRef.current.opacity = t * BORDER_MAX_OPACITY;
+      borderMatRef.current.visible = t > 0.001;
+    }
+
     // Rotación ambiente (el mapa se desliza).
     if (auto && spin) spin.rotation.y += dt * 0.04;
 
@@ -303,6 +342,7 @@ function Scene({
             onCotizar={onCotizar}
             cotizarLabel={cotizarLabel}
             zoom={zoom}
+            borderMatRef={borderMatRef}
           />
         </Suspense>
       </group>
