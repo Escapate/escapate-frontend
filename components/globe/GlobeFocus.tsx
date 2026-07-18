@@ -57,11 +57,12 @@ export default function GlobeFocus({
 
   const cotizar = useCallback(
     (m: { name: string; nights?: string; price?: string }) => {
-      // Hay que soltar el scroll del body ANTES de pedir la cotización: requestQuote
-      // hace scrollIntoView hacia #contacto y, con el body en overflow:hidden, ese
-      // scroll no llega a ningún lado. Cerrar primero tampoco alcanza — requestClose
-      // va por history.back(), que es asíncrono, así que el desmontaje (y con él la
-      // limpieza del overflow) ocurre varios ticks después de que el scroll ya falló.
+      // Se suelta el scroll del body antes de pedir la cotización: requestQuote hace
+      // scrollIntoView hacia #contacto y el desmontaje del overlay (que restauraría el
+      // overflow) llega tarde, porque requestClose va por history.back(), que es
+      // asíncrono. Esto por sí solo NO alcanza: lo que rompía el scroll era la
+      // restauración de posición del navegador al volver atrás — ver el efecto de
+      // historial más abajo, donde se pone scrollRestoration en "manual".
       document.body.style.overflow = prevOverflowRef.current;
       onCotizar(m);
       requestClose();
@@ -71,13 +72,27 @@ export default function GlobeFocus({
 
   // Historial: al abrir se empuja una entrada; el back del navegador (popstate) cierra el overlay.
   useEffect(() => {
+    // Mientras el overlay vive, el scroll lo manejamos nosotros. Por defecto
+    // (scrollRestoration = "auto") el navegador restaura la posición guardada en la
+    // entrada a la que se vuelve — el hero — como parte de la travesía de history.back().
+    // Esa restauración ocurre DESPUÉS del scrollIntoView que dispara "Cotizar", así que lo
+    // pisaba y el usuario terminaba arriba con el formulario prellenado fuera de vista.
+    const prevRestoration = window.history.scrollRestoration;
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
     if (!pushedRef.current) {
       window.history.pushState({ globeFocus: true }, "");
       pushedRef.current = true;
     }
     const onPop = () => onClose();
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = prevRestoration;
+      }
+    };
   }, [onClose]);
 
   // Escape para cerrar + foco inicial en cerrar + trampa de foco (aria-modal) + scroll bloqueado.
