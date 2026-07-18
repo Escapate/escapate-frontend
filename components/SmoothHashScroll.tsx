@@ -38,6 +38,12 @@ export default function SmoothHashScroll() {
       e.preventDefault();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      // preventDefault también se lleva por delante la escritura del hash, así que la
+      // hacemos a mano: sin esto la barra de direcciones nunca mostraba #destinos, no se
+      // podía compartir el enlace a una sección y el botón "atrás" no devolvía a la anterior.
+      if (window.location.hash !== `#${id}`) {
+        window.history.pushState(null, "", `#${id}`);
+      }
     }
 
     document.addEventListener("click", onClick);

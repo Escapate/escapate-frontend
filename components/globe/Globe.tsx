@@ -1,11 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "framer-motion";
 import StaticGlobe from "./StaticGlobe";
 import PinCardModal from "./PinCardModal";
 import { useIsMobile } from "@/lib/use-is-mobile";
+import { useI18n } from "@/lib/i18n";
 
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
   ssr: false,
@@ -17,11 +18,24 @@ const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
 export type GlobeMarker = {
   id: string;
   name: string;
-  price: string;
   img: string;
-  nights: string;
+  /** País o zona. Se muestra bajo el nombre cuando el destino no tiene precio. */
+  region: string;
   lat: number;
   lng: number;
+  /** Solo los destinos con paquete armado traen precio y noches. */
+  price?: string;
+  nights?: string;
+};
+
+// Textos que necesitan los marcadores. Van como props (no por contexto) porque viven
+// dentro del <Canvas>, que corre en el reconciliador de react-three-fiber: el contexto
+// de React no cruza esa frontera. Globe los resuelve una vez y los reparte.
+export type GlobeLabels = {
+  cotizar: string;
+  close: string;
+  destinations: string;
+  inArea: string;
 };
 
 // Intención de control del globo, escrita por GlobeControls (DOM) y leída por el canvas
@@ -36,7 +50,6 @@ export type GlobeInput = {
 export default function Globe({
   markers = [],
   onCotizar,
-  cotizarLabel,
   input,
   zoom = 1,
   paused = false,
@@ -44,14 +57,25 @@ export default function Globe({
   focusNonce = 0,
 }: {
   markers?: GlobeMarker[];
-  onCotizar?: (m: { name: string; nights: string; price: string }) => void;
-  cotizarLabel?: string;
+  onCotizar?: (m: { name: string; nights?: string; price?: string }) => void;
   input?: RefObject<GlobeInput>;
   zoom?: number;
   paused?: boolean;
   focusId?: string | null;
   focusNonce?: number;
 }) {
+  const { c } = useI18n();
+  // Se resuelven acá arriba (fuera del Canvas, donde el contexto sí existe) y bajan
+  // como prop hasta los marcadores.
+  const labels = useMemo<GlobeLabels>(
+    () => ({
+      cotizar: c.nav.cta,
+      close: c.globe.close,
+      destinations: c.globe.destinations,
+      inArea: c.globe.inArea,
+    }),
+    [c]
+  );
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false); // el navegador ya está ocioso
@@ -115,7 +139,7 @@ export default function Globe({
             frameloop={paused || !inView ? "never" : "always"}
             markers={markers}
             onCotizar={onCotizar}
-            cotizarLabel={cotizarLabel}
+            labels={labels}
             input={input}
             zoom={zoom}
             focusId={focusId}
@@ -131,7 +155,7 @@ export default function Globe({
       {isMobile && activeMarker && (
         <PinCardModal
           marker={activeMarker}
-          cotizarLabel={cotizarLabel ?? "Cotizar"}
+          labels={labels}
           onClose={() => setActive(null)}
           onCotizar={() => {
             onCotizar?.(activeMarker);

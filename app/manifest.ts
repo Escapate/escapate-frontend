@@ -12,7 +12,16 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "es-CO",
     background_color: "#0C1B2F",
     theme_color: "#0C1B2F",
+    // Chrome/Android solo ofrecen instalar si hay un PNG grande declarado; con el SVG
+    // suelto la app quedaba fuera del criterio de instalabilidad. /icon.png lo genera
+    // Next a partir de app/icon.png (512×512).
     icons: [
+      {
+        src: "/icon.png",
+        type: "image/png",
+        sizes: "512x512",
+        purpose: "any",
+      },
       {
         src: "/icon.svg",
         type: "image/svg+xml",

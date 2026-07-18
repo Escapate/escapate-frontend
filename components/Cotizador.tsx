@@ -118,6 +118,16 @@ function Combobox({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          // Enter dentro del combobox cierra la lista en vez de enviar el formulario:
+          // aquí el usuario está eligiendo destino, no terminando de cotizar.
+          if (e.key === "Enter") {
+            e.preventDefault();
+            setOpen(false);
+          } else if (e.key === "Escape") {
+            setOpen(false);
+          }
+        }}
         placeholder={placeholder}
         role="combobox"
         aria-expanded={open}
@@ -194,10 +204,11 @@ export default function Cotizador() {
   const q = c.quote;
   const { intent } = useQuoteIntent();
   const wa = `https://wa.me/${WHATSAPP_NUMBER}`;
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLFormElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const returnRef = useRef<HTMLInputElement>(null);
   // Honeypot antispam: un humano nunca lo ve ni lo llena; si viene con valor, es un bot.
   const botRef = useRef<HTMLInputElement>(null);
 
@@ -225,6 +236,11 @@ export default function Cotizador() {
   const [planIdx, setPlanIdx] = useState<number | null>(null);
   const [prefsIdx, setPrefsIdx] = useState<number[]>([]);
   const [otherPref, setOtherPref] = useState("");
+  // Hoy en YYYY-MM-DD para el `min` de los <input type="date">. Se calcula tras montar
+  // (no en render) porque el sitio es un export estático: el HTML se prerenderiza en el
+  // build y una fecha calculada en render quedaría congelada en la fecha de compilación.
+  const [today, setToday] = useState("");
+  useEffect(() => setToday(new Date().toLocaleDateString("en-CA")), []);
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -245,6 +261,16 @@ export default function Cotizador() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intent?.seq]);
+
+  // Con fechas exactas los días se derivan del rango. Antes eran independientes y el
+  // mensaje podía salir con "5 días" junto a un rango de tres semanas — tres datos
+  // contradictorios que el asesor tenía que devolver a preguntar.
+  useEffect(() => {
+    if (!hasDates || !departure || !depReturn) return;
+    const ms = new Date(depReturn).getTime() - new Date(departure).getTime();
+    if (!Number.isFinite(ms) || ms < 0) return;
+    setDays(Math.round(ms / 86_400_000) + 1);
+  }, [hasDates, departure, depReturn]);
 
   const total = adults + children + seniors;
   const paxParts = [
@@ -283,20 +309,40 @@ export default function Cotizador() {
     window.open(`${wa}?text=${encodeURIComponent(message)}`, "_blank");
   }
 
-  function validateEmail() {
+  // Mensaje tal como se envió la última vez. Sirve para saber si lo que hay en pantalla
+  // ya cambió respecto a lo enviado (ver el efecto de abajo).
+  const sentMessage = useRef<string | null>(null);
+
+  // Cualquier edición posterior a un envío devuelve el formulario a "idle": el aviso de
+  // "¡Gracias!" de la cotización anterior no puede quedar flotando sobre datos nuevos,
+  // haciendo creer que la nueva ya se envió.
+  useEffect(() => {
+    if ((status === "ok" || status === "err") && message !== sentMessage.current) {
+      setStatus("idle");
+    }
+  }, [message, status]);
+
+  function validate() {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = q.required;
     if (!isValidPhone(phone)) e.phone = phone.trim() ? q.invalidPhone : q.required;
     if (!isValidEmail(email)) e.email = email.trim() ? q.invalidEmail : q.required;
+    // Las fechas son YYYY-MM-DD: comparar como cadenas ya ordena cronológicamente.
+    if (hasDates && departure && depReturn && depReturn < departure) e.dates = q.invalidDates;
     setErrors(e);
     if (e.name) nameRef.current?.focus();
     else if (e.phone) phoneRef.current?.focus();
     else if (e.email) emailRef.current?.focus();
+    else if (e.dates) {
+      setOpen(true); // el error vive en "Más detalles"; hay que abrirlo para que se vea
+      returnRef.current?.focus();
+    }
     return Object.keys(e).length === 0;
   }
 
-  async function onEmail() {
-    if (!validateEmail()) return;
+  async function onEmail(ev: React.FormEvent) {
+    ev.preventDefault();
+    if (!validate()) return;
     if (!WEB3FORMS_KEY) {
       onWhatsApp();
       return;
@@ -308,13 +354,18 @@ export default function Cotizador() {
       return;
     }
     setStatus("sending");
+    sentMessage.current = message;
     try {
-      // Enviamos solo `message`: ya trae el resumen completo y legible (origen, destino,
-      // pasajeros, días, fechas, contacto, hotel, plan, preferencias, notas). Así el correo
-      // llega como un único bloque entendible en vez de una lista de campos sueltos.
+      // El cuerpo va como un solo bloque legible (`message` ya trae origen, destino,
+      // pasajeros, días, fechas, contacto, hotel, plan, preferencias y notas) en vez de
+      // una lista de campos sueltos. Aparte van `from_name` y `replyto`, que son los que
+      // hacen que "Responder" en la bandeja de la agencia le escriba al cliente: sin
+      // ellos el correo del lead solo existía como texto dentro del mensaje.
       const payload = {
         access_key: WEB3FORMS_KEY,
-        subject: "Nueva cotización · Escápate",
+        subject: `Nueva cotización · ${dest} · Escápate`,
+        from_name: name.trim(),
+        replyto: sanitizeEmail(email),
         message,
       };
 
@@ -338,8 +389,12 @@ export default function Cotizador() {
     }`;
 
   return (
-    <div
+    /* Es un <form> de verdad (no un div) para que el navegador autocomplete nombre,
+       celular y correo, y para que Enter envíe. noValidate: la validación es la nuestra. */
+    <form
       ref={ref}
+      onSubmit={onEmail}
+      noValidate
       className="overflow-hidden rounded-[10px] bg-cream-50 text-navy-900 shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)]"
     >
       {/* header del pase */}
@@ -427,6 +482,9 @@ export default function Cotizador() {
           <div>
             <input
               ref={nameRef}
+              name="name"
+              autoComplete="name"
+              aria-label={q.name}
               value={name}
               onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => ({ ...p, name: "" })); }}
               placeholder={q.name}
@@ -445,6 +503,9 @@ export default function Cotizador() {
               ref={phoneRef}
               type="tel"
               inputMode="tel"
+              name="phone"
+              autoComplete="tel"
+              aria-label={q.phone}
               value={phone}
               onChange={(e) => { setPhone(filterPhoneInput(e.target.value)); if (errors.phone) setErrors((p) => ({ ...p, phone: "" })); }}
               placeholder={q.phone}
@@ -463,6 +524,9 @@ export default function Cotizador() {
               ref={emailRef}
               type="email"
               inputMode="email"
+              name="email"
+              autoComplete="email"
+              aria-label={q.emailField}
               value={email}
               onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors((p) => ({ ...p, email: "" })); }}
               placeholder={q.emailField}
@@ -540,9 +604,15 @@ export default function Cotizador() {
                       </FieldLabel>
                       <input
                         type="date"
+                        name="departure"
+                        aria-label={q.departure}
                         value={departure}
-                        onChange={(e) => setDeparture(e.target.value)}
-                        className={inputCls()}
+                        min={today || undefined}
+                        onChange={(e) => {
+                          setDeparture(e.target.value);
+                          if (errors.dates) setErrors((p) => ({ ...p, dates: "" }));
+                        }}
+                        className={inputCls(!!errors.dates)}
                       />
                     </div>
                     <div>
@@ -550,12 +620,31 @@ export default function Cotizador() {
                         {q.returnLabel}
                       </FieldLabel>
                       <input
+                        ref={returnRef}
                         type="date"
+                        name="return"
+                        aria-label={q.returnLabel}
                         value={depReturn}
-                        onChange={(e) => setDepReturn(e.target.value)}
-                        className={inputCls()}
+                        // El regreso no puede ser anterior a la salida (ni a hoy).
+                        min={departure || today || undefined}
+                        onChange={(e) => {
+                          setDepReturn(e.target.value);
+                          if (errors.dates) setErrors((p) => ({ ...p, dates: "" }));
+                        }}
+                        className={inputCls(!!errors.dates)}
+                        aria-invalid={!!errors.dates}
+                        aria-describedby={errors.dates ? "quote-dates-error" : undefined}
                       />
                     </div>
+                    {errors.dates && (
+                      <p
+                        id="quote-dates-error"
+                        role="alert"
+                        className="text-xs text-red-600 sm:col-span-2"
+                      >
+                        {errors.dates}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="mt-2">
@@ -563,6 +652,8 @@ export default function Cotizador() {
                       {q.month}
                     </FieldLabel>
                     <select
+                      name="month"
+                      aria-label={q.month}
                       value={monthIdx ?? ""}
                       onChange={(e) => setMonthIdx(e.target.value === "" ? null : Number(e.target.value))}
                       className={inputCls()}
@@ -657,8 +748,7 @@ export default function Cotizador() {
             {q.whatsapp}
           </button>
           <button
-            type="button"
-            onClick={onEmail}
+            type="submit"
             disabled={status === "sending"}
             className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-navy-900/20 px-5 py-3.5 text-sm font-semibold text-navy-900 transition hover:border-orange hover:text-orange disabled:opacity-60"
           >
@@ -672,6 +762,6 @@ export default function Cotizador() {
           <p className="mt-3 text-sm font-semibold text-orange-600">{q.err}</p>
         )}
       </div>
-    </div>
+    </form>
   );
 }

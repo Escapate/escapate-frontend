@@ -36,6 +36,20 @@ export default function Destinos() {
   const [cooldown, setCooldown] = useState(false);
   const [visible, setVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  // Índices cuya foto de fondo ya se puede descargar. Las 8 son a pantalla completa
+  // (~1,6 MB en total) y, apiladas en inset-0, cruzaban el umbral de lazy-load todas a la
+  // vez aunque solo una se vea. Con `images.unoptimized` (obligado por el export estático)
+  // tampoco hay WebP ni srcset que amortigüe. Se monta la activa, la siguiente (que es a
+  // donde va el autoplay) y las ya vistas — así el crossfade conserva la saliente.
+  const [loaded, setLoaded] = useState<number[]>(() => (count > 1 ? [0, 1] : [0]));
+
+  useEffect(() => {
+    setLoaded((prev) => {
+      const next = [active, (active + 1) % count];
+      const missing = next.filter((i) => !prev.includes(i));
+      return missing.length ? [...prev, ...missing] : prev;
+    });
+  }, [active, count]);
 
   // Programa la reanudación del autoplay pasados `ms`.
   function scheduleResume(ms: number) {
@@ -132,14 +146,16 @@ export default function Destinos() {
             i === active ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Image
-            src={d.img}
-            alt={`${d.name} · ${d.region}`}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority={i === 0}
-          />
+          {loaded.includes(i) && (
+            <Image
+              src={d.img}
+              alt={`${d.name} · ${d.region}`}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={i === 0}
+            />
+          )}
         </div>
       ))}
       {/* Velo más suave: la foto se ve más; solo se oscurece abajo para leer el texto */}

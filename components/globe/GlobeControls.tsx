@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useCallback, useEffect, useState, type RefObject } from "react";
+import { useI18n } from "@/lib/i18n";
 import type { GlobeInput } from "./Globe";
 
 type Dir = "left" | "right" | "up" | "down";
@@ -43,6 +44,8 @@ export default function GlobeControls({
   canZoomOut?: boolean;
   showPad?: boolean;
 }) {
+  const { c } = useI18n();
+  const g = c.globe;
   // Se inicializa desde el flag compartido para no desincronizarse al re-montar el panel
   // (los controles del hero son colapsables → se montan/desmontan).
   const [playing, setPlaying] = useState(() => input.current?.autoRotate ?? true);
@@ -126,7 +129,7 @@ export default function GlobeControls({
   const pauseBtn = (
     <button
       type="button"
-      aria-label={playing ? "Pausar la rotación" : "Reanudar la rotación"}
+      aria-label={playing ? g.pause : g.resume}
       onClick={togglePlay}
       className={btnCls}
     >
@@ -134,17 +137,17 @@ export default function GlobeControls({
     </button>
   );
   const resetBtn = (
-    <button type="button" aria-label="Recentrar el globo" onClick={reset} className={btnCls}>
+    <button type="button" aria-label={g.recenter} onClick={reset} className={btnCls}>
       <RotateCcw className="h-4 w-4" />
     </button>
   );
   const zoomOutBtn = hasZoom ? (
-    <button type="button" aria-label="Alejar el globo" onClick={onZoomOut} disabled={!canZoomOut} className={zoomCls}>
+    <button type="button" aria-label={g.zoomOut} onClick={onZoomOut} disabled={!canZoomOut} className={zoomCls}>
       <Minus className="h-4 w-4" />
     </button>
   ) : null;
   const zoomInBtn = hasZoom ? (
-    <button type="button" aria-label="Acercar el globo" onClick={onZoomIn} disabled={!canZoomIn} className={zoomCls}>
+    <button type="button" aria-label={g.zoomIn} onClick={onZoomIn} disabled={!canZoomIn} className={zoomCls}>
       <Plus className="h-4 w-4" />
     </button>
   ) : null;
@@ -164,7 +167,7 @@ export default function GlobeControls({
     return (
       <div
         role="group"
-        aria-label="Controles del globo"
+        aria-label={g.controls}
         onKeyDown={onZoomKeys}
         className="pointer-events-auto flex items-center gap-1 rounded-xl border border-white/15 bg-navy-950/60 p-1.5 backdrop-blur"
       >
@@ -196,15 +199,15 @@ export default function GlobeControls({
       className="pointer-events-auto grid grid-cols-3 gap-1 rounded-xl border border-white/15 bg-navy-950/60 p-1.5 backdrop-blur"
     >
       <span aria-hidden="true" />
-      {dirButton("up", "Girar el globo hacia arriba", <ChevronUp className="h-4 w-4" />)}
+      {dirButton("up", g.rotateUp, <ChevronUp className="h-4 w-4" />)}
       {pauseBtn}
 
-      {dirButton("left", "Girar el globo a la izquierda", <ChevronLeft className="h-4 w-4" />)}
+      {dirButton("left", g.rotateLeft, <ChevronLeft className="h-4 w-4" />)}
       {resetBtn}
-      {dirButton("right", "Girar el globo a la derecha", <ChevronRight className="h-4 w-4" />)}
+      {dirButton("right", g.rotateRight, <ChevronRight className="h-4 w-4" />)}
 
       {zoomOutBtn ?? <span aria-hidden="true" />}
-      {dirButton("down", "Girar el globo hacia abajo", <ChevronDown className="h-4 w-4" />)}
+      {dirButton("down", g.rotateDown, <ChevronDown className="h-4 w-4" />)}
       {zoomInBtn ?? <span aria-hidden="true" />}
     </div>
   );

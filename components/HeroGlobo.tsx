@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import Globe, { type GlobeInput } from "./globe/Globe";
 import GlobeControls from "./globe/GlobeControls";
@@ -31,22 +31,36 @@ export default function HeroGlobo() {
   const closeFocus = useCallback(() => setFocused(false), []);
   // Panel de controles del globo en el hero: colapsable, cerrado por defecto.
   const [controlsOpen, setControlsOpen] = useState(false);
-  const markers = DESTINO_GEO.flatMap((geo) => {
-    const info = c.destinos.items.find((d) => d.id === geo.id);
-    if (!info) return [];
-    return [
-      {
-        id: geo.id,
-        name: info.name,
-        price: info.price,
-        img: info.img,
-        nights: info.nights,
-        lat: geo.lat,
-        lng: geo.lng,
-      },
-    ];
-  });
-  const handleCotizar = (m: { name: string; nights: string; price: string }) =>
+  // Memoizado: sin esto el array cambiaba de identidad en cada render y anulaba los
+  // useMemo de GlobeCanvas (clustering completo + proyección de cada pin por render).
+  const markers = useMemo(
+    () => {
+      // Los 8 paquetes con precio + los 42 destinos que solo tienen pin y foto.
+      const catalogo = [...c.destinos.items, ...c.destinos.more];
+      return DESTINO_GEO.flatMap((geo) => {
+        const info = catalogo.find((d) => d.id === geo.id);
+        if (!info) return [];
+        const conPaquete = "price" in info;
+        return [
+          {
+            id: geo.id,
+            name: info.name,
+            region: info.region,
+            // Siempre la miniatura de 640x320, nunca el `img` del carrusel: ese pesa
+            // ~350 KB porque se usa como fondo a pantalla completa, y acá la card
+            // mide 256 px de ancho.
+            img: `/destinos/globo/${geo.id}.webp`,
+            price: conPaquete ? info.price : undefined,
+            nights: conPaquete ? info.nights : undefined,
+            lat: geo.lat,
+            lng: geo.lng,
+          },
+        ];
+      });
+    },
+    [c.destinos.items, c.destinos.more]
+  );
+  const handleCotizar = (m: { name: string; nights?: string; price?: string }) =>
     requestQuote(buildQuoteIntent(m, c.quote.prefillNote));
 
   const rise = (delay: number) =>
@@ -77,7 +91,7 @@ export default function HeroGlobo() {
             className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 lg:justify-start"
           >
             <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-orange-400 sm:text-sm">
-              Agencia de viajes
+              {c.hero.agency}
             </span>
             <span className="hidden h-5 w-px bg-cream-50/30 sm:inline-block" aria-hidden="true" />
             <span className="font-display text-xl font-black uppercase tracking-tight text-cream-50 sm:text-2xl">
@@ -142,7 +156,6 @@ export default function HeroGlobo() {
             <Globe
               markers={markers}
               onCotizar={handleCotizar}
-              cotizarLabel={c.nav.cta}
               input={globeInput}
               paused={focused}
             />
@@ -161,7 +174,7 @@ export default function HeroGlobo() {
                   className="absolute right-1 top-1 z-20 inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/15 bg-navy-950/60 px-3 py-1.5 font-mono text-[11px] tracking-wide text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
                 >
                   <Maximize2 className="h-3.5 w-3.5" />
-                  Explorar
+                  {c.globe.explore}
                 </button>
                 <div className="absolute bottom-1 right-1 z-20 flex flex-col items-end gap-1.5">
                   {controlsOpen && <GlobeControls input={globeInput} />}
@@ -169,7 +182,7 @@ export default function HeroGlobo() {
                     type="button"
                     onClick={() => setControlsOpen((o) => !o)}
                     aria-expanded={controlsOpen}
-                    aria-label={controlsOpen ? "Ocultar controles del globo" : "Mostrar controles del globo"}
+                    aria-label={controlsOpen ? c.globe.hideControls : c.globe.showControls}
                     className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-white/15 bg-navy-950/60 text-cream-50 outline-none backdrop-blur transition hover:border-orange hover:text-orange-400 focus-visible:ring-2 focus-visible:ring-orange"
                   >
                     {controlsOpen ? <X className="h-4 w-4" /> : <Move className="h-4 w-4" />}
@@ -181,12 +194,7 @@ export default function HeroGlobo() {
         </div>
       </div>
       {focused && !reduced && (
-        <GlobeFocus
-          markers={markers}
-          onCotizar={handleCotizar}
-          cotizarLabel={c.nav.cta}
-          onClose={closeFocus}
-        />
+        <GlobeFocus markers={markers} onCotizar={handleCotizar} onClose={closeFocus} />
       )}
     </section>
   );

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import Globe, { type GlobeInput, type GlobeMarker } from "./Globe";
 import GlobeControls from "./GlobeControls";
+import { useI18n } from "@/lib/i18n";
 
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
@@ -19,14 +20,14 @@ const clamp = (n: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, n));
 export default function GlobeFocus({
   markers,
   onCotizar,
-  cotizarLabel,
   onClose,
 }: {
   markers: GlobeMarker[];
-  onCotizar: (m: { name: string; nights: string; price: string }) => void;
-  cotizarLabel: string;
+  onCotizar: (m: { name: string; nights?: string; price?: string }) => void;
   onClose: () => void;
 }) {
+  const { c } = useI18n();
+  const g = c.globe;
   const input = useRef<GlobeInput>({ azVel: 0, polVel: 0, autoRotate: true, resetToken: 0 });
   const [zoom, setZoom] = useState(ZOOM_MIN);
   // Destino enfocado: al clickearlo en el menú, el globo vuela hacia él, pausa y abre su card.
@@ -40,6 +41,9 @@ export default function GlobeFocus({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const pushedRef = useRef(false);
+  // Overflow original del body. Se guarda en un ref (no en una variable del efecto)
+  // porque `cotizar` también necesita restaurarlo — ver el comentario de abajo.
+  const prevOverflowRef = useRef("");
 
   const zoomIn = useCallback(() => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2))), []);
   const zoomOut = useCallback(() => setZoom((z) => clamp(+(z - ZOOM_STEP).toFixed(2))), []);
@@ -52,7 +56,13 @@ export default function GlobeFocus({
   }, []);
 
   const cotizar = useCallback(
-    (m: { name: string; nights: string; price: string }) => {
+    (m: { name: string; nights?: string; price?: string }) => {
+      // Hay que soltar el scroll del body ANTES de pedir la cotización: requestQuote
+      // hace scrollIntoView hacia #contacto y, con el body en overflow:hidden, ese
+      // scroll no llega a ningún lado. Cerrar primero tampoco alcanza — requestClose
+      // va por history.back(), que es asíncrono, así que el desmontaje (y con él la
+      // limpieza del overflow) ocurre varios ticks después de que el scroll ya falló.
+      document.body.style.overflow = prevOverflowRef.current;
       onCotizar(m);
       requestClose();
     },
@@ -97,11 +107,11 @@ export default function GlobeFocus({
       }
     };
     window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
+    prevOverflowRef.current = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prevOverflowRef.current;
     };
   }, [requestClose]);
 
@@ -143,7 +153,7 @@ export default function GlobeFocus({
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Explorar destinos en el globo"
+      aria-label={`${g.explore} · ${g.destinations}`}
       className="fixed inset-0 z-[100] flex flex-col bg-navy-950/97 backdrop-blur-md lg:flex-row"
     >
       {/* Escenario del globo (overflow-hidden → el globo no se desborda sobre el menú/la X). */}
@@ -154,7 +164,6 @@ export default function GlobeFocus({
         <Globe
           markers={markers}
           onCotizar={cotizar}
-          cotizarLabel={cotizarLabel}
           input={input}
           zoom={zoom}
           focusId={focusId}
@@ -163,7 +172,7 @@ export default function GlobeFocus({
         {/* Hint oculto en celular (no hay rueda; el gesto de pellizco/arrastre se descubre solo). */}
         <div className="pointer-events-none absolute left-1/2 top-4 z-10 hidden -translate-x-1/2 sm:block">
           <span className="rounded-full border border-orange/30 bg-navy-950/80 px-4 py-1.5 font-mono text-[11px] tracking-wide text-cream-50/90 shadow-lg backdrop-blur">
-            Rueda o pellizca para acercar · arrastra para girar
+            {g.hint}
           </span>
         </div>
         <div className="absolute bottom-4 right-4 z-10">
@@ -184,17 +193,17 @@ export default function GlobeFocus({
         <div className="flex items-center justify-between px-5 py-4">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-orange-400">
-              Explorar
+              {g.explore}
             </p>
             <h2 className="font-display text-xl font-black uppercase tracking-tight text-cream-50">
-              Destinos
+              {g.destinations}
             </h2>
           </div>
           <button
             ref={closeRef}
             type="button"
             onClick={requestClose}
-            aria-label="Cerrar el mapa"
+            aria-label={g.closeMap}
             className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-orange"
           >
             <X className="h-4 w-4" />
@@ -206,18 +215,32 @@ export default function GlobeFocus({
               <button
                 type="button"
                 onClick={() => flyTo(m.id)}
-                aria-label={`Ver ${m.name} en el globo`}
+                aria-label={`${g.viewOnGlobe}: ${m.name}`}
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left transition hover:bg-white/5"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.img} alt={m.name} className="h-20 w-20 shrink-0 rounded-lg object-cover lg:h-16 lg:w-16" />
+                {/* lazy: la lista son 50 miniaturas; sin esto se piden todas de golpe
+                    al abrir el modo enfoque. */}
+                <img
+                  src={m.img}
+                  alt={m.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-20 w-20 shrink-0 rounded-lg object-cover lg:h-16 lg:w-16"
+                />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-heading text-xl font-bold leading-tight text-cream-50 lg:text-lg">
                     {m.name}
                   </span>
-                  <span className="mt-0.5 block font-heading text-base font-semibold text-cream-50 lg:text-sm">
-                    {m.price}
-                  </span>
+                  {m.price ? (
+                    <span className="mt-0.5 block font-heading text-base font-semibold text-cream-50 lg:text-sm">
+                      {m.price}
+                    </span>
+                  ) : (
+                    <span className="mt-0.5 block truncate font-mono text-sm tracking-wide text-cream-50/60 lg:text-xs">
+                      {m.region}
+                    </span>
+                  )}
                 </span>
               </button>
               <button
@@ -225,7 +248,7 @@ export default function GlobeFocus({
                 onClick={() => cotizar(m)}
                 className="mr-2 shrink-0 cursor-pointer rounded-lg bg-orange px-3 py-2 text-sm font-bold text-white transition hover:bg-orange-600"
               >
-                {cotizarLabel}
+                {c.nav.cta}
               </button>
             </li>
           ))}

@@ -23,6 +23,15 @@ describe("buildQuoteIntent", () => {
       note: "Interesado en el paquete Cartagena · 4 noches, desde $890.000",
     });
   });
+
+  it("sin precio ni noches deja la nota solo con el destino y cae al fallback de días", () => {
+    const r = buildQuoteIntent({ name: "Tokio" }, "Interesado en el paquete");
+    expect(r).toEqual({
+      dest: "Tokio",
+      days: 5, // fallback de 4 noches + 1
+      note: "Interesado en el paquete Tokio",
+    });
+  });
 });
 
 describe("nextIntent", () => {

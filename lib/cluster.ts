@@ -1,14 +1,19 @@
 import { latLngToVec3 } from "./destino-geo";
 
-/** Marcador de entrada al clustering (lo que aporta cada destino con info). */
+/**
+ * Marcador de entrada al clustering (lo que aporta cada destino con info).
+ * Espeja a `GlobeMarker`: solo los destinos con paquete armado traen precio y noches,
+ * los que existen únicamente como pin en el globo llegan sin ellos.
+ */
 export type ClusterInput = {
   id: string;
   name: string;
-  price: string;
   img: string;
-  nights: string;
+  region: string;
   lat: number;
   lng: number;
+  price?: string;
+  nights?: string;
 };
 
 /** Grupo de 1+ destinos cercanos, con su centroide ya proyectado a la esfera de render. */

@@ -2,9 +2,10 @@ import { describe, it, expect } from "vitest";
 import { clusterMarkers, type ClusterInput } from "./cluster";
 import { latLngToVec3 } from "./destino-geo";
 
-const cartagena: ClusterInput = { id: "cartagena", name: "Cartagena", price: "", img: "", nights: "", lat: 10.39, lng: -75.51 };
-const santaMarta: ClusterInput = { id: "santa-marta", name: "Santa Marta", price: "", img: "", nights: "", lat: 11.24, lng: -74.2 };
-const tokyo: ClusterInput = { id: "tokyo", name: "Tokio", price: "", img: "", nights: "", lat: 35.68, lng: 139.65 };
+// El clustering solo mira lat/lng; el resto del marcador viaja como carga útil.
+const cartagena: ClusterInput = { id: "cartagena", name: "Cartagena", img: "", region: "", lat: 10.39, lng: -75.51 };
+const santaMarta: ClusterInput = { id: "santa-marta", name: "Santa Marta", img: "", region: "", lat: 11.24, lng: -74.2 };
+const tokyo: ClusterInput = { id: "tokyo", name: "Tokio", img: "", region: "", lat: 35.68, lng: 139.65 };
 
 describe("clusterMarkers", () => {
   it("devuelve [] con lista vacía", () => {

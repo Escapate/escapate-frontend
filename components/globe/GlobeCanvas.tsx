@@ -8,7 +8,7 @@ import { latLngToVec3 } from "@/lib/destino-geo";
 import { clusterMarkers, type Cluster } from "@/lib/cluster";
 import DestinoMarker from "./DestinoMarker";
 import ClusterMarker from "./ClusterMarker";
-import type { GlobeMarker, GlobeInput } from "./Globe";
+import type { GlobeMarker, GlobeInput, GlobeLabels } from "./Globe";
 
 const JET_MODEL = "/models/jet.glb";
 
@@ -35,7 +35,7 @@ const BORDER_FADE_START = 0.8; // por debajo de esta escala: sin fronteras
 const BORDER_FADE_END = 2; // a esta escala: fronteras al máximo
 const BORDER_MAX_OPACITY = 0.72;
 
-type MarkerCotizar = { name: string; nights: string; price: string };
+type MarkerCotizar = { name: string; nights?: string; price?: string };
 type FocusTarget = { id: string; lat: number; lng: number };
 
 // Ángulos (spin en Y, tilt en X) que traen un lat/lng al frente, mirando a la cámara.
@@ -63,7 +63,7 @@ function Earth({
   active,
   setActive,
   onCotizar,
-  cotizarLabel,
+  labels,
   zoom,
   borderMatRef,
 }: {
@@ -73,7 +73,7 @@ function Earth({
   active: string | null;
   setActive: (id: string | null) => void;
   onCotizar?: (m: MarkerCotizar) => void;
-  cotizarLabel: string;
+  labels: GlobeLabels;
   zoom: number;
   borderMatRef: RefObject<THREE.MeshBasicMaterial>;
 }) {
@@ -117,6 +117,7 @@ function Earth({
                   id: cl.members[0].id,
                   name: cl.members[0].name,
                   price: cl.members[0].price,
+                  region: cl.members[0].region,
                   img: cl.members[0].img,
                 }}
                 position={cl.position}
@@ -127,7 +128,7 @@ function Earth({
                   onCotizar?.(cl.members[0]);
                   setActive(null);
                 }}
-                cotizarLabel={cotizarLabel}
+                labels={labels}
                 occludeRef={earthRef}
                 zoom={zoom}
               />
@@ -143,7 +144,7 @@ function Earth({
                   onCotizar?.(m);
                   setActive(null);
                 }}
-                cotizarLabel={cotizarLabel}
+                labels={labels}
                 occludeRef={earthRef}
               />
             )
@@ -225,7 +226,7 @@ function Scene({
   active,
   setActive,
   onCotizar,
-  cotizarLabel,
+  labels,
   input,
   zoom,
   focusTarget,
@@ -235,7 +236,7 @@ function Scene({
   active: string | null;
   setActive: (id: string | null) => void;
   onCotizar?: (m: MarkerCotizar) => void;
-  cotizarLabel: string;
+  labels: GlobeLabels;
   input?: RefObject<GlobeInput>;
   zoom: number;
   focusTarget: FocusTarget | null;
@@ -366,7 +367,7 @@ function Scene({
             active={active}
             setActive={setActive}
             onCotizar={onCotizar}
-            cotizarLabel={cotizarLabel}
+            labels={labels}
             zoom={zoom}
             borderMatRef={borderMatRef}
           />
@@ -400,7 +401,7 @@ export default function GlobeCanvas({
   frameloop = "always",
   markers = [],
   onCotizar,
-  cotizarLabel = "Cotizar",
+  labels,
   input,
   zoom = 1,
   focusId = null,
@@ -411,7 +412,7 @@ export default function GlobeCanvas({
   frameloop?: "always" | "never";
   markers?: GlobeMarker[];
   onCotizar?: (m: MarkerCotizar) => void;
-  cotizarLabel?: string;
+  labels: GlobeLabels;
   input?: RefObject<GlobeInput>;
   zoom?: number;
   focusId?: string | null;
@@ -463,7 +464,7 @@ export default function GlobeCanvas({
           active={active}
           setActive={setActive}
           onCotizar={onCotizar}
-          cotizarLabel={cotizarLabel}
+          labels={labels}
           input={input}
           zoom={zoom}
           focusTarget={focusTarget}

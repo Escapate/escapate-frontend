@@ -6,12 +6,16 @@ import { X } from "lucide-react";
 import { useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
 import { useIsMobile } from "@/lib/use-is-mobile";
+import type { GlobeLabels } from "./Globe";
 
 export type DestinoMarkerData = {
   id: string;
   name: string;
-  price: string;
   img: string;
+  /** País o zona. Se muestra bajo el nombre cuando el destino no tiene precio. */
+  region: string;
+  /** Solo los destinos con paquete armado traen precio. */
+  price?: string;
 };
 
 // ── Ajuste visual fino (probar en pnpm dev) ──────────────────────────────────
@@ -70,7 +74,7 @@ export default function DestinoMarker({
   onActivate,
   onClose,
   onCotizar,
-  cotizarLabel,
+  labels,
   occludeRef,
   zoom,
 }: {
@@ -80,7 +84,7 @@ export default function DestinoMarker({
   onActivate: () => void;
   onClose: () => void;
   onCotizar: () => void;
-  cotizarLabel: string;
+  labels: GlobeLabels;
   occludeRef: RefObject<THREE.Object3D>;
   zoom: number;
 }) {
@@ -218,10 +222,13 @@ export default function DestinoMarker({
               <div className="relative h-32 w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={data.img} alt={data.name} className="h-full w-full object-cover" />
+                {/* tabIndex={-1}: está dentro del contenedor aria-hidden del globo
+                    (ver la nota en ClusterMarker.tsx). */}
                 <button
                   type="button"
+                  tabIndex={-1}
                   onClick={onClose}
-                  aria-label="Cerrar"
+                  aria-label={labels.close}
                   className="absolute right-2 top-2 grid h-7 w-7 cursor-pointer place-items-center rounded-full bg-navy-950/70 text-cream-50 transition hover:bg-navy-950"
                 >
                   <X className="h-4 w-4" />
@@ -229,13 +236,23 @@ export default function DestinoMarker({
               </div>
               <div className="p-4">
                 <p className="font-heading text-lg font-bold leading-tight">{data.name}</p>
-                <p className="mt-1 font-heading text-sm font-semibold text-cream-50">{data.price}</p>
+                {/* Sin precio (destino sin paquete armado) se muestra el país. */}
+                {data.price ? (
+                  <p className="mt-1 font-heading text-sm font-semibold text-cream-50">
+                    {data.price}
+                  </p>
+                ) : (
+                  <p className="mt-1 font-mono text-xs tracking-wide text-cream-50/60">
+                    {data.region}
+                  </p>
+                )}
                 <button
                   type="button"
+                  tabIndex={-1}
                   onClick={onCotizar}
                   className="mt-3 w-full cursor-pointer rounded-lg bg-orange px-3 py-2 text-sm font-bold text-white transition hover:bg-orange-600"
                 >
-                  {cotizarLabel}
+                  {labels.cotizar}
                 </button>
               </div>
             </div>

@@ -30,7 +30,7 @@ export default function Testimonials() {
               <figure className="flex h-full flex-col gap-4 rounded-2xl border border-navy-900/[0.06] bg-white p-7 shadow-[0_22px_50px_-38px_rgba(12,27,47,0.55)]">
                 <div
                   className="text-base tracking-[2px] text-orange"
-                  aria-label="5 de 5 estrellas"
+                  aria-label={c.testimonials.stars}
                 >
                   ★★★★★
                 </div>

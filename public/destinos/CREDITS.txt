@@ -1,10 +1,60 @@
 Fotos de destinos — Wikimedia Commons
 
-cartagena: File:Sector Antiguo de Cartagena, Colombia 01.jpg | CC BY-SA 4.0 | Bernard Gagnon
-san-andres: File:Atardecer en San Andres Isla.JPG | CC BY-SA 3.0 | Mr.Jhosimar
-cancun: File:Caribbean Sea Cancun Mexico (121721407).jpeg | CC BY 3.0 | 
-Orange Liu
-punta-cana: File:Punta Cana (Dominican Republic) banner Beach.jpg | CC0 | Inmouchar
-eje-cafetero: File:View of the Cerro Morrogacho in the Cócora Valley.jpg | CC BY-SA 4.0 | Sierramroberts
-espana: File:Madrid - Edificio Grassy (Gran Vía 1) - north facade - relief over entrance.jpg | CC BY-SA 4.0 | Tomascastelazo
-europa: File:Eiffel Tower and Pont Alexandre III at night.jpg | CC BY 2.0 | Getfunky Paris
+Todas las imágenes provienen de Wikimedia Commons y se redistribuyen bajo su
+licencia original. Se redimensionaron y convirtieron a WebP; no se alteró el
+contenido. Las licencias CC BY y CC BY-SA exigen atribución al autor.
+
+Formato: id | archivo en Commons | licencia | autor
+
+cartagena | 62 - Carthagène - Décembre 2008.jpg | CC BY-SA 3.0 | Martin St-Amant (S23678)
+san-andres | Johny Cay.jpg | CC BY 3.0 | Mario Carvajal
+santa-marta | Cabo_San_Juan,_Colombia.jpg | CC BY-SA 3.0 | OpenAperture
+eje-cafetero | View of the Cerro Morrogacho in the Cócora Valley.jpg | CC BY-SA 4.0 | Sierramroberts
+cancun | Cancun_Strand_Luftbild_(22143397586).jpg | CC BY 2.0 | dronepicr
+punta-cana | Bávaro, 23000, Dominican Republic - panoramio (26).jpg | CC BY 3.0 | Максим Улитин
+espana | Plaza_de_España_(Sevilla)_-_01.jpg | CC BY-SA 4.0 | Carlos Delgado
+europa | La Tour Eiffel vue de la Tour Saint-Jacques, Paris août 2014 (2).jpg | CC BY-SA 2.0 | Yann Caradec from Paris, France
+rome | Colosseo Roma WLM 2015.jpg | CC0 | Jebulon
+london | Tower_Bridge_London_Feb_2006.jpg | CC BY-SA 3.0 | Diliff
+barcelona | Sagrada Familia Barcelona 2.jpg | CC BY-SA 4.0 | kallerna
+lisbon | Belém_Tower_in_Lisbon,_Portugal.jpg | CC BY-SA 4.0 | Lisbon Photoshoots
+amsterdam | Amsterdam Canal Houses (Unsplash).jpg | CC0 | Kaci Baum kacibaum
+venice | View_of_the_Grand_Canal_from_Rialto_to_Ca'Foscari.jpg | CC BY-SA 4.0 | Didier Descouens
+santorini | Oia sunset - panoramio (2).jpg | CC BY 3.0 | TomasEE
+istanbul | Hagia_Sophia_Mars_2013.jpg | CC BY-SA 3.0 | Arild Vågen
+prague | Karlův_most_z_Kampy.JPG | CC BY-SA 3.0 | David Sedlecký
+vienna | Wien_-_Schloss_Schönbrunn.JPG | CC BY-SA 4.0 | C.Stadler/Bwag
+athens | Classic view of Acropolis.jpg | CC BY-SA 4.0 | Alexander Popkov (engineerontour.com)
+swiss-alps | Matterhorn_from_Domhütte_-_2.jpg | CC BY-SA 3.0 | Photo: chil, on Camptocamp.org Derivative work:Zacharie Grossen
+new-york | Lower Manhattan, New York skyline from Liberty Island 2021.jpg | CC BY-SA 3.0 | Percival Kestreltail
+miami | Lifeguard stand, Miami Beach.jpg | CC BY-SA 4.0 | Radomianin
+orlando | Seaworld-Orlando-Kraken-1629.jpg | CC BY-SA 3.0 | Loadmaster (David R. Tribble) This image was made by Loadmaster (David
+los-angeles | Santa_monica_pier_entrance_evening.jpg | CC BY-SA 2.0 | web4camguy
+las-vegas | The_Vegas_Strip_by_Don_Ramey_Logan.jpg | CC BY-SA 3.0 | Don Ramey Logan
+toronto | Toronto_-_ON_-_Toronto_Harbourfront7.jpg | CC BY-SA 3.0 | Wladyslaw
+mexico-city | Bellas_Artes_01.jpg | CC BY-SA 3.0 | Xavier Quetzalcoatl Contreras Castillo
+rio-de-janeiro | Pão_de_Açucar_-_Sugarloaf_Mountain_-_Zuckerhut_-_2022.jpg | CC BY-SA 3.0 de | Arne Müseler
+buenos-aires | Tango Porteño.jpg | CC BY-SA 4.0 | Manticora87
+lima | La Costa Verde y Miraflores, desde Barranco (3545043786).jpg | CC BY-SA 2.0 | David Almeida from Lima, Peru
+cusco | Machu_Picchu,_Peru_(2018).jpg | CC BY-SA 2.0 | Zielonamapa.pl
+santiago | Santiago de Chile, La Moneda (2019) 02.jpg | CC BY-SA 4.0 | Draceane
+aruba | Mangrove tree (Conocarpus erectus) at Eagle Beach, Aruba 2019.jpg | CC BY-SA 4.0 | SIryn
+havana | Habana_Vieja_de_noche.jpg | CC BY-SA 2.0 | Gabriel Rodríguez
+panama-city | Panama_Papers_(148830809).jpeg | CC BY 3.0 | Dronepicr
+san-jose-cr | Arenal_Volcano_as_seen_from_Monteverde.jpg | CC BY-SA 3.0 | Peter Andersen
+galapagos | Galapagos-satellite-2002.jpg | Public domain | Jacques Descloitres, MODIS Rapid Response Project at NASA/GSFC
+dubai | Dubai,_United_Arab_Emirates_(Unsplash_suv4vuJsH6g).jpg | CC0 | Caleb Whiting dogbear869
+tokyo | 2019_Shibuya_Crossing_-_Shibuya_Scramble_Square_-_SHIBUYA_SKY_1.jpg | CC BY-SA 4.0 | Kakidai
+kyoto | KyotoFushimiInariLarge.jpg | CC BY-SA 3.0 | Paul Vlaar
+bangkok | Templo_Wat_Arun,_Bangkok,_Tailandia,_2013-08-22,_DD_01.jpg | CC BY-SA 3.0 | Diego Delso
+bali | Bali_-_Pura_Tanah_Lot,_20220827_1005_1141.jpg | CC BY-SA 4.0 | Jakub Hałun
+singapore | Marina_Bay_Sands_in_the_evening_-_20101120.jpg | CC BY-SA 3.0 | Someformofhuman
+phuket | Phuket_Aerial.jpg | CC BY-SA 4.0 | Bennypc
+hong-kong | Hong Kong Skyline viewed from Victoria Peak.jpg | CC BY-SA 3.0 | Haydn Hsin
+maldives | Diamonds Thudufushi Beach and Water Villas, May 2017 -04.jpg | CC BY-SA 4.0 | Martin Falbisoner
+cape-town | Table_Mountain_DanieVDM.jpg | CC BY 2.0 | Danie van der Merwe from Cape Town, South Africa
+marrakech | Djemaa_el_Fna.jpg | CC BY-SA 3.0 | Boris Macek
+cairo | All_Gizah_Pyramids-2.jpg | CC BY-SA 2.0 | Ricardo Liberato
+sydney | Sydney_Australia._(21339175489).jpg | CC0 | Bernard Spragg. NZ from Christchurch, New Zealand
+
+Cada archivo se puede consultar en: https://commons.wikimedia.org/wiki/File:<archivo>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
-import { MAPS_DIRECTIONS_URL } from "@/lib/content";
+import { MAPS_DIRECTIONS_URL, BUSINESS } from "@/lib/content";
 import { SectionHead, Reveal } from "./ui";
 import { MapPin, Clock, ArrowUpRight } from "lucide-react";
 
@@ -15,9 +15,11 @@ const tiles = [
 
 export default function Gallery() {
   const { c } = useI18n();
-  // Ubicación real de "Escápate" (Cúcuta): 7.853932, -72.4663327
-  const mapEmbed =
-    "https://maps.google.com/maps?q=7.853932,-72.4663327&z=16&output=embed";
+  // Las coordenadas salen de BUSINESS.geo, el mismo dato que alimenta el GeoCoordinates
+  // del JSON-LD: mapa visible y structured data no pueden discrepar.
+  const mapEmbed = BUSINESS.geo
+    ? `https://maps.google.com/maps?q=${BUSINESS.geo.lat},${BUSINESS.geo.lng}&z=16&output=embed`
+    : null;
 
   return (
     <section
@@ -61,15 +63,17 @@ export default function Gallery() {
           {/* Ubicación — oculta en móvil; ahí se usa el FAB flotante (FloatingMap) */}
           <Reveal delay={0.1} className="hidden sm:block">
             <div className="flex h-full flex-col overflow-hidden rounded-2xl bg-navy-950 text-cream-50 shadow-[0_40px_80px_-40px_rgba(12,27,47,0.6)]">
-              <div className="relative h-40 w-full">
-                <iframe
-                  title="Ubicación de Escápate en Cúcuta"
-                  src={mapEmbed}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="h-full w-full"
-                />
-              </div>
+              {mapEmbed && (
+                <div className="relative h-40 w-full">
+                  <iframe
+                    title="Ubicación de Escápate en Cúcuta"
+                    src={mapEmbed}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="h-full w-full"
+                  />
+                </div>
+              )}
               <div className="flex flex-1 flex-col gap-4 p-6">
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
