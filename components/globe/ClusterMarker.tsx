@@ -83,14 +83,20 @@ export default function ClusterMarker({
             </ul>
           </div>
         ) : (
+          /* El botón es solo el área de toque; el círculo visible es el <span>. En celular
+             el círculo se achica (36px) pero el padding compensa, así que el blanco para el
+             dedo no encoge — importa porque se toca sobre un globo que además se arrastra.
+             El número se mantiene en text-base en los dos tamaños. */
           <button
             type="button"
             tabIndex={-1}
             onClick={onActivate}
             aria-label={`${members.length} ${labels.inArea}`}
-            className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border-2 border-white/70 bg-orange text-base font-black text-white shadow-[0_6px_16px_-4px_rgba(232,115,42,0.9)] outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-white"
+            className="grid cursor-pointer place-items-center rounded-full p-1.5 outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-white sm:p-0"
           >
-            {members.length}
+            <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-white/70 bg-orange text-base font-black text-white shadow-[0_6px_16px_-4px_rgba(232,115,42,0.9)] sm:h-11 sm:w-11">
+              {members.length}
+            </span>
           </button>
         )}
       </Html>
