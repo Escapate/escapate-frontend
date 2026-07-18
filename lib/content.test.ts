@@ -31,13 +31,15 @@ describe("catálogo del globo (items + more)", () => {
     const { items, more } = content[lang].destinos;
 
     it(`${lang}: entre items y more se cubren los 50 destinos del globo`, () => {
-      const ids = new Set([...items, ...more].map((d) => d.id));
+      // Set<string> explícito: con `as const` el id queda como unión de literales y
+      // .has() rechazaría comparar contra el id (string) de DESTINO_GEO.
+      const ids = new Set<string>([...items, ...more].map((d) => d.id));
       expect(ids.size).toBe(DESTINO_GEO.length);
       for (const g of DESTINO_GEO) expect(ids.has(g.id)).toBe(true);
     });
 
     it(`${lang}: more no repite ningún id de items`, () => {
-      const enItems = new Set(items.map((d) => d.id));
+      const enItems = new Set<string>(items.map((d) => d.id));
       for (const d of more) expect(enItems.has(d.id)).toBe(false);
     });
 
