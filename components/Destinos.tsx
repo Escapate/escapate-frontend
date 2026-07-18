@@ -7,6 +7,7 @@ import { SectionHead, RouteTag } from "./ui";
 import { airportCode } from "@/lib/airports";
 import { useQuoteIntent } from "@/lib/quote-provider";
 import { buildQuoteIntent } from "@/lib/quote-intent";
+import { centerScrollLeft } from "@/lib/scroll";
 import { ArrowUpRight } from "lucide-react";
 
 const ADVANCE_MS = 4000; // avance automático al siguiente destino
@@ -91,11 +92,27 @@ export default function Destinos() {
     return () => clearInterval(id);
   }, [reducedMotion, hovering, cooldown, visible, count]);
 
-  // Centra la mini-card activa en la tira (por si no cabe completa).
+  // Centra la mini-card activa en la tira (por si no cabe completa). Movemos solo
+  // el scroll horizontal de la tira, NO usamos scrollIntoView: ese desplaza también
+  // la ventana en vertical y, al entrar la sección en pantalla, robaba el scroll de
+  // la página anclándola en #destinos (rompía la navegación desde el hero).
   useEffect(() => {
     if (!visible) return;
-    const li = listRef.current?.children[active] as HTMLElement | undefined;
-    li?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    const list = listRef.current;
+    const li = list?.children[active] as HTMLElement | undefined;
+    if (!list || !li) return;
+    const liBox = li.getBoundingClientRect();
+    const listBox = list.getBoundingClientRect();
+    const left = centerScrollLeft({
+      scrollLeft: list.scrollLeft,
+      clientWidth: list.clientWidth,
+      scrollWidth: list.scrollWidth,
+      containerLeft: listBox.left,
+      childLeft: liBox.left,
+      childWidth: liBox.width,
+    });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    list.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
   }, [active, visible]);
 
   return (
