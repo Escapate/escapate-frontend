@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Search, SearchX, X } from "lucide-react";
 import Globe, { type GlobeInput, type GlobeMarker } from "./Globe";
 import GlobeControls from "./GlobeControls";
 import { useI18n } from "@/lib/i18n";
+import { matchesQuery } from "@/lib/search";
 
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
@@ -40,7 +41,13 @@ export default function GlobeFocus({
   const stageRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const pushedRef = useRef(false);
+  // Buscador: colapsado es solo la lupa; al abrirlo ocupa la fila del encabezado. Filtra
+  // la lista lateral, no los pines: vaciar el globo mientras se escribe lo hace ver roto
+  // y rompería el vuelo al destino. Por ahora filtra por nombre (país/continente después).
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
   // Overflow original del body. Se guarda en un ref (no en una variable del efecto)
   // porque `cotizar` también necesita restaurarlo — ver el comentario de abajo.
   const prevOverflowRef = useRef("");
@@ -48,6 +55,27 @@ export default function GlobeFocus({
   const zoomIn = useCallback(() => setZoom((z) => clamp(+(z + ZOOM_STEP).toFixed(2))), []);
   const zoomOut = useCallback(() => setZoom((z) => clamp(+(z - ZOOM_STEP).toFixed(2))), []);
   const reset = useCallback(() => setZoom(ZOOM_MIN), []);
+
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+  // Cerrar la búsqueda siempre limpia la consulta: dejar un filtro activo escondido
+  // detrás de la lupa haría que la lista se viera incompleta sin explicación.
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
+    setQuery("");
+  }, []);
+
+  // El foco entra al input recién cuando aparece (no se puede enfocar antes de montarlo).
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
+
+  const visibles = useMemo(
+    () => markers.filter((m) => matchesQuery(m.name, query)),
+    [markers, query]
+  );
+  // Exige consulta escrita: así el estado vacío nunca aparece con la lista sin filtrar
+  // (y el botón de cotizar nunca se dispara con un destino en blanco).
+  const sinResultados = visibles.length === 0 && query.trim().length > 0;
 
   // Cerrar consumiendo la entrada de historial (→ dispara popstate → onClose). Así el botón
   // "atrás" del navegador y el ✕/Escape terminan en el mismo lugar (el hero), sin salir del sitio.
@@ -95,11 +123,28 @@ export default function GlobeFocus({
     };
   }, [onClose]);
 
-  // Escape para cerrar + foco inicial en cerrar + trampa de foco (aria-modal) + scroll bloqueado.
+  // Foco inicial + bloqueo del scroll de la página. Va en su propio efecto, con deps [],
+  // a propósito: si volviera a correr, `prevOverflowRef` capturaría el "hidden" que puso
+  // la pasada anterior y al desmontar dejaría la página entera sin poder scrollear.
   useEffect(() => {
     closeRef.current?.focus();
+    prevOverflowRef.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflowRef.current;
+    };
+  }, []);
+
+  // Escape + trampa de foco (aria-modal).
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        // Escape cierra por capas: primero la búsqueda, y solo si no hay búsqueda
+        // abierta cierra el overlay. Si no, escribir mal una consulta te echaba del globo.
+        if (searchOpen) {
+          closeSearch();
+          return;
+        }
         requestClose();
         return;
       }
@@ -122,13 +167,8 @@ export default function GlobeFocus({
       }
     };
     window.addEventListener("keydown", onKey);
-    prevOverflowRef.current = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflowRef.current;
-    };
-  }, [requestClose]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [requestClose, searchOpen, closeSearch]);
 
   // Zoom con rueda del mouse y pellizco (listeners nativos con { passive: false } para poder
   // preventDefault y no hacer scroll/zoom de la página).
@@ -174,7 +214,11 @@ export default function GlobeFocus({
       {/* Escenario del globo (overflow-hidden → el globo no se desborda sobre el menú/la X). */}
       <div
         ref={stageRef}
-        className="relative min-h-[55vh] flex-1 touch-none overflow-hidden lg:min-h-0"
+        className={`relative flex-1 touch-none overflow-hidden lg:min-h-0 ${
+          // En celular el alto se reparte con el menú: al buscar, el globo cede sitio para
+          // que la lista y el teclado virtual quepan sin desbordar la pantalla.
+          searchOpen ? "min-h-[28vh]" : "min-h-[55vh]"
+        }`}
       >
         <Globe
           markers={markers}
@@ -203,17 +247,63 @@ export default function GlobeFocus({
         </div>
       </div>
 
-      {/* Menú de destinos */}
-      <aside className="flex max-h-[45vh] w-full flex-col border-t border-white/10 bg-navy-950/80 lg:max-h-none lg:w-80 lg:border-l lg:border-t-0">
-        <div className="flex items-center justify-between px-5 py-4">
-          <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-orange-400">
-              {g.explore}
-            </p>
-            <h2 className="font-display text-xl font-black uppercase tracking-tight text-cream-50">
-              {g.destinations}
-            </h2>
-          </div>
+      {/* Menú de destinos. En celular crece cuando se busca (y el escenario del globo cede
+          el alto), para que quepan resultados con el teclado virtual abierto. */}
+      <aside
+        className={`flex w-full flex-col border-t border-white/10 bg-navy-950/80 lg:max-h-none lg:w-80 lg:border-l lg:border-t-0 ${
+          searchOpen ? "max-h-[70vh]" : "max-h-[45vh]"
+        }`}
+      >
+        {/* Encabezado pegajoso: la lupa y la ✕ quedan siempre a mano aunque la lista scrollee. */}
+        <div className="sticky top-0 z-10 flex items-center gap-2 bg-navy-950/95 px-5 py-4 backdrop-blur">
+          {searchOpen ? (
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cream-50/40"
+                aria-hidden="true"
+              />
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={g.searchPlaceholder}
+                aria-label={g.search}
+                autoComplete="off"
+                className="w-full rounded-full border border-white/15 bg-white/5 py-2.5 pl-9 pr-10 text-sm text-cream-50 outline-none transition placeholder:text-cream-50/40 focus:border-orange focus-visible:ring-2 focus-visible:ring-orange"
+              />
+              {/* Cierra la búsqueda. Va DENTRO del campo para no competir con la ✕ del
+                  overlay, que tiene que seguir disponible: en celular no hay Escape y sin
+                  ella el usuario quedaría encerrado en el globo mientras busca. */}
+              <button
+                type="button"
+                onClick={closeSearch}
+                aria-label={g.closeSearch}
+                className="absolute right-1 top-1/2 grid h-7 w-7 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-cream-50/50 outline-none transition hover:bg-white/10 hover:text-cream-50 focus-visible:ring-2 focus-visible:ring-orange"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-orange-400">
+                  {g.explore}
+                </p>
+                <h2 className="font-display text-xl font-black uppercase tracking-tight text-cream-50">
+                  {g.destinations}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={openSearch}
+                aria-label={g.search}
+                className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/5 text-cream-50 outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-orange"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </>
+          )}
           <button
             ref={closeRef}
             type="button"
@@ -224,8 +314,27 @@ export default function GlobeFocus({
             <X className="h-4 w-4" />
           </button>
         </div>
+        {sinResultados ? (
+          /* Sin coincidencias no es un callejón sin salida: el catálogo del globo es una
+             selección, no el límite de lo que se puede vender. Se ofrece cotizar lo que
+             el usuario escribió, que entra tal cual como destino del formulario. */
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-auto px-6 pb-24 pt-4 text-center lg:pb-6">
+            <SearchX className="h-9 w-9 shrink-0 text-orange-400" aria-hidden="true" />
+            <p className="font-heading text-lg font-bold leading-tight text-cream-50">
+              {g.noResultsFor} «{query.trim()}»
+            </p>
+            <p className="max-w-xs text-sm leading-relaxed text-cream-50/70">{g.noResultsBody}</p>
+            <button
+              type="button"
+              onClick={() => cotizar({ name: query.trim() })}
+              className="mt-1 w-full max-w-xs shrink-0 cursor-pointer rounded-lg bg-orange px-4 py-3.5 text-sm font-bold text-white outline-none transition hover:bg-orange-600 focus-visible:ring-2 focus-visible:ring-orange"
+            >
+              {c.nav.cta}
+            </button>
+          </div>
+        ) : (
         <ul className="min-h-0 flex-1 divide-y divide-white/5 overflow-auto px-2 pb-24 lg:pb-3">
-          {markers.map((m) => (
+          {visibles.map((m) => (
             <li key={m.id} className="flex items-center gap-2 py-1">
               <button
                 type="button"
@@ -233,9 +342,9 @@ export default function GlobeFocus({
                 aria-label={`${g.viewOnGlobe}: ${m.name}`}
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left transition hover:bg-white/5"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {/* lazy: la lista son 50 miniaturas; sin esto se piden todas de golpe
                     al abrir el modo enfoque. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={m.img}
                   alt={m.name}
@@ -268,6 +377,7 @@ export default function GlobeFocus({
             </li>
           ))}
         </ul>
+        )}
       </aside>
     </div>
   );

@@ -1,6 +1,8 @@
 // Códigos IATA para los tags tipo "pase de abordar" (CUC ✈ CTG).
 // Se mapea por nombre normalizado para cubrir ES y EN sin duplicar datos.
 
+import { foldAccents } from "./search";
+
 const CODES: Record<string, string> = {
   cucuta: "CUC",
   bogota: "BOG",
@@ -23,10 +25,8 @@ const CODES: Record<string, string> = {
 };
 
 function normalize(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // quita acentos
+  // El plegado de tildes/mayúsculas es el mismo que usa el buscador del globo.
+  return foldAccents(s)
     .replace(/[^a-z\s]/g, "")
     .trim();
 }
