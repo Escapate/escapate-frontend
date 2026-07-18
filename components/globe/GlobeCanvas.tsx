@@ -18,7 +18,7 @@ const ORBIT_R = 2.02;
 // Clustering + control manual (ajuste fino en pnpm dev).
 const CLUSTER_DEG = 7; // separación angular para agrupar destinos cercanos (a zoom 1)
 const ZOOM_POW = 1.5; // el umbral baja como CLUSTER_DEG / zoom^ZOOM_POW → separa pares muy juntos sin agrandar tanto
-const BASE_TILT = 0.32; // inclinación base del globo
+const BASE_TILT = 0.10; // inclinación base del globo
 const MANUAL_AZ = 0.9; // velocidad de giro manual (longitud)
 const MANUAL_POL = 0.7; // velocidad de giro manual (latitud/tilt)
 const TILT_RANGE = 0.6; // cuánto se puede inclinar arriba/abajo respecto a la base
@@ -42,6 +42,15 @@ function faceTarget(lat: number, lng: number): { spinY: number; tiltX: number } 
     tiltX: Math.atan2(y, Math.hypot(x, z)) - BASE_TILT,
   };
 }
+
+// Longitud (grados) que mira a la cámara cuando el globo carga y al recentrar.
+// Cambia este número para elegir el meridiano inicial (positivo = este, negativo = oeste):
+//   -30 → Atlántico: Américas a la izquierda, África/Europa a la derecha (mucha tierra)
+//     0 → Greenwich: África/Europa de frente
+//   -90 → Américas de frente (era el arranque anterior, más Pacífico)
+//   120 → Asia / Pacífico occidental
+const HOME_LNG = -30;
+const HOME_SPIN_Y = faceTarget(0, HOME_LNG).spinY;
 
 function Earth({
   spinRef,
@@ -237,6 +246,7 @@ function Scene({
   const fly = useRef({ nonce: 0, spinY: 0, tiltX: 0, id: "", active: false });
   const lastInteract = useRef(-Infinity);
   const dragging = useRef(false);
+  const initedSpin = useRef(false);
 
   useFrame((_, dt) => {
     const inp = input?.current;
@@ -244,6 +254,12 @@ function Scene({
     const tilt = tiltRef.current;
     const controls = controlsRef.current;
     const zoomed = zoom > 1.01;
+
+    // Meridiano inicial: coloca el globo en HOME_LNG en el primer frame (antes de pintar, sin flash).
+    if (!initedSpin.current && spin) {
+      spin.rotation.y = HOME_SPIN_Y;
+      initedSpin.current = true;
+    }
 
     // Vuelo a un destino (click en el menú de "Explorar"): calcula el destino angular y anima.
     if (focusNonce !== fly.current.nonce) {
@@ -307,7 +323,7 @@ function Scene({
       // Recentrar.
       if (inp.resetToken !== lastReset.current) {
         lastReset.current = inp.resetToken;
-        if (spin) spin.rotation.y = 0;
+        if (spin) spin.rotation.y = HOME_SPIN_Y;
         if (tilt) tilt.rotation.x = 0;
         controls?.reset();
       }
